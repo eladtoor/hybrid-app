@@ -1,0 +1,38 @@
+/* styles/CartItem.css */
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eaeaea;
+  padding: 20px 0;
+}
+
+.cart-item-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.cart-item-details {
+  flex-grow: 1;
+  margin-right: 20px;
+}
+
+.cart-item-status {
+  display: flex;
+  align-items: center;
+}
+
+.in-stock {
+  color: green;
+}
+
+.out-of-stock {
+  color: red;
+}
+
+.remove-item {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
