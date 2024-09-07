@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setUser } from '../reducers/userReducer'; // הפעולה של Redux לשמירת נתונים
-import { doc, setDoc } from "firebase/firestore"; // פונקציה לשמירת המידע בפיירבייס
-import { db } from '../firebase'; // יצוא Firestore מ- firebase.js
+import { setUser } from '../reducers/userReducer';
+import { doc, setDoc } from "firebase/firestore";
+import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import '../styles/UserInfoForm.css'; // ייבוא ה-CSS
+import '../styles/UserInfoForm.css';
 
 const UserInfoForm = () => {
     const [name, setName] = useState('');
@@ -12,37 +12,28 @@ const UserInfoForm = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // קבלת המשתמש הנוכחי מ-Redux
     const currentUser = useSelector((state) => state.user.user);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log('current user:', currentUser);
-
-
-            if (!currentUser || !currentUser.uid) {
-                throw new Error("user not authnticated or missing uid")
-            }
-
-            // שילוב המידע החדש עם המידע מהמשתמש הנוכחי
+            // איחוד המידע הקיים עם השדות החדשים
             const updatedUser = {
-                ...currentUser,  // פרטי המשתמש מ-Google
-                name,            // השם שהוכנס בטופס
-                phone            // מספר הפלאפון שהוכנס בטופס
+                ...currentUser,
+                name: name || currentUser.name,  // אם הוזן שם חדש, עדכן, אחרת שמור את הקיים
+                phone: phone || currentUser.phone // אם הוזן טלפון חדש, עדכן, אחרת שמור את הקיים
             };
 
-            // שמירת המידע ב-Redux
+            // עדכון המידע ב-Redux
             dispatch(setUser(updatedUser));
 
-            // שמירת המידע בפיירבייס (Firestore)
-            const userRef = doc(db, "users", updatedUser.uid); // שימוש ב-UID לשמירה
+            // עדכון המידע ב-localStorage
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+
+            // עדכון Firestore
+            const userRef = doc(db, "users", updatedUser.uid);
             await setDoc(userRef, updatedUser);
 
-
-            console.log("Saved going home");
-
-            // ניתוב לדף הבית לאחר השלמת המידע
             navigate('/');
         } catch (error) {
             console.error("Error saving user info: ", error);
