@@ -1,27 +1,21 @@
 import React from 'react';
-import '../styles/CartItem.css'
+import '../styles/CartItem.css';
 
-const CartItem = ({ item }) => {
+const CartItem = ({ item, onIncrease, onDecrease }) => {
     return (
         <div className="cart-item">
+            <button className="remove-item">×</button> {/* כפתור מחיקה */}
             <img src={item.image} alt={item.name} className="cart-item-image" />
             <div className="cart-item-details">
                 <h4>{item.name}</h4>
                 <p>{item.color} - {item.size}</p>
-                <p>${item.price}</p>
+                <p>₪{item.price}</p>
                 <div className="cart-item-quantity">
-                    <label>כמות:</label>
-                    <input type="number" value={item.quantity} readOnly />
+                    <button className="quantity-button" onClick={onDecrease}>-</button>
+                    <input type="number" value={item.quantity} readOnly className="quantity-input" />
+                    <button className="quantity-button" onClick={onIncrease}>+</button>
                 </div>
             </div>
-            <div className="cart-item-status">
-                {item.inStock ? (
-                    <p className="in-stock">במלאי</p>
-                ) : (
-                    <p className="out-of-stock">אזל מהמלאי</p>
-                )}
-            </div>
-            <button className="remove-item">×</button>
         </div>
     );
 };
