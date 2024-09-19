@@ -1,7 +1,7 @@
 import React from 'react';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../reducers/userReducer'; // ייבוא נכון של setUser
+import { setUser } from '../redux/reducers/userReducer'; // ייבוא נכון של setUser
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'; // ייבוא של אייקון גוגל
 import { useNavigate } from 'react-router-dom';

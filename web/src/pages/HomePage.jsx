@@ -1,42 +1,47 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import '../styles/HomePage.css';
 import Carousel from '../components/Carousel';
 import Category from '../components/Category';
 
+const HomePage = ({ categories }) => {
+    // Get userDetails from Redux store
+    const user = useSelector(state => state ? state.user.user : null);
 
-const HomePage = () => {
-    const { name } = useSelector((state) => state.user)
-    const buildingMaterialsSubcategories = [
-        { name: 'בלוקים', image: '/product1.png' },
-        { name: 'מלט', image: '/product2.png' },
-        { name: 'טיח', image: '/product3.png' }
-    ];
+    // Use useEffect to sync userDetails with localStorage
+    useEffect(() => {
+        if (user) {
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+    }, [user]);
 
-    const paintSubcategories = [
-        { name: 'צבע קירות', image: '/product1.png' },
-        { name: 'צבע עץ', image: '/product2.png' },
-        { name: 'צבע מתכת', image: '/product3.png' },
-        { name: 'צבע מתכת', image: '/product3.png' }
-    ];
+    const userFromStorage = JSON.parse(localStorage.getItem('user'));
 
-    const plumbingSubcategories = [
-        { name: 'צנרת', image: '/product1.png' },
-        { name: 'ברזים', image: '/product2.png' },
-        { name: 'משאבות מים', image: '/product3.png' },
-        { name: 'צבע מתכת', image: '/product3.png' },
-        { name: 'צבע מתכת', image: '/product3.png' }
-    ];
+
+
+    // בדיקה אם categories מוגדר ואם הוא כולל את companyCategories
+    const companyCategories = categories?.companyCategories;
+
+    // אם companyCategories הוא אובייקט, נשתמש ב-Object.values כדי לקבל מערך של קטגוריות
+    const categoryArray = Array.isArray(companyCategories) ? companyCategories : Object.values(companyCategories || {});
+
+
+
 
     return (
         <div className="home-page">
             <Carousel />
-            {name && <h2 style={{ textAlign: 'center' }}>ברוך הבא, {name}!</h2>}
+            {user || userFromStorage ? (
+                <h2>ברוך הבא, {userFromStorage.name}</h2>
+            ) : ""}
 
             <div className="category-section">
-                <Category title="חומרי בניין" subcategories={buildingMaterialsSubcategories} />
-                <Category title="צבעים" subcategories={paintSubcategories} />
-                <Category title="אינסטלציה" subcategories={plumbingSubcategories} />
+                {/* הצגת קטגוריות בצורה בטוחה */}
+                {categoryArray.length > 0 ? (
+                    <Category title={categories.companyName} subcategories={companyCategories} />
+                ) : (
+                    <p>אין קטגוריות זמינות.</p>
+                )}
             </div>
         </div>
     );

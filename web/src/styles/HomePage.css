@@ -40,3 +40,9 @@
   gap: 20px;
   flex-wrap: wrap;
 }
+
+.company-section {
+  padding: 50px 20px;
+  width: 70%;
+  margin: 0 auto;
+}

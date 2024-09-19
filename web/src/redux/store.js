@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import rootReducer from "./reducers"; // ייבוא ה-rootReducer המעודכן
+import rootReducer from "../redux/reducers/index.js"; // ייבוא ה-rootReducer המעודכן
 
 const store = configureStore({
   reducer: rootReducer, // עכשיו rootReducer כולל את כל ה-reducers

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setUser } from '../reducers/userReducer'; // הפעולה של Redux לשמירת נתונים
+import { setUser } from '../redux/reducers/userReducer'; // הפעולה של Redux לשמירת נתונים
 import { doc, setDoc } from "firebase/firestore"; // פונקציה לשמירת המידע בפיירבייס
 import { db } from '../firebase'; // יצוא Firestore מ- firebase.js
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +18,7 @@ const UserInfoForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log('current user:', currentUser);
+
 
 
             if (!currentUser || !currentUser.uid) {
@@ -33,7 +33,11 @@ const UserInfoForm = () => {
             };
 
             // שמירת המידע ב-Redux
-            dispatch(setUser(updatedUser));
+            dispatch(setUser({ ...currentUser, name, phone }));
+
+            //שמירת המידע בלוקל סוטרייג'
+
+            localStorage.setItem('user', JSON.stringify(updatedUser));
 
             // שמירת המידע בפיירבייס (Firestore)
             const userRef = doc(db, "users", updatedUser.uid); // שימוש ב-UID לשמירה
