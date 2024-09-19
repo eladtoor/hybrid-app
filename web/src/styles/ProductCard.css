@@ -8,6 +8,9 @@
   cursor: pointer;
   text-align: center;
   padding: 15px;
+  width: 100%;
+  max-width: 300px; /* מגדיר גודל מקסימלי אחיד לכל הכרטיסים */
+  margin-bottom: 20px; /* רווח תחתון בין הכרטיסים */
 }
 
 /* On hover, the card slightly lifts and shows a shadow */
@@ -27,11 +30,73 @@
 
 /* Product name */
 .product-name {
-  font-size: 1.2rem;
+  font-size: 1.4rem; /* גודל פונט גדול יותר */
   color: #333;
   margin-bottom: 10px;
 }
 
+/* Product description with max height and ellipsis */
+.product-description {
+  font-size: 1rem;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* לא מאפשר מעבר שורה */
+  height: 24px; /* מגדיר גובה כדי להציג רק שורה אחת */
+}
+
+/* Show more button */
+.show-more {
+  cursor: pointer;
+  color: #007bff;
+  font-size: 1rem;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 10px;
+  transition: color 0.3s ease;
+}
+
+.show-more:hover {
+  color: #0056b3;
+}
+
+/* Availability text */
+
+.product-availability {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* במלאי - צבע ירוק */
+.product-availability.in-stock {
+  color: green;
+}
+
+/* לא במלאי - צבע אדום */
+.product-availability.out-of-stock {
+  color: red;
+}
+
+.product-description {
+  font-size: 0.9em;
+  color: #666;
+  height: auto; /* גובה אוטומטי */
+  overflow: hidden;
+}
+
+.show-more {
+  cursor: pointer;
+  color: #007bff;
+  font-size: 0.9em;
+  text-decoration: underline;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-top: 5px;
+  display: inline-block;
+}
 /* Responsive design */
 @media (max-width: 768px) {
   .product-card {
@@ -39,6 +104,6 @@
   }
 
   .product-name {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
 }

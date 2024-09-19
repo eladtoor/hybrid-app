@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Carousel.css'; // Ensure this path is correct
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // ייבוא אייקוני חצים
 
 const Carousel = () => {
     const images = [
@@ -35,8 +36,12 @@ const Carousel = () => {
                     </div>
                 ))}
             </div>
-            <button className="carousel-button prev" onClick={handlePrev}>Prev</button>
-            <button className="carousel-button next" onClick={handleNext}>Next</button>
+            <button className="carousel-button prev" onClick={handlePrev}>
+                <FaChevronLeft /> {/* חץ שמאלה */}
+            </button>
+            <button className="carousel-button next" onClick={handleNext}>
+                <FaChevronRight /> {/* חץ ימינה */}
+            </button>
             <div className="carousel-indicators">
                 {images.map((_, index) => (
                     <span

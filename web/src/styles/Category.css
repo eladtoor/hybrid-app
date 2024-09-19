@@ -2,6 +2,7 @@
   padding: 50px 20px;
   width: 70%;
   margin: 0 auto;
+  
 }
 
 .category {
@@ -10,6 +11,7 @@
   text-align: right;
   background-color: #f7f7f7;
   border-radius: 1rem;
+  
 }
 
 .hr {
@@ -38,7 +40,8 @@
   font-size: 2em;
   margin-bottom: 20px;
   margin-top: 20px;
-  margin-right: 20px;
+  margin-right: 25px;
+  /* cursor: pointer; */
 }
 
 .subcategory-list {
@@ -54,10 +57,11 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   padding: 5px;
-  width: 150px;
+  width: 165px;
   font-size: 1.2rem;
   margin-bottom: 10px;
   margin-right: 20px;
+  cursor: pointer;
 }
 .subcategory-card:hover {
   background-color: #f3eeea;
@@ -65,8 +69,8 @@
 }
 
 .subcategory-image {
-  width: 5rem;
-  height: 5rem;
+  width: 7rem;
+  height: 7rem;
   border-radius: 50%;
   margin-top: 5px;
 }

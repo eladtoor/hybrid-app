@@ -7,8 +7,8 @@ import { logoutUser } from '../redux/reducers/userReducer';
 import '../styles/NavBar.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-
 const NavBar = ({ categories }) => {
+    const [searchQuery, setSearchQuery] = useState('');
     const [searchVisible, setSearchVisible] = useState(false);
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const user = useSelector(state => state?.user?.user);
@@ -27,6 +27,12 @@ const NavBar = ({ categories }) => {
         setSearchVisible(!searchVisible);
     };
 
+    const handleSearch = () => {
+        if (searchQuery.trim()) {
+            navigate(`/search?query=${searchQuery.trim()}`); // העברה לדף תוצאות חיפוש
+        }
+    };
+
     const handleSignOut = async () => {
         try {
             await signOut(auth);
@@ -37,6 +43,7 @@ const NavBar = ({ categories }) => {
             console.error('Error signing out: ', error);
         }
     };
+
     return (
         <header className="navbar-container">
             <div className="navbar">
@@ -93,8 +100,13 @@ const NavBar = ({ categories }) => {
 
             {searchVisible && (
                 <div className="navbar-search">
-                    <input type="text" placeholder="חפש מוצרים..." />
-                    <button>
+                    <input
+                        type="text"
+                        placeholder="חפש מוצרים..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <button onClick={handleSearch}>
                         <i className="fa fa-search"></i>
                     </button>
                 </div>

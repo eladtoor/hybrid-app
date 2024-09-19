@@ -4,43 +4,44 @@ import '../styles/HomePage.css';
 import Carousel from '../components/Carousel';
 import Category from '../components/Category';
 
-const HomePage = ({ categories }) => {
-    // Get userDetails from Redux store
-    const user = useSelector(state => state ? state.user.user : null);
+const HomePage = ({ categories, products }) => {
+    const loadingCategories = useSelector((state) => state.categories.loading);
+    const loadingProducts = useSelector((state) => state.products.loading);
 
-    // Use useEffect to sync userDetails with localStorage
-    useEffect(() => {
-        if (user) {
-            localStorage.setItem('user', JSON.stringify(user));
-        }
-    }, [user]);
-
+    const user = useSelector(state => state?.user?.user);
     const userFromStorage = JSON.parse(localStorage.getItem('user'));
-
-
-
-    // בדיקה אם categories מוגדר ואם הוא כולל את companyCategories
-    const companyCategories = categories?.companyCategories;
-
-    // אם companyCategories הוא אובייקט, נשתמש ב-Object.values כדי לקבל מערך של קטגוריות
-    const categoryArray = Array.isArray(companyCategories) ? companyCategories : Object.values(companyCategories || {});
-
-
-
 
     return (
         <div className="home-page">
             <Carousel />
             {user || userFromStorage ? (
-                <h2>ברוך הבא, {userFromStorage.name}</h2>
+                <h2>ברוך הבא {userFromStorage?.name || user?.name}</h2>
             ) : ""}
 
+            {/* הצגת הקטגוריות */}
             <div className="category-section">
-                {/* הצגת קטגוריות בצורה בטוחה */}
-                {categoryArray.length > 0 ? (
-                    <Category title={categories.companyName} subcategories={companyCategories} />
+                {loadingCategories ? (
+                    <p>טוען קטגוריות...</p>
+                ) : categories?.companyCategories ? (
+                    <Category title={categories.companyName} subcategories={categories.companyCategories} />
                 ) : (
                     <p>אין קטגוריות זמינות.</p>
+                )}
+            </div>
+
+            {/* הצגת המוצרים */}
+            <div className="product-section">
+                {loadingProducts ? (
+                    <p>טוען מוצרים...</p>
+                ) : products?.length > 0 ? (
+                    products.map((product) => (
+                        <div key={product.id}>
+                            {/* הוסף את עיצוב הצגת המוצרים */}
+                            <p>{product.name}</p>
+                        </div>
+                    ))
+                ) : (
+                    <p>אין מוצרים זמינים.</p>
                 )}
             </div>
         </div>

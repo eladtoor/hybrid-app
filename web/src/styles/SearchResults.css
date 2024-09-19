@@ -1,0 +1,39 @@
+/* Container for search results */
+.search-results-page {
+    padding: 100px 20px 20px; /* מרווח עליון כדי למנוע חפיפה עם ה-NavBar */
+    text-align: center; /* יישור המרכז */
+  }
+  
+  /* Header styling */
+  .search-results-page h2 {
+    font-size: 2.5em; /* גודל פונט גדול יותר */
+    margin-bottom: 40px; /* מרווח תחתון כדי להפריד בין הכותרת למוצרים */
+    font-weight: bold; /* הדגשה */
+    color: #333; /* צבע כהה */
+    text-align: center; /* יישור למרכז */
+    border-bottom: 2px solid #eaeaea; /* קו תחתון לכותרת */
+    padding-bottom: 10px; /* מרווח פנימי תחתון */
+  }
+  
+  /* Grid for product listing */
+  .product-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 מוצרים בשורה */
+    gap: 15px; /* רווח בין הכרטיסים */
+    justify-items: center; /* ממרכז את המוצרים */
+    margin-bottom: 50px; /* מרווח תחתון אחרי המוצרים */
+  }
+  
+  /* Mobile responsive design */
+  @media (max-width: 768px) {
+    .product-list {
+      grid-template-columns: repeat(2, 1fr); /* 2 מוצרים בשורה במסכים קטנים יותר */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .product-list {
+      grid-template-columns: 1fr; /* מוצר אחד בשורה במסכים קטנים מאוד */
+    }
+  }
+  
