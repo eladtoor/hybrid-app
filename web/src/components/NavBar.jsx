@@ -3,14 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import { logoutUser } from '../reducers/userReducer';
+import { logoutUser } from '../redux/reducers/userReducer';
 import '../styles/NavBar.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { useDispatch, useSelector } from 'react-redux';
-import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
-import { logoutUser } from '../redux/reducers/userReducer';
-import { useNavigate } from 'react-router-dom';
+
 
 const NavBar = ({ categories }) => {
     const [searchVisible, setSearchVisible] = useState(false);

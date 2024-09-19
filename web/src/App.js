@@ -1,4 +1,4 @@
-import React, { useEffect }, { useEffect } from "react"; 
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux"; // ייבוא ה-Provider של Redux
 import store from "./redux/store.js";

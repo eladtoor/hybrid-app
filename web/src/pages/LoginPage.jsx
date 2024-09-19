@@ -5,9 +5,7 @@ import { setUser } from '../redux/reducers/userReducer';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'; // ייבוא של אייקון גוגל
-import { useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+
 import '../styles/LoginPage.css';
 
 const LoginPage = () => {

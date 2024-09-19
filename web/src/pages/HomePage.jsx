@@ -1,5 +1,5 @@
-import React, { useEffect }, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import '../styles/HomePage.css';
 import Carousel from '../components/Carousel';
 import Category from '../components/Category';

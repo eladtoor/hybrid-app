@@ -4,7 +4,7 @@ const userSlice = createSlice({
   name: "user",
   initialState: {
     user: null,
-    logoutSuccess: false // משתנה למעקב אחרי התנתקות
+    logoutSuccess: false, // משתנה למעקב אחרי התנתקות
   },
   reducers: {
     setUser: (state, action) => {
@@ -17,7 +17,7 @@ const userSlice = createSlice({
     },
     clearLogoutMessage: (state) => {
       state.logoutSuccess = false; // איפוס הודעת ההתנתקות
-    }
+    },
   },
 });
 
