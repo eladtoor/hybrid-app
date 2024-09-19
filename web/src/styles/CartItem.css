@@ -1,38 +1,81 @@
-/* styles/CartItem.css */
 .cart-item {
+  position: relative; /* כדי שה-X ימוקם ביחס לכרטיסיה */
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid #eaeaea;
-  padding: 20px 0;
+  align-items: center;
+  border-radius: 10px;
+  background-color: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cart-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .cart-item-image {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
+  border-radius: 10px;
 }
 
 .cart-item-details {
   flex-grow: 1;
-  margin-right: 20px;
+  margin-left: 20px;
+  text-align: center; /* ממקם את התוכן במרכז */
 }
 
-.cart-item-status {
+.cart-item-details h4, .cart-item-details p {
+  margin-bottom: 10px;
+}
+
+.cart-item-quantity {
   display: flex;
   align-items: center;
+  justify-content: center;
+  margin-top: 10px;
 }
 
-.in-stock {
-  color: green;
+.quantity-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 0 5px;
+  transition: background-color 0.3s;
 }
 
-.out-of-stock {
-  color: red;
+.quantity-button:hover {
+  background-color: #0056b3;
+}
+
+.quantity-input {
+  width: 50px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .remove-item {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
+  color: red;
+  position: absolute;
+  top: 10px;
+  left: 10px; /* העברת ה-X לצד שמאל */
 }

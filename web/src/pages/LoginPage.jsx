@@ -1,11 +1,14 @@
 import React from 'react';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../redux/reducers/userReducer'; // ייבוא נכון של setUser
+import { setUser } from '../redux/reducers/userReducer';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'; // ייבוא של אייקון גוגל
 import { useNavigate } from 'react-router-dom';
-import '../styles/LoginPage.css'; // ייבוא CSS
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import '../styles/LoginPage.css';
 
 const LoginPage = () => {
     const dispatch = useDispatch();
@@ -17,11 +20,22 @@ const LoginPage = () => {
         signInWithPopup(auth, provider)
             .then((result) => {
                 const user = result.user;
-                dispatch(setUser({
+
+                // יצירת אובייקט מלא עם המידע מגוגל
+                const fullUser = {
                     uid: user.uid,
                     displayName: user.displayName,
-                    email: user.email
-                }));
+                    email: user.email,  // המייל מגוגל
+                    name: "",  // שם ריק עד שהמשתמש יזין
+                    phone: ""  // טלפון ריק עד שהמשתמש יזין
+                };
+
+                // שמירת המידע המלא ב-Redux
+                dispatch(setUser(fullUser));
+
+                // שמירת המידע ב-localStorage
+                localStorage.setItem('user', JSON.stringify(fullUser));
+
                 navigate('/user-info');
             })
             .catch((error) => {

@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect }, { useEffect } from "react"; 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux"; // ייבוא ה-Provider של Redux
 import store from "./redux/store.js";
 import NavBar from "./components/NavBar";
 import HomePage from "./pages/HomePage";
 import CartPage from "./pages/CartPage";
-import LoginPage from "./pages/LoginPage"; // ייבוא דף הכניסה
+import LoginPage from "./pages/LoginPage";
 import Footer from "./components/Footer";
 import UserInfoForm from "./components/UserInfoForm";
 import { Subcategory } from "./pages/Subcategory";
@@ -35,7 +35,6 @@ function App() {
           <Route path="/:title/:subcategoryName" element={<Subcategory />} />
           <Route path="/product/:id" element={<ProductPage />} />
         </Routes>
-
         <Footer />
       </Router>
     </Provider>
