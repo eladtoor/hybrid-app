@@ -52,11 +52,12 @@
   font-size: 18px;
 }
 
-.dropdown {
+/* דרופדאון של הקטגוריות */
+.category-dropdown {
   position: relative;
 }
 
-.dropdown-button {
+.category-dropdown-button {
   font-size: 30px; /* גודל טקסט מוגדל */
   font-weight: bold; /* הדגשת הטקסט */
   color: #333; /* צבע טקסט כהה */
@@ -66,13 +67,13 @@
   border: none; /* הסרת גבול */
 }
 
-.dropdown-button:hover {
+.category-dropdown-button:hover {
   background-color: #333; /* שינוי צבע הרקע ב-hover */
   color: white; /* שינוי צבע הטקסט ב-hover */
 }
 
 /* דרופדאון רחב ויציב */
-.dropdown-content {
+.category-dropdown-content {
   display: none;
   position: fixed;
   top: 80px; /* יישר את הדרופדאון מתחת ל-navbar */
@@ -86,12 +87,11 @@
   visibility: hidden; /* התחל במצב מוסתר */
   font-size: 25px; /* גודל טקסט מוגדל */
   padding-bottom: 10px;
-
 }
 
 /* בעת hover על הכפתור או הדרופדאון */
-.dropdown:hover .dropdown-content,
-.dropdown-content:hover {
+.category-dropdown:hover .category-dropdown-content,
+.category-dropdown-content:hover {
   display: flex;
   justify-content: space-evenly; /* יישור התוכן בצורה שווה */
   opacity: 1; /* הצגת הדרופדאון */
@@ -99,7 +99,7 @@
 }
 
 /* סגנון הקישורים בתוך הדרופדאון */
-.dropdown-content a {
+.category-dropdown-content a {
   display: block;
   color: #333;
   padding: 12px 16px;
@@ -108,7 +108,7 @@
   width: auto;
 }
 
-.dropdown-content a:hover {
+.category-dropdown-content a:hover {
   background-color: #ddd;
 }
 
@@ -138,36 +138,76 @@
   cursor: pointer;
 }
 
-/* CSS לדרופ דאון של המשתמש */
+/* CSS לדרופדאון של המשתמש */
 .user-dropdown {
   position: relative;
   display: inline-block;
 }
 
-.user-dropdown .dropdown-content {
+/* כפתור האייקון של המשתמש */
+.user-dropdown a {
+  color: black;
+  text-decoration: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 20px;
+  transition: color 0.3s ease;
+}
+
+.user-dropdown a:hover {
+  color: #007bff; /* שינוי צבע בזמן מעבר hover */
+}
+
+/* הדרופדאון עצמו */
+.user-dropdown-content {
   display: none;
   position: absolute;
-  right: 0;
+  left: 1rem;
+
+  top: 100%; /* דרופדאון יופיע מתחת לאייקון */
   background-color: white;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
   min-width: 160px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  padding: 1rem;
 }
 
-.user-dropdown .dropdown-content button {
-  background: none;
-  border: none;
-  padding: 12px 16px;
-  text-align: right;
-  display: block;
+/* כפתורי הדרופדאון */
+.user-dropdown-content button {
   width: 100%;
+  padding: 12px;
+  border: none;
+  background-color: white;
+  text-align: right;
+  font-size: 16px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.user-dropdown .dropdown-content button:hover {
+/* אפקט בעת מעבר עם העכבר */
+.user-dropdown-content button:hover {
   background-color: #f1f1f1;
 }
 
-.user-dropdown:hover .dropdown-content {
+/* הצגת הדרופדאון בעת ה-hover */
+.user-dropdown:hover .user-dropdown-content {
   display: block;
+}
+
+/* התאמה לרזולוציות נמוכות יותר */
+@media (max-width: 768px) {
+  .user-dropdown-content {
+    min-width: 120px;
+  }
+
+  .user-dropdown a {
+    font-size: 18px;
+  }
+
+  .user-dropdown-content button {
+    font-size: 14px;
+    padding: 10px;
+  }
 }

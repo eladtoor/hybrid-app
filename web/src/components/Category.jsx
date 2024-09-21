@@ -15,10 +15,12 @@ const Category = ({ title, subcategories }) => {
     }
 
 
+    console.log(subcategories, "IN CATEGORY");
 
     const subcategoryArray = Object.values(subcategories)
-    //console.log(subcategoryArray[0].subCategories[0].products[0].image);
-    console.log(subcategories);
+    console.log(subcategoryArray, "AFTER CHANGE");
+
+
 
 
     return (
@@ -29,8 +31,8 @@ const Category = ({ title, subcategories }) => {
                 {subcategoryArray.length > 0 ? subcategoryArray.map((subcategory, index) => (
                     <button key={index} className="subcategory-card" onClick={() => moveToSubcategory(subcategory.categoryName)}>
                         {/* בדיקה אם יש מוצרים בתת קטגוריה */}
-                        {console.log(subcategory.subCategories[0]?.products[0].image)
-                        }
+                        {/*console.log(subcategory.subCategories[0]?.products[0].image)*/}
+
 
                         <img
                             src={subcategory.subCategories[0]?.products[0].image || subcategory.products[0].image}

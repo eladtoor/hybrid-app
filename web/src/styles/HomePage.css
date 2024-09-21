@@ -46,3 +46,23 @@
   width: 70%;
   margin: 0 auto;
 }
+
+.login-button {
+  margin-top: 50px;
+  padding: 10px 20px;
+  background-color: rgba(178, 120, 46, 0.648);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #010810;
+}
+
+.welcome {
+  margin-top: 50px;
+}

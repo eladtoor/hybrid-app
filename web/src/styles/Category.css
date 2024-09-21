@@ -2,7 +2,6 @@
   padding: 50px 20px;
   width: 70%;
   margin: 0 auto;
-  
 }
 
 .category {
@@ -11,7 +10,14 @@
   text-align: right;
   background-color: #f7f7f7;
   border-radius: 1rem;
-  
+}
+.sub-category {
+  margin-top: 60px;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  text-align: right;
+  background-color: #f7f7f7;
+  border-radius: 1rem;
 }
 
 .hr {

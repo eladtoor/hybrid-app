@@ -5,6 +5,7 @@ import '../styles/UserProfile.css';
 const UserProfile = () => {
     // נשלוף את נתוני המשתמש מ-Redux
     const user = useSelector((state) => state.user.user);
+    console.log("im here", user);
 
     if (!user) {
         return <p>אין נתונים להציג. אנא התחבר.</p>;
