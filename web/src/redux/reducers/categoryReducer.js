@@ -23,6 +23,14 @@ const categoryReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+
+    // New case to set categories from localStorage
+    case "SET_CATEGORIES_FROM_STORAGE":
+      return {
+        ...state,
+        categories: action.payload,
+      };
+
     default:
       return state;
   }

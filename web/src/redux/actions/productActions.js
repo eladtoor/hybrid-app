@@ -3,7 +3,9 @@ export const fetchProducts = () => async (dispatch) => {
   try {
     const response = await fetch("http://localhost:5000/api/products/getAll");
     const data = await response.json();
-    // console.log(data);
+
+    // Save products to localStorage
+    localStorage.setItem("products", JSON.stringify(data));
 
     dispatch({ type: "FETCH_PRODUCTS_SUCCESS", payload: data });
   } catch (error) {

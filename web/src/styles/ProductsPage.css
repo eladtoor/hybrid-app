@@ -1,0 +1,96 @@
+/* Container for the entire product page */
+.product-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 90px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Container for the product list (to display products horizontally) */
+.product-list {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Allows products to wrap to the next line if necessary */
+  justify-content: center; /* Center products horizontally */
+  gap: 20px; /* Space between products */
+}
+
+/* Individual Product Card Styling */
+.product-card {
+  width: 250px; /* Set a fixed width for the cards */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Product Image Styling */
+.product-card img {
+  width: 100%;
+  max-width: 200px; /* Prevent large images from overflowing */
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+/* Product Name/Title Styling */
+.product-card h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* Product Description */
+.product-card p {
+  font-size: 1rem;
+  color: #666;
+  text-align: center;
+  line-height: 1.5;
+  max-width: 220px; /* Limit width of text */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Truncate long descriptions */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Product Price Styling */
+.product-price {
+  font-size: 1.2rem;
+  color: #007bff;
+  margin-top: 10px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .product-card {
+    width: 100%; /* Make cards full width on mobile */
+  }
+
+  .product-card img {
+    max-width: 100%;
+  }
+
+  .product-card h3 {
+    font-size: 1.3rem;
+  }
+
+  .product-card p {
+    font-size: 0.9rem;
+  }
+
+  .product-price {
+    font-size: 1rem;
+  }
+}

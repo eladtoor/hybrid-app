@@ -10,7 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import Footer from "./components/Footer";
 import UserInfoForm from "./components/UserInfoForm";
 import { Subcategory } from "./pages/Subcategory";
-import ProductPage from "./pages/ProductPage";
+import ProductsPage from "./pages/ProductsPage.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "./redux/actions/categoryActions";
 import { fetchProducts } from "./redux/actions/productActions";
@@ -23,9 +23,40 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchCategories());
-    dispatch(fetchProducts());
+    const storedCategories = localStorage.getItem("categories");
+    const storedProducts = localStorage.getItem("products");
+
+    if (storedCategories) {
+      console.log("got here1");
+
+      dispatch({
+        type: "SET_CATEGORIES_FROM_STORAGE",
+        payload: JSON.parse(storedCategories),
+      });
+    } else {
+      dispatch(fetchCategories());
+    }
+
+    if (storedProducts) {
+      console.log("got here2");
+      dispatch({
+        type: "SET_PRODUCTS_FROM_STORAGE",
+        payload: JSON.parse(storedProducts),
+      });
+    } else {
+      dispatch(fetchProducts());
+    }
   }, [dispatch]);
+
+  useEffect(() => {
+    if (categories.length) {
+      localStorage.setItem("categories", JSON.stringify(categories));
+    }
+
+    if (products.length) {
+      localStorage.setItem("products", JSON.stringify(products));
+    }
+  }, [categories, products]);
 
   return (
     <Provider store={store}>
@@ -41,11 +72,15 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/user-info" element={<UserInfoForm />} />
           <Route path="/:title/:subcategoryName" element={<Subcategory />} />
-          <Route path="/product/:id" element={<ProductPage />} />
+          <Route
+            path="/:companyName/:categoryname/:subcategoryname/products"
+            element={<ProductsPage />}
+          />
           <Route
             path="/search"
             element={<SearchResults products={products} />}
           />
+
           <Route path="/profile" element={<UserProfile />} />
         </Routes>
         <Footer />

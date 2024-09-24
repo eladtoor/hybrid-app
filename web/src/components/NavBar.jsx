@@ -7,6 +7,7 @@ import { logoutUser } from '../redux/reducers/userReducer';
 import '../styles/NavBar.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
+
 const NavBar = ({ categories }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchVisible, setSearchVisible] = useState(false);

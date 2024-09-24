@@ -1,19 +1,20 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom'; 
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import "../styles/Category.css"
 
 export const Subcategory = () => {
     const { subcategoryName } = useParams();
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     // Get company categories from Redux store
     const companyCategories = useSelector((state) => state.categories.categories?.companyCategories);
-
+    const companyName = useSelector(state => state.categories).categories.companyName
     // Check if companyCategories is defined and not null
     if (!companyCategories) {
         return <p>קטגוריות לא זמינות.</p>;
     }
+
 
     // Convert the subcategories to an array (if it's an object)
     const subcategoriesArray = Object.values(companyCategories || {});
@@ -27,9 +28,10 @@ export const Subcategory = () => {
 
     const subCategories = currentCategory.subCategories || [];
     const products = currentCategory.products || [];
+    console.log(currentCategory);
 
     const moveToSubcategory = (subcategoryName) => {
-        navigate(`/${subcategoryName}/products`);
+        navigate(`/${companyName}/${currentCategory.categoryName}/${subcategoryName}/products`);
     }
 
     return (
@@ -43,9 +45,9 @@ export const Subcategory = () => {
                     <div className="subcategory-container">
                         <div className="subcategory-list">
                             {subCategories.map((subcategory, index) => (
-                                <button 
-                                    key={index} 
-                                    className="subcategory-card" 
+                                <button
+                                    key={index}
+                                    className="subcategory-card"
                                     onClick={() => moveToSubcategory(subcategory.subCategoryName)}
                                 >
                                     {/* Display subcategory image */}
@@ -57,6 +59,7 @@ export const Subcategory = () => {
                                     <hr className='hr-card'></hr>
                                     {/* Display subcategory name */}
                                     <p className="subcategory-name">{subcategory.subCategoryName}</p>
+
                                 </button>
                             ))}
                         </div>
