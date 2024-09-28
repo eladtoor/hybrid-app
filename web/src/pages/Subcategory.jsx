@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import "../styles/Category.css"
+import "../styles/Category.css";
+import ProductCard from '../components/ProductCard'; // ייבוא הכרטיס של המוצרים
 
 export const Subcategory = () => {
     const { subcategoryName } = useParams();
@@ -9,12 +10,12 @@ export const Subcategory = () => {
 
     // Get company categories from Redux store
     const companyCategories = useSelector((state) => state.categories.categories?.companyCategories);
-    const companyName = useSelector(state => state.categories).categories.companyName
+    const companyName = useSelector(state => state.categories).categories.companyName;
+
     // Check if companyCategories is defined and not null
     if (!companyCategories) {
         return <p>קטגוריות לא זמינות.</p>;
     }
-
 
     // Convert the subcategories to an array (if it's an object)
     const subcategoriesArray = Object.values(companyCategories || {});
@@ -75,16 +76,8 @@ export const Subcategory = () => {
                 <div className="sub-category">
                     <div className="product-container">
                         <div className="product-list">
-                            {products.map((product, index) => (
-                                <div key={index} className="product-card">
-                                    <img
-                                        src={product.image || '/default-image.png'}
-                                        alt={product.name || product.productName} // Use the correct field for the product name
-                                        className="product-image"
-                                    />
-                                    <hr className='hr-card'></hr>
-                                    <p className="product-name">{product.name || product.productName}</p> {/* Display the correct product name */}
-                                </div>
+                            {products.map((product) => (
+                                <ProductCard key={product.productId} product={product} /> 
                             ))}
                         </div>
                     </div>

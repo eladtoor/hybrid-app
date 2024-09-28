@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import '../styles/ProductsPage.css'; // Import the CSS file
 import { useSelector } from 'react-redux';
 import ProductCard from '../components/ProductCard';
+import "../styles/Category.css"
+
 
 const ProductsPage = () => {
     const { categoryname } = useParams();
@@ -38,13 +40,21 @@ const ProductsPage = () => {
     console.log("in productsPage", currentSubCategory);
 
     return (
-        <div className="product-page-container">
-            <h2>{`${categoryname}: ${subcategoryname}`}</h2>
-            <div className="product-list">
-                {currentSubCategory.products.map((product) => (
-                    <ProductCard key={product.productId} product={product} />
-                ))}
+        <div className="category-section">
+
+            <div className="sub-category">
+            <hr className='hr'></hr>
+
+                <div className="product-page-container">
+                    <h2 className="category-title">{`${categoryname}: ${subcategoryname}`}</h2>
+                    <div className="product-list">
+                        {currentSubCategory.products.map((product) => (
+                            <ProductCard key={product.productId} product={product} />
+                    ))}
+                    </div>
+                </div>
             </div>
+
         </div>
 
     );

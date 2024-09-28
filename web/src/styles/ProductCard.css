@@ -63,6 +63,12 @@
   background-color: #218838;
 }
 
+.success-message {
+  color: green;
+  font-size: 1.5em;
+  margin-top: 10px;
+}
+
 @media (max-width: 768px) {
   .product-card {
     width: 45%;
