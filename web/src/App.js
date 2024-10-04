@@ -22,13 +22,13 @@ function App() {
   const products = useSelector((state) => state.products.products);
   const dispatch = useDispatch();
 
+  console.log(products);
+
   useEffect(() => {
     const storedCategories = localStorage.getItem("categories");
     const storedProducts = localStorage.getItem("products");
 
     if (storedCategories) {
-      console.log("got here1");
-
       dispatch({
         type: "SET_CATEGORIES_FROM_STORAGE",
         payload: JSON.parse(storedCategories),
@@ -38,7 +38,6 @@ function App() {
     }
 
     if (storedProducts) {
-      console.log("got here2");
       dispatch({
         type: "SET_PRODUCTS_FROM_STORAGE",
         payload: JSON.parse(storedProducts),

@@ -14,13 +14,7 @@ const Category = ({ title, subcategories }) => {
 
     }
 
-
-    console.log(subcategories, "IN CATEGORY");
-
     const subcategoryArray = Object.values(subcategories)
-    console.log(subcategoryArray, "AFTER CHANGE");
-
-
 
 
     return (

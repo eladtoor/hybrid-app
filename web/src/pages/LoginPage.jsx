@@ -4,8 +4,9 @@ import { useDispatch } from 'react-redux';
 import { setUser } from '../redux/reducers/userReducer';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons'; // ייבוא של אייקון גוגל
-
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { doc, getDoc } from 'firebase/firestore'; // ייבוא של getDoc לבדוק את המידע של המשתמש
+import { db } from '../firebase'; // ייבוא ה- Firestore
 import '../styles/LoginPage.css';
 
 const LoginPage = () => {
@@ -16,7 +17,7 @@ const LoginPage = () => {
     const handleGoogleSignIn = () => {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider)
-            .then((result) => {
+            .then(async (result) => {
                 const user = result.user;
 
                 // יצירת אובייקט מלא עם המידע מגוגל
@@ -34,7 +35,17 @@ const LoginPage = () => {
                 // שמירת המידע ב-localStorage
                 localStorage.setItem('user', JSON.stringify(fullUser));
 
-                navigate('/user-info');
+                // בדיקה אם המידע הנוסף (שם וטלפון) כבר קיים ב-Firestore
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists() && userSnap.data().name && userSnap.data().phone) {
+                    // אם המידע קיים, נעביר לדף הבית
+                    navigate('/');
+                } else {
+                    // אם המידע לא קיים, נעביר אותו לעמוד למילוי פרטים נוספים
+                    navigate('/user-info');
+                }
             })
             .catch((error) => {
                 console.error('Error signing in with Google:', error.message);

@@ -29,7 +29,7 @@ export const Subcategory = () => {
 
     const subCategories = currentCategory.subCategories || [];
     const products = currentCategory.products || [];
-    console.log(currentCategory);
+
 
     const moveToSubcategory = (subcategoryName) => {
         navigate(`/${companyName}/${currentCategory.categoryName}/${subcategoryName}/products`);
@@ -77,7 +77,7 @@ export const Subcategory = () => {
                     <div className="product-container">
                         <div className="product-list">
                             {products.map((product) => (
-                                <ProductCard key={product.productId} product={product} /> 
+                                <ProductCard key={product.productId} product={product} />
                             ))}
                         </div>
                     </div>

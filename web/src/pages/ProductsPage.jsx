@@ -12,14 +12,15 @@ const ProductsPage = () => {
 
     // Safely access the companyCategories from Redux store
     const companyCategories = useSelector((state) => state.categories.categories?.companyCategories);
+    console.log(companyCategories);
 
     // Check if companyCategories is available before proceeding
     if (!companyCategories) {
         return <h2>Loading categories...</h2>;
     }
 
-    console.log(subcategoryname, categoryname);
-    console.log(companyCategories);
+
+
 
     // Convert the object to an array only when it's defined
     const categoriesArray = Object.values(companyCategories);
@@ -37,20 +38,20 @@ const ProductsPage = () => {
         return <h2>Subcategory not found</h2>;
     }
 
-    console.log("in productsPage", currentSubCategory);
+
 
     return (
         <div className="category-section">
 
             <div className="sub-category">
-            <hr className='hr'></hr>
+                <hr className='hr'></hr>
 
                 <div className="product-page-container">
                     <h2 className="category-title">{`${categoryname}: ${subcategoryname}`}</h2>
                     <div className="product-list">
                         {currentSubCategory.products.map((product) => (
                             <ProductCard key={product.productId} product={product} />
-                    ))}
+                        ))}
                     </div>
                 </div>
             </div>

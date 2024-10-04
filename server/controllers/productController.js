@@ -24,12 +24,26 @@ const getProduct = async (req, res) => {
   }
 };
 
+const mapProductFieldsToEnglish = (product) => {
+  return {
+    productId: product._id,
+    productName: product["שם"],
+    price: product["מחיר"],
+    description: product["תיאור"],
+    image: product["תמונות"],
+    sku: product['מק"ט'],
+    quantity: product["כמות"],
+  };
+};
+
+// פונקציה לשליפת המוצרים מהדאטה בייס ולהמיר את השדות לאנגלית
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
-    res.status(200).send(products);
+    const products = await Product.find(); // שליפת כל המוצרים מהדאטה בייס
+    const normalizedProducts = products.map(mapProductFieldsToEnglish); // נורמליזציה של השדות
+    res.json(normalizedProducts); // החזרת המוצרים עם שדות באנגלית
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).json({ error: "Error fetching products" });
   }
 };
 

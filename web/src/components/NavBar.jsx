@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { logoutUser } from '../redux/reducers/userReducer';
 import '../styles/NavBar.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-
 
 const NavBar = ({ categories }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -59,12 +58,17 @@ const NavBar = ({ categories }) => {
         }
     };
 
+    const handleCartClick = (e) => {
+        e.preventDefault(); // מניעת ריענון העמוד
+        navigate('/cart');
+    };
+
     return (
         <header className="navbar-container">
             <div className="navbar">
-                <a href="/" className="navbar-logo">
+                <Link to="/" className="navbar-logo">
                     <img src="/logo.png" alt="לוגו לבן גרופ" />
-                </a>
+                </Link>
 
                 <ul className="navbar-categories">
                     {/* כפתור טמבור עם דרופדאון של קטגוריות */}
@@ -73,9 +77,9 @@ const NavBar = ({ categories }) => {
                             <button className="category-dropdown-button">{categories.companyName}</button>
                             <div className="category-dropdown-content">
                                 {Object.values(categories.companyCategories).map((category, index) => (
-                                    <a key={index} href={`/${category.categoryName}/${category.categoryName}`}>
+                                    <Link key={index} to={`/${category.categoryName}/${category.categoryName}`}>
                                         {category.categoryName}
-                                    </a>
+                                    </Link>
                                 ))}
                             </div>
                         </li>
@@ -104,11 +108,11 @@ const NavBar = ({ categories }) => {
                             )}
                         </div>
                     ) : (
-                        <a href="/login">
+                        <Link to="/login">
                             <i className="fa fa-user"></i>
-                        </a>
+                        </Link>
                     )}
-                    <a href="/cart">
+                    <a href="/cart" onClick={handleCartClick}>
                         <i className="fa fa-shopping-cart"></i>
                     </a>
                 </div>

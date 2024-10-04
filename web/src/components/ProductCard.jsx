@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../redux/slices/cartSlice';
+import { addToCart } from '../redux/slices/cartSlice'
 import '../styles/ProductCard.css';
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
+
+
     const handleAddToCart = () => {
         // הוספת מחיר ברירת מחדל אם הוא NULL
-        const productToAdd = { 
-            ...product, 
+        const productToAdd = {
+            ...product,
             quantity: product.quantity > 0 ? product.quantity : 1,
             price: product.price !== null && product.price !== undefined ? product.price : 0 // מחיר ברירת מחדל ₪0
         };
+
+
+
         dispatch(addToCart(productToAdd));
         setShowSuccessMessage(true);
 
@@ -25,7 +30,8 @@ const ProductCard = ({ product }) => {
 
     return (
         <div className="product-card">
-            <img src={product.image} alt={product.productName} className="product-card-image" />
+
+            <img src={product.image || product.תמונות} alt={product.productName} className="product-card-image" />
             <h3 className="product-card-title">{product.productName}</h3>
             <p className="product-card-description">{product.description}</p>
             <div className="product-card-footer">

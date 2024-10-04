@@ -11,7 +11,7 @@ const SearchResults = ({ products }) => {
     useEffect(() => {
         if (query && products.length > 0) {
             const lowerQuery = query.toLowerCase();
-            console.log('Products:', products);
+
 
             // שימוש ב-RegExp לחיפוש דומה
             const regex = new RegExp(lowerQuery.split('').join('.*'), 'i');
@@ -30,6 +30,8 @@ const SearchResults = ({ products }) => {
     return (
         <div className="search-results-page">
             <h2>תוצאות חיפוש עבור: {query}</h2>
+            {console.log(filteredProducts)
+            }
             <div className="product-list">
                 {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (

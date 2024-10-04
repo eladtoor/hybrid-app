@@ -1,27 +1,39 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import CartItem from '../components/CartItem';
 import '../styles/CartPage.css';
-import { increaseQuantity, decreaseQuantity, removeFromCart } from '../redux/slices/cartSlice';
+import { increaseQuantity, decreaseQuantity, removeFromCart, setCartItems } from '../redux/slices/cartSlice';
+import { loadCartFromFirestore } from '../utils/cartUtils'; // הפונקציה לשליפת העגלה מ-Firestore
 
 const CartPage = () => {
-    // מושך את הפריטים מהעגלה מתוך Redux
-    const cartItems = useSelector((state) => state.cart.cartItems); 
+    const cartItems = useSelector((state) => state.cart.cartItems);
     const dispatch = useDispatch();
 
-    const handleIncrease = (id) => {
-        dispatch(increaseQuantity({ id }));
+    useEffect(() => {
+        // שליפת העגלה מ-Firestore עם הטעינה של העמוד
+        const fetchCart = async () => {
+            const cartFromFirestore = await loadCartFromFirestore();
+            if (cartFromFirestore) {
+                dispatch(setCartItems(cartFromFirestore)); // שמירת הנתונים ב-Redux
+            }
+        };
+
+        fetchCart(); // קריאה לפונקציה שמבצעת את השליפה
+    }, [dispatch]); // הפונקציה תפעל רק פעם אחת לאחר טעינת העמוד
+
+    const handleIncrease = (sku) => {
+        dispatch(increaseQuantity({ sku }));
     };
 
-    const handleDecrease = (id) => {
-        dispatch(decreaseQuantity({ id }));
+    const handleDecrease = (sku) => {
+        dispatch(decreaseQuantity({ sku }));
     };
 
-    const handleRemove = (id) => {
-        dispatch(removeFromCart({ id }));
+    const handleRemove = (sku) => {
+        dispatch(removeFromCart({ sku }));
     };
 
-    const totalPrice = cartItems.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0); // וודא שיש מחיר
+    const totalPrice = cartItems.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0);
 
     return (
         <div className="cart-page">
@@ -31,9 +43,9 @@ const CartPage = () => {
                     {cartItems.length > 0 ? (
                         cartItems.map(item => (
                             <CartItem
-                                key={item.sku} // וודא שאתה משתמש במפתח ייחודי
+                                key={item.sku}
                                 item={item}
-                                onIncrease={() => handleIncrease(item.sku)} // מזהה את המוצר לפי ה-SKU
+                                onIncrease={() => handleIncrease(item.sku)}
                                 onDecrease={() => handleDecrease(item.sku)}
                                 onRemove={() => handleRemove(item.sku)}
                             />
@@ -42,7 +54,7 @@ const CartPage = () => {
                         <p>העגלה ריקה</p>
                     )}
                 </div>
-                <div className="vertical-divider"></div> {/* מפריד אנכי */}
+                <div className="vertical-divider"></div>
                 <div className="cart-summary">
                     <h2>סיכום הזמנה</h2>
                     <p>סה"כ לתשלום: ₪{totalPrice.toFixed(2)}</p>
