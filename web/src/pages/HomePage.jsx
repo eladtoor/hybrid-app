@@ -15,6 +15,9 @@ const HomePage = ({ categories, products }) => {
     const handleLoginClick = () => {
         navigate('/login');
     };
+    console.log(products);
+    console.log(categories);
+
 
     return (
         <div className="home-page">

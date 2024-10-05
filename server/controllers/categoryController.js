@@ -9,7 +9,6 @@ const buildCategoryStructure = async (req, res) => {
     }
 
     const categoryMap = {};
-    console.log(products);
 
     products.forEach((product) => {
       const categories = product["קטגוריות"]; // וודא שהמפתח הוא בעברית כפי שמופיע ב-JSON
@@ -18,7 +17,6 @@ const buildCategoryStructure = async (req, res) => {
       }
 
       const categoryPaths = categories.split(","); // מחלק לפי פסיקים לקטגוריות שונות
-      console.log(categoryPaths);
 
       categoryPaths.forEach((categoryPath) => {
         const categoryParts = categoryPath.split(">"); // מפצל לפי '>'
@@ -47,25 +45,15 @@ const buildCategoryStructure = async (req, res) => {
               currentCategory.subCategories.push(foundSubCategory);
             }
 
-            // הוספת המוצר לתוך תת הקטגוריה
+            // הוספת המוצר לתוך תת הקטגוריה עם כל השדות של המוצר
             foundSubCategory.products.push({
-              productId: product._id,
-              productName: product.שם,
-              sku: product['מק"ט'],
-              description: product["תיאור קצר"],
-              price: product.מחיר || null, // אם יש מחיר
-              image: product["תמונות"],
+              ...product._doc, // שימוש בכל השדות הקיימים במוצר
             });
           });
         } else {
           // אם אין תתי קטגוריות, נוסיף את המוצרים ישירות לקטגוריה הראשית
           currentCategory.products.push({
-            productId: product._id,
-            productName: product.שם,
-            sku: product['מק"ט'],
-            description: product["תיאור קצר"],
-            price: product.מחיר || null, // אם יש מחיר
-            image: product["תמונות"],
+            ...product._doc, // שימוש בכל השדות הקיימים במוצר
           });
         }
       });

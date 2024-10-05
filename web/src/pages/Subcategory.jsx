@@ -53,7 +53,7 @@ export const Subcategory = () => {
                                 >
                                     {/* Display subcategory image */}
                                     <img
-                                        src={subcategory.products?.[0]?.image || '/default-image.png'}
+                                        src={subcategory.products?.[0]?.תמונות || '/default-image.png'}
                                         alt={subcategory.subCategoryName}
                                         className="subcategory-image"
                                     />

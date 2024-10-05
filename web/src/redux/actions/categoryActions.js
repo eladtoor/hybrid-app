@@ -3,6 +3,8 @@ export const fetchCategories = () => async (dispatch) => {
   try {
     const response = await fetch("http://localhost:5000/api/categories");
     const data = await response.json();
+    console.log(data);
+
     const newData = { companyName: "טמבור", companyCategories: { ...data } };
 
     // Save categories to localStorage

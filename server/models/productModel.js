@@ -1,27 +1,59 @@
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
-  מזהה: { type: Number, required: true }, // מזהה המוצר
-  סוג: { type: String, enum: ["simple", "variable"], default: "simple" }, // סוג המוצר
-  'מק"ט': { type: String }, // מק"ט
-  שם: { type: String, required: true }, // שם המוצר
-  פורסם: { type: Number, default: 1 }, // האם המוצר פורסם (1 = כן, 0 = לא)
-  "האם מומלץ": { type: Number, default: 0 }, // האם המוצר מומלץ (1 = כן, 0 = לא)
+  מזהה: { type: Number, required: true },
+  סוג: { type: String, enum: ["simple", "variable"], default: "simple" },
+  'מק"ט': { type: String },
+  שם: { type: String, required: true },
+  פורסם: { type: Number, default: 1 },
+  "האם מומלץ": { type: Number, default: 0 },
   "נראות בקטלוג": {
     type: String,
     enum: ["visible", "hidden"],
     default: "visible",
   },
-  "תיאור קצר": { type: String }, // תיאור קצר
-  תיאור: { type: String }, // תיאור המוצר (כמו תיאור ארוך יותר)
-  "סטטוס מס": { type: String, default: "taxable" }, // סטטוס מס
-  במלאי: { type: Boolean, default: true }, // במלאי
-  "לאפשר הזמנות מראש": { type: Boolean, default: false }, // האם אפשר להזמין מראש
-  "נמכר בנפרד": { type: Boolean, default: false }, // נמכר בנפרד
-  "לאפשר חוות דעת של לקוחות": { type: Boolean, default: false }, // האם אפשר חוות דעת של לקוחות
-  קטגוריות: { type: String }, // קטגוריות המוצר (לדוגמה "צבעי תעשיה > אבקות אלקטרוסטטיות")
-  תמונות: { type: String }, // כתובת התמונה של המוצר
-  מיקום: { type: Number }, // מיקום המוצר
+  "תיאור קצר": { type: String },
+  תיאור: { type: String },
+  "תאריך התחלה של מחיר המבצע": { type: Date },
+  "תאריך סיום של מחיר המבצע": { type: Date },
+  "סטטוס מס": { type: String, default: "taxable" },
+  במלאי: { type: Boolean, default: true },
+  "כמות של מלאי מועט": { type: Number },
+  "לאפשר הזמנות מראש": { type: Boolean, default: false },
+  "נמכר בנפרד": { type: Boolean, default: false },
+  'משקל (ק"ג)': { type: Number },
+  "אורך (סנטימטרים)": { type: Number },
+  "רוחב (סנטימטרים)": { type: Number },
+  "גובה (סנטימטרים)": { type: Number },
+  "מחיר רגיל": { type: Number },
+  "מחיר מבצע": { type: Number },
+  קטגוריות: { type: String },
+  תגיות: { type: String },
+  "סוג משלוח": { type: String },
+  תמונות: { type: String },
+  "הגבלת הורדות": { type: Number },
+  "מוצרים מקובצים": { type: [String] },
+  "מוצרים משודרגים": { type: [String] },
+  "מוצרים משלימים": { type: [String] },
+
+  "שיוך 1 שמות": { type: String },
+  "שיוך 1 ערכים": { type: String },
+  "שיוך 1 פריטים מוצגים": { type: Number },
+  "שיוך 1 פריטים גלובליים": { type: Number },
+  "שיוך 2 שמות": { type: String },
+  "שיוך 2 ערכים": { type: String },
+  "שיוך 2 פריטים מוצגים": { type: Number },
+  "שיוך 2 פריטים גלובליים": { type: Number },
+  "שיוך 3 שמות": { type: String },
+  "שיוך 3 ערכים": { type: String },
+  "שיוך 3 פריטים מוצגים": { type: Number },
+  "שיוך 3 פריטים גלובליים": { type: Number },
+  "שיוך 4 שמות": { type: String },
+  "שיוך 4 ערכים": { type: String },
+  "שיוך 4 פריטים מוצגים": { type: Number },
+  "שיוך 4 פריטים גלובליים": { type: Number },
+
+  attributes: mongoose.Schema.Types.Mixed,
 });
 
 const Product = mongoose.model("Product", productSchema);

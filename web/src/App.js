@@ -22,8 +22,6 @@ function App() {
   const products = useSelector((state) => state.products.products);
   const dispatch = useDispatch();
 
-  console.log(products);
-
   useEffect(() => {
     const storedCategories = localStorage.getItem("categories");
     const storedProducts = localStorage.getItem("products");

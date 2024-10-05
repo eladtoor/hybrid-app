@@ -29,7 +29,7 @@ const Category = ({ title, subcategories }) => {
 
 
                         <img
-                            src={subcategory.subCategories[0]?.products[0].image || subcategory.products[0].image}
+                            src={subcategory.subCategories[0]?.products[0].תמונות || subcategory.products[0].תמונות}
                             alt={subcategory.categoryName}
                             className="subcategory-image"
                         />

@@ -12,15 +12,18 @@ const SearchResults = ({ products }) => {
         if (query && products.length > 0) {
             const lowerQuery = query.toLowerCase();
 
-
             // שימוש ב-RegExp לחיפוש דומה
             const regex = new RegExp(lowerQuery.split('').join('.*'), 'i');
+
+            // נסה להמיר את query למספר במידה וזה מספר
+            const queryAsNumber = Number(query);
 
             // מסנן את המוצרים על פי השם, SKU, ו-ID, ומציג רק את 9 הקרובים ביותר
             const results = products.filter(product =>
                 regex.test(product['שם']) || // התאמה לשם המוצר
                 regex.test(product['מק"ט']) || // התאמה ל-SKU
-                regex.test(product._id) // התאמה ל-ID של המוצר
+                product['מזהה'] === query || // התאמה מדויקת למזהה כמחרוזת
+                product['מזהה'] === queryAsNumber // התאמה מדויקת למזהה כמספר
             ).slice(0, 9); // הצגת 9 המוצרים הקרובים ביותר לתוצאה
 
             setFilteredProducts(results);
@@ -29,12 +32,14 @@ const SearchResults = ({ products }) => {
 
     return (
         <div className="search-results-page">
-            <h2>תוצאות חיפוש עבור: {query}</h2>
+            {console.log(filteredProducts, "here")
+            }            <h2>תוצאות חיפוש עבור: {query}</h2>
             {console.log(filteredProducts)
             }
             <div className="product-list">
                 {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
+
                         <ProductCard key={product._id} product={product} />
                     ))
                 ) : (

@@ -1,57 +1,63 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '../redux/slices/cartSlice'
+import { addToCart } from '../redux/slices/cartSlice';
 import '../styles/ProductCard.css';
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
+    // פונקציה לפתיחה וסגירה של ה-Modal
+    const toggleModal = () => {
+        setShowModal(!showModal);
+    };
 
-
-    const handleAddToCart = () => {
-        // הוספת מחיר ברירת מחדל אם הוא NULL
-        const productToAdd = {
-            ...product,
-            quantity: product.quantity > 0 ? product.quantity : 1,
-            price: product.price !== null && product.price !== undefined ? product.price : 0 // מחיר ברירת מחדל ₪0
-        };
-
-
-
-        dispatch(addToCart(productToAdd));
-        setShowSuccessMessage(true);
-
-        // הסתרת הודעת הצלחה לאחר 3 שניות
-        setTimeout(() => {
-            setShowSuccessMessage(false);
-        }, 3000);
+    // פונקציה לסגירת המודל גם בלחיצה על החלק הקהה מחוץ למודל
+    const handleCloseModalOnBackgroundClick = (e) => {
+        if (e.target.className === 'modal') {
+            toggleModal();
+        }
     };
 
     return (
-        <div className="product-card">
-
-            <img src={product.image || product.תמונות} alt={product.productName} className="product-card-image" />
-            <h3 className="product-card-title">{product.productName}</h3>
-            <p className="product-card-description">{product.description}</p>
-            <div className="product-card-footer">
-                {product.price !== null && product.price !== undefined ? (
-                    <span className="product-card-price">{`₪${product.price}`}</span>
-                ) : (
-                    <span className="product-card-price">מחיר לא זמין</span>
-                )}
-                <button className="product-card-button" onClick={handleAddToCart}>
-                    הוסף לעגלה
-                </button>
+        <>
+            {/* כל הכרטיס לחיץ */}
+            <div className="product-card" onClick={toggleModal}>
+                <img src={product.תמונות} alt={product.שם} className="product-card-image" />
+                <h3 className="product-card-title">{product.שם}</h3>
+                {/* הצגת תיאור קצר אם קיים, אחרת תיאור */}
+                <p className="product-card-description">
+                    {product["תיאור קצר"] ? product["תיאור קצר"] : product["תיאור"]}
+                </p>
+                <div className="product-card-footer">
+                    {/* הצגת המחיר מעל הכפתור */}
+                    {product["מחיר רגיל"] && !isNaN(product["מחיר רגיל"]) ? (
+                        <span className="product-card-price">{`₪${Number(product["מחיר רגיל"]).toFixed(2)}`}</span>
+                    ) : (
+                        <span className="product-card-price">מחיר לא זמין</span>
+                    )}
+                </div>
             </div>
 
-            {/* הצגת הודעת הצלחה */}
-            {showSuccessMessage && (
-                <div className="success-message-container">
-                    <h3 className="success-message">המוצר התווסף בהצלחה!</h3>
+            {/* Modal הצגת */}
+            {showModal && (
+                <div className="modal" onClick={handleCloseModalOnBackgroundClick}>
+                    <div className="modal-content">
+                        <span className="close" onClick={toggleModal}>&times;</span>
+                        <h2>{product.שם}</h2>
+                        <img src={product.תמונות} alt={product.שם} className="modal-image" />
+                        {/* הצגת תיאור מלא אם קיים, אחרת תיאור קצר */}
+                        <p>
+                            {product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}
+                        </p>
+                        <p>{`מחיר: ₪${product["מחיר רגיל"]}`}</p>
+                        <button className="product-card-button" onClick={() => dispatch(addToCart(product))}>
+                            הוסף לעגלה
+                        </button>
+                    </div>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 

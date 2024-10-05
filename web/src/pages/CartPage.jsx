@@ -43,11 +43,11 @@ const CartPage = () => {
                     {cartItems.length > 0 ? (
                         cartItems.map(item => (
                             <CartItem
-                                key={item.sku}
+                                key={item['מק"ט']}
                                 item={item}
-                                onIncrease={() => handleIncrease(item.sku)}
-                                onDecrease={() => handleDecrease(item.sku)}
-                                onRemove={() => handleRemove(item.sku)}
+                                onIncrease={() => handleIncrease(item['מק"ט'])}
+                                onDecrease={() => handleDecrease(item['מק"ט'])}
+                                onRemove={() => handleRemove(item['מק"ט'])}
                             />
                         ))
                     ) : (

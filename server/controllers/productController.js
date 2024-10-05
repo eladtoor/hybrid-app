@@ -3,6 +3,11 @@ const Product = require("../models/productModel");
 // פונקציה ליצירת מוצר חדש
 const createProduct = async (req, res) => {
   try {
+    // וודא שהמאפיינים נשמרים כ-Map ולא כמחרוזת
+    if (req.body.attributes && typeof req.body.attributes === "string") {
+      req.body.attributes = JSON.parse(req.body.attributes);
+    }
+
     const newProduct = new Product(req.body);
     const savedProduct = await newProduct.save();
     res.status(201).send(savedProduct);
@@ -24,24 +29,13 @@ const getProduct = async (req, res) => {
   }
 };
 
-const mapProductFieldsToEnglish = (product) => {
-  return {
-    productId: product._id,
-    productName: product["שם"],
-    price: product["מחיר"],
-    description: product["תיאור"],
-    image: product["תמונות"],
-    sku: product['מק"ט'],
-    quantity: product["כמות"],
-  };
-};
-
 // פונקציה לשליפת המוצרים מהדאטה בייס ולהמיר את השדות לאנגלית
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find(); // שליפת כל המוצרים מהדאטה בייס
-    const normalizedProducts = products.map(mapProductFieldsToEnglish); // נורמליזציה של השדות
-    res.json(normalizedProducts); // החזרת המוצרים עם שדות באנגלית
+    console.log(products);
+
+    res.json(products);
   } catch (error) {
     res.status(500).json({ error: "Error fetching products" });
   }
