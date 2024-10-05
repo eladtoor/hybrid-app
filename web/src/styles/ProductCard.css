@@ -66,6 +66,25 @@
 .product-card-button:hover {
   background-color: #218838;
 }
+/* עיצוב המאפיינים */
+.product-attributes {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.attribute {
+  margin-bottom: 10px;
+}
+
+.attribute select {
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.attribute strong {
+  margin-right: 10px;
+}
 
 /* Modal Styles */
 .modal {
