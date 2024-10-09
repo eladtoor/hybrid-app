@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/slices/cartSlice';
 import '../styles/ProductCard.css';
@@ -6,6 +6,30 @@ import '../styles/ProductCard.css';
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
     const [showModal, setShowModal] = useState(false);
+    const [selectedAttributes, setSelectedAttributes] = useState({});
+
+    useEffect(() => {
+        if (product.variations && product.variations.length > 0) {
+            const attributeOptions = {};
+            product.variations.forEach((variation) => {
+                const attributes = variation.attributes;
+                for (const [key, value] of Object.entries(attributes)) {
+                    if (!attributeOptions[key]) {
+                        attributeOptions[key] = new Set();
+                    }
+                    attributeOptions[key].add(value);
+                }
+            });
+            // Set default selected attribute if there is only one value
+            const defaultAttributes = {};
+            Object.entries(attributeOptions).forEach(([attributeName, values]) => {
+                if (values.size === 1) {
+                    defaultAttributes[attributeName] = [...values][0];
+                }
+            });
+            setSelectedAttributes(defaultAttributes);
+        }
+    }, [product.variations]);
 
     // פונקציה לפתיחה וסגירה של ה-Modal
     const toggleModal = () => {
@@ -19,59 +43,53 @@ const ProductCard = ({ product }) => {
         }
     };
 
-    // פונקציה להצגת attributes בצורה של dropdown אם יש יותר מאחד
-    const renderAttributes = () => {
-        const attributes = product.attributes;
+    // פונקציה לעדכון הערך שנבחר ברדיו
+    const handleAttributeChange = (attributeName, value) => {
+        setSelectedAttributes((prevSelectedAttributes) => ({
+            ...prevSelectedAttributes,
+            [attributeName]: value,
+        }));
+    };
 
-        // בדיקה אם attributes קיים, שהוא לא undefined ולא null
-        if (!attributes || attributes.length === 0) {
-            return <p>אין מאפיינים למוצר זה.</p>; // אם המאפיינים ריקים או לא קיימים
-        }
+    // פונקציה להצגת מאפיינים אם המוצר הוא מסוג variable
+    const renderVariationAttributes = () => {
+        if (product.variations && product.variations.length > 0) {
+            const attributeOptions = {};
 
-        // בדיקה האם attributes הוא מערך
-        if (Array.isArray(attributes)) {
-            // אם זה מערך, נבדוק את התוכן
-            return attributes.map((attribute, index) => {
-                const [attributeName, attributeValue] = Object.entries(attribute)[0];
-
-                // אם יש ערך אחד בלבד - הצג כטקסט רגיל
-                if (!Array.isArray(attributeValue) || attributeValue.length === 1) {
-                    return (
-                        <div key={index} className="attribute">
-                            <strong>{attributeName}: </strong>
-                            <span>{Array.isArray(attributeValue) ? attributeValue[0] : attributeValue}</span>
-                        </div>
-                    );
+            // איסוף כל הערכים של המאפיינים מכל הווריאציות
+            product.variations.forEach((variation) => {
+                const attributes = variation.attributes;
+                for (const [key, value] of Object.entries(attributes)) {
+                    if (!attributeOptions[key]) {
+                        attributeOptions[key] = new Set();
+                    }
+                    attributeOptions[key].add(value);
                 }
-
-                // אם יש מספר ערכים - הצג כ-dropdown לבחירה
-                return (
-                    <div key={index} className="attribute">
-                        <strong>{attributeName}: </strong>
-                        <select>
-                            {attributeValue.map((value, idx) => (
-                                <option key={idx} value={value}>
-                                    {value}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                );
             });
-        }
 
-        // אם זה לא מערך, זה אובייקט (או כל דבר אחר לא צפוי), מטפל בהתאם
-        if (typeof attributes === 'object') {
-            return Object.entries(attributes).map(([attributeName, attributeValue], index) => (
+            // יצירת כפתורי רדיו עבור כל מאפיין
+            return Object.entries(attributeOptions).map(([attributeName, values], index) => (
                 <div key={index} className="attribute">
-                    <strong>{attributeName}: </strong>
-                    <span>{attributeValue}</span>
+                    <strong>{attributeName}:</strong>
+                    {[...values].map((value) => (
+                        <label
+                            key={value}
+                            className={selectedAttributes[attributeName] === value ? 'selected' : ''}
+                        >
+                            <input
+                                type="radio"
+                                name={attributeName}
+                                value={value}
+                                checked={selectedAttributes[attributeName] === value}
+                                onChange={() => handleAttributeChange(attributeName, value)}
+                            />
+                            {value}
+                        </label>
+                    ))}
                 </div>
             ));
         }
-
-        // אם המידע לא במבנה תקין
-        return <p>אין מאפיינים למוצר זה.</p>;
+        return null;
     };
 
     return (
@@ -102,10 +120,12 @@ const ProductCard = ({ product }) => {
                         <p>{product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}</p>
                         <p>{`מחיר: ₪${product["מחיר רגיל"]}`}</p>
 
-                        {/* הצגת attributes */}
-                        <div className="product-attributes">
-                            {renderAttributes()}
-                        </div>
+                        {/* הצגת attributes אם זה מוצר מסוג variable */}
+                        {product.סוג === 'variable' && (
+                            <div className="product-attributes">
+                                {renderVariationAttributes()}
+                            </div>
+                        )}
 
                         <button className="product-card-button" onClick={() => dispatch(addToCart(product))}>
                             הוסף לעגלה

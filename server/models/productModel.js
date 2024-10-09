@@ -56,6 +56,6 @@ const productSchema = new mongoose.Schema({
   attributes: mongoose.Schema.Types.Mixed,
 });
 
-const Product = mongoose.model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema, "test");
 
 module.exports = Product;

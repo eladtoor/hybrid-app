@@ -66,27 +66,74 @@
 .product-card-button:hover {
   background-color: #218838;
 }
+
 /* עיצוב המאפיינים */
 .product-attributes {
   margin-top: 15px;
-  text-align: left;
+  text-align: right;
+  direction: rtl; /* הצגת המאפיינים מימין לשמאל */
 }
 
 .attribute {
   margin-bottom: 10px;
+  direction: rtl; /* הצגת המאפיינים מימין לשמאל */
+  text-align: right;
 }
 
-.attribute select {
-  padding: 5px;
-  border-radius: 4px;
+.attribute label {
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
   border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.2s ease;
 }
 
-.attribute strong {
-  margin-right: 10px;
+.attribute label.selected {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
 }
 
-/* Modal Styles */
+.attribute input[type="radio"] {
+  display: none;
+}
+
+.attribute input[type="radio"]:checked + label {
+  background-color: #28a745;
+  color: white;
+  border-color: #28a745;
+  transform: scale(1.05);
+}
+
+.attribute label:hover {
+  transform: scale(1.05);
+  border-color: #28a745;
+}
+
+/* Add styles to visually indicate the selected value */
+.attribute input[type="radio"]:checked + label::before {
+  content: "\2713";
+  display: inline-block;
+  margin-right: 5px;
+  color: white;
+  font-weight: bold;
+}
+
+/* Clean animations for transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .modal {
   position: fixed;
   z-index: 1000;
@@ -98,6 +145,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
@@ -109,6 +157,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   text-align: center;
+  animation: fadeIn 0.5s ease;
 }
 
 .close {
@@ -118,6 +167,11 @@
   font-size: 24px;
   font-weight: bold;
   cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.close:hover {
+  transform: rotate(90deg);
 }
 
 .modal-image {
@@ -125,6 +179,7 @@
   height: 200px;
   object-fit: cover;
   margin-bottom: 15px;
+  animation: fadeIn 0.5s ease;
 }
 
 /* Modal Responsive */
