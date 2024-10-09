@@ -1,0 +1,30 @@
+/* AdminPanel.css */
+
+.admin-panel {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.admin-panel h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.admin-panel button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 20px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.admin-panel button:hover {
+  background-color: #0056b3;
+}

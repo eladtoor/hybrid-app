@@ -5,7 +5,7 @@ import { setUser } from '../redux/reducers/userReducer';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { doc, getDoc } from 'firebase/firestore'; // ייבוא של getDoc לבדוק את המידע של המשתמש
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'; // ייבוא של getDoc לבדוק את המידע של המשתמש
 import { db } from '../firebase'; // ייבוא ה- Firestore
 import '../styles/LoginPage.css';
 
@@ -26,8 +26,18 @@ const LoginPage = () => {
                     displayName: user.displayName,
                     email: user.email,  // המייל מגוגל
                     name: "",  // שם ריק עד שהמשתמש יזין
-                    phone: ""  // טלפון ריק עד שהמשתמש יזין
+                    phone: "",  // טלפון ריק עד שהמשתמש יזין
+                    isAdmin: false,  // ברירת מחדל אינה מנהל
                 };
+
+                // בדיקה אם המשתמש הוא מנהל על פי Firestore
+                const q = query(collection(db, "admins"), where("email", "==", user.email));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    // אם המשתמש קיים ברשימת המנהלים
+                    fullUser.isAdmin = true;
+                }
 
                 // שמירת המידע המלא ב-Redux
                 dispatch(setUser(fullUser));

@@ -63,6 +63,11 @@ const NavBar = ({ categories }) => {
         navigate('/cart');
     };
 
+    const handleAdminClick = (e) => {
+        e.preventDefault();
+        navigate('/admin');
+    };
+
     return (
         <header className="navbar-container">
             <div className="navbar">
@@ -112,6 +117,13 @@ const NavBar = ({ categories }) => {
                             <i className="fa fa-user"></i>
                         </Link>
                     )}
+
+                    {user?.isAdmin && (
+                        <a href="#" onClick={handleAdminClick}>
+                            <i className="fa fa-cogs"></i> {/* Admin Icon */}
+                        </a>
+                    )}
+
                     <a href="/cart" onClick={handleCartClick}>
                         <i className="fa fa-shopping-cart"></i>
                     </a>

@@ -14,8 +14,9 @@ import ProductsPage from "./pages/ProductsPage.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "./redux/actions/categoryActions";
 import { fetchProducts } from "./redux/actions/productActions";
-
 import SearchResults from "./pages/SearchResults";
+import AdminPanel from "./pages/AdminPanel"; // Import AdminPanel
+import AdminRoute from "./components/AdminRoute"; // Import the AdminRoute component
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -77,9 +78,15 @@ function App() {
             path="/search"
             element={<SearchResults products={products} />}
           />
-
           <Route path="/profile" element={<UserProfile />} />
+
+          {/* Admin Panel Route - Protected */}
+          <Route
+            path="/admin"
+            element={<AdminRoute element={<AdminPanel />} />}
+          />
         </Routes>
+
         <Footer />
       </Router>
     </Provider>
