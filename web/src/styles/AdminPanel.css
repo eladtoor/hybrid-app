@@ -70,19 +70,19 @@
 
 .modal-content {
   background-color: #fefefe;
-  margin: 100px auto; /* Added margin to push modal down */
+  margin: 100px auto;
   padding: 20px;
   border: 1px solid #888;
   width: 90%;
-  max-height: 65%; /* Set max height to allow scrolling */
-  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 65%;
+  overflow-y: auto;
 }
 
 .radio-group {
-  display: flex; /* Use flexbox for the radio buttons */
+  display: flex;
   justify-content: center;
-  gap: 20px; /* Add some space between the radio buttons */
-  margin-bottom: 10px; /* Space below radio buttons */
+  gap: 20px;
+  margin-bottom: 10px;
 }
 
 .close {
@@ -120,15 +120,69 @@ button[type="submit"] {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-right: 10px; /* Space between buttons */
+  margin-right: 10px;
 }
 
 button[type="submit"]:hover {
   background-color: #0056b3;
 }
 
-/* Style for button container */
 .button-container {
-  display: flex; /* Use flexbox to align buttons side by side */
-  justify-content: flex-end; /* Align buttons to the right */
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Categories section */
+.category-checklist-container {
+  margin-top: 20px;
+}
+
+/* Styling for main categories */
+.main-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.main-categories div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.main-categories label {
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+/* Styling for subcategory section */
+.sub-category-section {
+  margin-top: 20px; /* Adds space between main categories and subcategories */
+}
+
+.sub-category-group {
+  margin-bottom: 15px; /* Adds space between subcategory groups */
+}
+
+.sub-category-group h4 {
+  margin-bottom: 10px; /* Adds space between the title and subcategory checkboxes */
+}
+
+.sub-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.sub-categories div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.sub-categories label {
+  margin-bottom: 5px;
+  text-align: center;
 }
