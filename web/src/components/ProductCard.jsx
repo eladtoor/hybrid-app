@@ -9,17 +9,30 @@ const ProductCard = ({ product }) => {
     const [selectedAttributes, setSelectedAttributes] = useState({});
 
     useEffect(() => {
-        if (product.variations && product.variations.length > 0) {
+        // Check if product.variations exists and is a valid array
+        if (product && Array.isArray(product.variations) && product.variations.length > 0) {
             const attributeOptions = {};
-            product.variations.forEach((variation) => {
+            console.log("Variations found:", product.variations); // Log the variations for debugging
+    
+            product.variations.forEach((variation, index) => {
+                // Check if variation.attributes is a valid object before iterating
                 const attributes = variation.attributes;
-                for (const [key, value] of Object.entries(attributes)) {
-                    if (!attributeOptions[key]) {
-                        attributeOptions[key] = new Set();
+    
+                // Log to check if attributes exist for this variation
+                if (attributes && typeof attributes === 'object') {
+                    console.log(`Attributes for variation ${index}:`, attributes);
+    
+                    for (const [key, value] of Object.entries(attributes)) {
+                        if (!attributeOptions[key]) {
+                            attributeOptions[key] = new Set();
+                        }
+                        attributeOptions[key].add(value);
                     }
-                    attributeOptions[key].add(value);
+                } else {
+                    console.warn(`Attributes are missing or invalid for variation ${index}`, variation); // Warn about invalid attributes
                 }
             });
+    
             // Set default selected attribute if there is only one value
             const defaultAttributes = {};
             Object.entries(attributeOptions).forEach(([attributeName, values]) => {
@@ -27,9 +40,13 @@ const ProductCard = ({ product }) => {
                     defaultAttributes[attributeName] = [...values][0];
                 }
             });
+    
             setSelectedAttributes(defaultAttributes);
+        } else {
+            console.warn("No valid variations found or variations is empty"); // Log if no valid variations exist
         }
     }, [product.variations]);
+    
 
     // פונקציה לפתיחה וסגירה של ה-Modal
     const toggleModal = () => {

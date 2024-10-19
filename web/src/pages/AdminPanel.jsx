@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux'; // Import dispatch and selector
 import { useNavigate } from 'react-router-dom';
 import '../styles/AdminPanel.css';
+import { createProduct } from '../redux/actions/productActions'; // Import the action to create a product
 
 const initialProductState = {
     מזהה: '',
@@ -20,9 +21,11 @@ const initialProductState = {
 
 const AdminPanel = () => {
     const navigate = useNavigate();
-    const userInfo = useSelector((state) => state.user?.user);
+    const dispatch = useDispatch(); // Initialize dispatch for Redux actions
+
     const products = useSelector((state) => state.products.products);
     const categories = useSelector((state) => state.categories);
+
     const [organizedCategories, setCategoriesOrganized] = useState([]);
     const [selectedMainCategories, setSelectedMainCategories] = useState([]); // Selected main categories
     const [selectedSubCategories, setSelectedSubCategories] = useState({}); // Selected subcategories per main category
@@ -138,6 +141,21 @@ const AdminPanel = () => {
 
         let updatedProduct = { ...newProduct, קטגוריות: selectedCategories };
 
+        // Convert קטגוריות array into the desired string format
+        const categoriesString = updatedProduct.קטגוריות.map(category => {
+            const mainCategory = category.mainCategory;
+            const subCategories = category.subCategories;
+            if (subCategories.length > 0) {
+                return subCategories.map(sub => `${mainCategory} > ${sub}`).join(', ');
+            } else {
+                return mainCategory;
+            }
+        }).join(', ');
+
+        // Set the קטגוריות field to the resulting string
+        updatedProduct.קטגוריות = categoriesString;
+
+        // Handle variable products
         if (updatedProduct.סוג === 'variable') {
             const attributeNames = updatedProduct.attributes.map((attr) => attr.name);
             const attributeValues = updatedProduct.attributes.map((attr) => attr.values);
@@ -147,7 +165,7 @@ const AdminPanel = () => {
             const variations = combinations.map((combination, index) => {
                 const attributes = {};
                 combination.forEach((value, i) => {
-                    attributes[`${attributeNames[i]}`] = value; // Naming the attributes like גובה, צבע, etc.
+                    attributes[`${attributeNames[i]}`] = value;
                 });
 
                 return {
@@ -164,11 +182,19 @@ const AdminPanel = () => {
                 variations: variations,
             };
 
-            delete updatedProduct.attributes; // Remove the attributes field from the root object
+            delete updatedProduct.attributes;
         }
 
-        console.log('מוצר חדש:', updatedProduct);
-        setNewProduct(initialProductState); // Reset product state after submission
+        // Remove attributes for simple products
+        if (updatedProduct.סוג === 'simple') {
+            delete updatedProduct.attributes;
+        }
+
+        // Dispatch the action to create the product
+        dispatch(createProduct(updatedProduct));
+
+        // Reset form state after submission
+        setNewProduct(initialProductState);
         handleCloseModal();
     };
 

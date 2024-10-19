@@ -24,21 +24,12 @@ mongoose
     process.exit(1);
   });
 
-// CORS setup
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
-  : [];
+// CORS setup (for development, allowing all origins)
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: '*', // Allow all origins for development
 };
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // Use the simplified CORS setup
 app.use(express.json());
 
 // Routes
