@@ -5,12 +5,13 @@ const productSchema = new mongoose.Schema({
   סוג: { type: String, enum: ["simple", "variable"], default: "simple" }, // Product type (simple or variable)
   'מק"ט': { type: String }, // SKU
   שם: { type: String, required: true }, // Product name
-  'תיאור קצר': { type: String }, // Short description
+  "תיאור קצר": { type: String }, // Short description
   תיאור: { type: String }, // Full description
   "מחיר רגיל": { type: Number }, // Regular price
   "מחיר מבצע": { type: Number }, // Sale price
   קטגוריות: { type: String }, // Categories as a string
   תמונות: { type: String }, // Image URL
+  quantities: { type: [Number], default: [] }, // Quantities as an array of numbers
 
   // Disable _id generation in variations
   variations: [
@@ -19,9 +20,9 @@ const productSchema = new mongoose.Schema({
       מזהה: { type: Number }, // Variation ID
       סוג: { type: String, default: "variation" }, // Variation type
       שם: { type: String }, // Variation name
-      'תיאור קצר': { type: String }, // Short description of variation
+      "תיאור קצר": { type: String }, // Short description of variation
       attributes: mongoose.Schema.Types.Mixed, // Variation-specific attributes (e.g., color, size)
-    }
+    },
   ],
 });
 

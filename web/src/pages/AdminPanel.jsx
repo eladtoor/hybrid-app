@@ -1,243 +1,186 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux'; // Import dispatch and selector
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AdminPanel.css';
-import { createProduct } from '../redux/actions/productActions'; // Import the action to create a product
+import { createProduct, deleteProduct, fetchProducts, updateProduct } from '../redux/actions/productActions';
+import {
+    generateCombinations,
+    fetchCategories,
+    handleSearch,
+    handleMainCategoryChange,
+    handleSubCategoryChange,
+    handleInputChange,
+    handleRadioChange,
+    handleAttributeChange,
+    handleAttributeValueChange,
+    handleAddAttribute,
+    handleAddAttributeValue
+} from '../utils/adminPanelUtils';
 
 const initialProductState = {
     מזהה: '',
-    סוג: 'simple', // Default to 'simple'
+    סוג: 'simple',
     'מק"ט': '',
     שם: '',
     'תיאור קצר': '',
     תיאור: '',
     'מחיר מבצע': '',
     'מחיר רגיל': '',
-    קטגוריות: [], // Will contain selected categories and subcategories
+    קטגוריות: [],
     תמונות: '',
     variations: [],
-    attributes: [] // For storing attribute names and values
+    attributes: [{ name: '', values: [{ value: '', price: '' }] }],
+    quantities: []
 };
 
 const AdminPanel = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch(); // Initialize dispatch for Redux actions
+    const dispatch = useDispatch();
 
     const products = useSelector((state) => state.products.products);
     const categories = useSelector((state) => state.categories);
 
     const [organizedCategories, setCategoriesOrganized] = useState([]);
-    const [selectedMainCategories, setSelectedMainCategories] = useState([]); // Selected main categories
-    const [selectedSubCategories, setSelectedSubCategories] = useState({}); // Selected subcategories per main category
+    const [selectedMainCategories, setSelectedMainCategories] = useState([]);
+    const [selectedSubCategories, setSelectedSubCategories] = useState({});
     const [showForm, setShowForm] = useState(false);
-    const [newProduct, setNewProduct] = useState(initialProductState); // Set the initial state
+    const [isEditing, setIsEditing] = useState(false); // מצב עריכה
+    const [newProduct, setNewProduct] = useState(initialProductState);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [quantityEnabled, setQuantityEnabled] = useState(false);
+    const [quantityInput, setQuantityInput] = useState('');
 
     useEffect(() => {
-        if (categories?.categories?.companyCategories) {
-            const organizedCategories = fetchCategories();
-            setCategoriesOrganized(organizedCategories);
-        }
+        dispatch(fetchProducts());
+    }, [dispatch]);
+
+    useEffect(() => {
+        setCategoriesOrganized(fetchCategories(categories));
     }, [categories]);
 
-    const fetchCategories = () => {
-        if (categories?.categories?.companyCategories) {
-            const mainCategoriesWithSubcategories = Object.values(categories.categories.companyCategories).map((category) => ({
-                categoryName: category.categoryName,
-                subCategories: category.subCategories.map((subCategory) => ({
-                    subCategoryName: subCategory.subCategoryName
-                }))
-            }));
-            return mainCategoriesWithSubcategories;
-        }
-        return [];
-    };
-
-    const handleMainCategoryChange = (categoryName) => {
-        setSelectedMainCategories((prevSelected) => {
-            const alreadySelected = prevSelected.includes(categoryName);
-            if (alreadySelected) {
-                const updated = prevSelected.filter((name) => name !== categoryName);
-                const { [categoryName]: _, ...rest } = selectedSubCategories; // Remove subcategories of deselected main category
-                setSelectedSubCategories(rest);
-                return updated;
-            } else {
-                return [...prevSelected, categoryName];
-            }
-        });
-    };
-
-    const handleSubCategoryChange = (mainCategoryName, subCategoryName) => {
-        setSelectedSubCategories((prevSelected) => {
-            const subCategoriesForMain = prevSelected[mainCategoryName] || [];
-            const alreadySelected = subCategoriesForMain.includes(subCategoryName);
-            const updatedSubCategories = alreadySelected
-                ? subCategoriesForMain.filter((name) => name !== subCategoryName)
-                : [...subCategoriesForMain, subCategoryName];
-
-            return {
-                ...prevSelected,
-                [mainCategoryName]: updatedSubCategories
-            };
-        });
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewProduct((prevProduct) => ({
-            ...prevProduct,
-            [name]: value
-        }));
-    };
-
-    const handleRadioChange = (e) => {
-        setNewProduct((prevProduct) => ({
-            ...prevProduct,
-            סוג: e.target.value
-        }));
-    };
-
-    const handleAttributeChange = (index, field, value) => {
-        const updatedAttributes = newProduct.attributes.map((attribute, i) =>
-            i === index ? { ...attribute, [field]: value } : attribute
-        );
-        setNewProduct({ ...newProduct, attributes: updatedAttributes });
-    };
-
-    const handleAttributeValueChange = (attrIndex, valueIndex, value) => {
-        const updatedAttributes = newProduct.attributes.map((attribute, i) =>
-            i === attrIndex
-                ? {
-                    ...attribute,
-                    values: attribute.values.map((val, j) =>
-                        j === valueIndex ? value : val
-                    )
-                }
-                : attribute
-        );
-        setNewProduct({ ...newProduct, attributes: updatedAttributes });
-    };
-
-    const handleAddAttribute = () => {
-        setNewProduct((prevProduct) => ({
-            ...prevProduct,
-            attributes: [...prevProduct.attributes, { name: '', values: [''] }]
-        }));
-    };
-
-    const handleAddAttributeValue = (index) => {
-        const updatedAttributes = newProduct.attributes.map((attribute, i) =>
-            i === index ? { ...attribute, values: [...attribute.values, ''] } : attribute
-        );
-        setNewProduct({ ...newProduct, attributes: updatedAttributes });
-    };
+    useEffect(() => {
+        setFilteredProducts(handleSearch(searchQuery, products));
+    }, [searchQuery, products]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
         const selectedCategories = selectedMainCategories.map((mainCategoryName) => ({
             mainCategory: mainCategoryName,
             subCategories: selectedSubCategories[mainCategoryName] || []
         }));
 
         let updatedProduct = { ...newProduct, קטגוריות: selectedCategories };
-
-        // Convert קטגוריות array into the desired string format
         const categoriesString = updatedProduct.קטגוריות.map(category => {
             const mainCategory = category.mainCategory;
             const subCategories = category.subCategories;
-            if (subCategories.length > 0) {
-                return subCategories.map(sub => `${mainCategory} > ${sub}`).join(', ');
-            } else {
-                return mainCategory;
-            }
+            return subCategories.length > 0
+                ? subCategories.map(sub => `${mainCategory} > ${sub}`).join(', ')
+                : mainCategory;
         }).join(', ');
 
-        // Set the קטגוריות field to the resulting string
         updatedProduct.קטגוריות = categoriesString;
 
-        // Handle variable products
+        if (Number(updatedProduct['מחיר מבצע']) === 0 || !updatedProduct['מחיר מבצע']) {
+            delete updatedProduct['מחיר מבצע'];
+        }
+
         if (updatedProduct.סוג === 'variable') {
             const attributeNames = updatedProduct.attributes.map((attr) => attr.name);
             const attributeValues = updatedProduct.attributes.map((attr) => attr.values);
-
-            const combinations = generateCombinations(attributeValues);
-
-            const variations = combinations.map((combination, index) => {
+            const variations = generateCombinations(attributeValues).map((combination, index) => {
                 const attributes = {};
-                combination.forEach((value, i) => {
-                    attributes[`${attributeNames[i]}`] = value;
+                let totalPrice = 0;
+
+                combination.forEach((valueObj, i) => {
+                    attributes[`${attributeNames[i]}`] = {
+                        value: valueObj.value,
+                        price: valueObj.price
+                    };
+                    totalPrice += Number(valueObj.price);
                 });
 
                 return {
                     מזהה: Math.floor(Math.random() * 100000),
                     סוג: 'variation',
-                    שם: `${updatedProduct.שם} - ${combination.join(', ')}`,
+                    שם: `${updatedProduct.שם} - ${combination.map((val) => val.value).join(', ')}`,
+                    מחיר: totalPrice,
                     'תיאור קצר': updatedProduct['תיאור קצר'],
-                    attributes: attributes
+                    attributes
                 };
             });
 
-            updatedProduct = {
-                ...updatedProduct,
-                variations: variations,
-            };
-
+            updatedProduct = { ...updatedProduct, variations };
             delete updatedProduct.attributes;
         }
 
-        // Remove attributes for simple products
-        if (updatedProduct.סוג === 'simple') {
-            delete updatedProduct.attributes;
+        if (isEditing) {
+            console.log(updateProduct, "PRODUCT AFTER EDIT");  // pipipi
+
+            dispatch(updateProduct(updatedProduct));
+            setIsEditing(false);
+        } else {
+            dispatch(createProduct(updatedProduct));
         }
 
-        // Dispatch the action to create the product
-        dispatch(createProduct(updatedProduct));
-
-        // Reset form state after submission
         setNewProduct(initialProductState);
-        handleCloseModal();
+        setShowForm(false);
     };
 
-    const generateCombinations = (arrays) => {
-        if (arrays.length === 0) return [[]];
-        const firstArray = arrays[0];
-        const restArrays = generateCombinations(arrays.slice(1));
-        const combinations = [];
-        firstArray.forEach((value) => {
-            restArrays.forEach((rest) => {
-                combinations.push([value, ...rest]);
-            });
-        });
-        return combinations;
+    const handleDelete = (productId) => {
+        if (window.confirm('האם אתה בטוח שברצונך למחוק את המוצר?')) {
+            dispatch(deleteProduct(productId));
+        }
     };
 
-    const handleAddProduct = () => {
-        // Reset form when adding a new product
-        setNewProduct(initialProductState);
-        setSelectedMainCategories([]); // Reset selected categories
-        setSelectedSubCategories({}); // Reset selected subcategories
-        setShowForm(true); // Open the modal
+    const handleAddQuantity = () => {
+        if (quantityInput && !isNaN(quantityInput)) {
+            setNewProduct(prevState => ({
+                ...prevState,
+                quantities: [...prevState.quantities, Number(quantityInput)]
+            }));
+            setQuantityInput('');
+        }
     };
 
-    const handleCloseModal = () => {
-        setShowForm(false); // Close the modal
+    const openEditModal = (product) => {
+        // אם המוצר הוא מסוג variable ואין לו attributes, נוודא שהשדה מוגדר
+        const productToEdit = { ...product };
+        if (productToEdit.סוג === 'variable' && !productToEdit.attributes) {
+            productToEdit.attributes = [{ name: '', values: [{ value: '', price: '' }] }];
+        }
+
+        setNewProduct(productToEdit);
+        setIsEditing(true);
+        setShowForm(true);
     };
 
     return (
         <div className="admin-panel">
             <h1>פאנל ניהול</h1>
-            <button className="admin-button" onClick={handleAddProduct}>הוסף מוצר חדש</button>
+            <button className="admin-button" onClick={() => {
+                setIsEditing(false);
+                setNewProduct(initialProductState);
+                setShowForm(true);
+            }}>הוסף מוצר חדש</button>
+
+            <input
+                type="text"
+                placeholder="חפש לפי מזהה/מק״ט/שם"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-bar"
+            />
 
             {showForm && (
                 <div className="modal">
                     <div className="modal-content">
-                        <span className="close" onClick={handleCloseModal}>&times;</span>
-                        <h2>הוסף מוצר חדש</h2>
+                        <span className="close" onClick={() => setShowForm(false)}>&times;</span>
+                        <h2>{isEditing ? "ערוך מוצר" : "הוסף מוצר חדש"}</h2>
                         <form onSubmit={handleSubmit}>
-                            {/* Main form fields */}
                             <label>
                                 מזהה:
-                                <input type="text" name="מזהה" value={newProduct.מזהה} onChange={handleInputChange} required />
+                                <input type="number" name="מזהה" value={newProduct.מזהה} onChange={(e) => handleInputChange(e, setNewProduct)} required />
                             </label>
 
                             <label>
@@ -249,7 +192,7 @@ const AdminPanel = () => {
                                             name="סוג"
                                             value="simple"
                                             checked={newProduct.סוג === 'simple'}
-                                            onChange={handleRadioChange}
+                                            onChange={(e) => handleRadioChange(e, setNewProduct)}
                                         />
                                         Simple
                                     </label>
@@ -259,7 +202,7 @@ const AdminPanel = () => {
                                             name="סוג"
                                             value="variable"
                                             checked={newProduct.סוג === 'variable'}
-                                            onChange={handleRadioChange}
+                                            onChange={(e) => handleRadioChange(e, setNewProduct)}
                                         />
                                         Variable
                                     </label>
@@ -276,61 +219,95 @@ const AdminPanel = () => {
                                                 <input
                                                     type="text"
                                                     value={attribute.name}
-                                                    onChange={(e) => handleAttributeChange(index, 'name', e.target.value)}
+                                                    onChange={(e) => handleAttributeChange(index, 'name', e.target.value, newProduct, setNewProduct)}
                                                     required
                                                 />
                                             </label>
-                                            {attribute.values.map((value, valueIndex) => (
+                                            {attribute.values.map((valueObj, valueIndex) => (
                                                 <div key={valueIndex}>
                                                     <label>
                                                         ערך מאפיין:
                                                         <input
                                                             type="text"
-                                                            value={value}
-                                                            onChange={(e) => handleAttributeValueChange(index, valueIndex, e.target.value)}
+                                                            value={valueObj.value}
+                                                            onChange={(e) => handleAttributeValueChange(index, valueIndex, 'value', e.target.value, newProduct, setNewProduct)}
+                                                            required
+                                                        />
+                                                    </label>
+                                                    <label>
+                                                        מחיר מאפיין:
+                                                        <input
+                                                            type="number"
+                                                            value={valueObj.price}
+                                                            onChange={(e) => handleAttributeValueChange(index, valueIndex, 'price', e.target.value, newProduct, setNewProduct)}
                                                             required
                                                         />
                                                     </label>
                                                 </div>
                                             ))}
-                                            <button type="button" onClick={() => handleAddAttributeValue(index)}>+ הוסף ערך מאפיין</button>
+                                            <button type="button" onClick={() => handleAddAttributeValue(index, newProduct, setNewProduct)}>+ הוסף ערך מאפיין</button>
                                         </div>
                                     ))}
-                                    <button type="button" onClick={handleAddAttribute}>+ הוסף שם מאפיין</button>
+                                    <button type="button" onClick={() => handleAddAttribute(newProduct, setNewProduct)}>+ הוסף שם מאפיין</button>
                                 </>
                             )}
 
                             <label>
+                                <input
+                                    type="checkbox"
+                                    checked={quantityEnabled}
+                                    onChange={() => setQuantityEnabled(!quantityEnabled)}
+                                />
+                                אופציה לכמות
+                            </label>
+
+                            {quantityEnabled && (
+                                <div className="quantity-input-section">
+                                    <input
+                                        type="number"
+                                        placeholder="הכנס כמות"
+                                        value={quantityInput}
+                                        onChange={(e) => setQuantityInput(e.target.value)}
+                                    />
+                                    <button type="button" onClick={handleAddQuantity}>הוסף כמות</button>
+                                    <div className="quantities-display">
+                                        {newProduct.quantities.map((qty, idx) => (
+                                            <span key={idx} className="quantity-item">{qty}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <label>
                                 מק"ט:
-                                <input type="text" name='מק"ט' value={newProduct['מק"ט']} onChange={handleInputChange} required />
+                                <input type="text" name='מק"ט' value={newProduct['מק"ט']} onChange={(e) => handleInputChange(e, setNewProduct)} required />
                             </label>
                             <label>
                                 שם:
-                                <input type="text" name="שם" value={newProduct.שם} onChange={handleInputChange} required />
+                                <input type="text" name="שם" value={newProduct.שם} onChange={(e) => handleInputChange(e, setNewProduct)} required />
                             </label>
                             <label>
                                 תיאור קצר:
-                                <textarea name="תיאור קצר" value={newProduct['תיאור קצר']} onChange={handleInputChange} />
+                                <textarea name="תיאור קצר" value={newProduct['תיאור קצר']} onChange={(e) => handleInputChange(e, setNewProduct)} />
                             </label>
                             <label>
                                 תיאור:
-                                <textarea name="תיאור" value={newProduct.תיאור} onChange={handleInputChange} />
+                                <textarea name="תיאור" value={newProduct.תיאור} onChange={(e) => handleInputChange(e, setNewProduct)} />
                             </label>
                             <label>
                                 מחיר רגיל:
-                                <input type="number" name="מחיר רגיל" value={newProduct['מחיר רגיל']} onChange={handleInputChange} />
+                                <input type="number" name="מחיר רגיל" value={newProduct['מחיר רגיל']} onChange={(e) => handleInputChange(e, setNewProduct)} />
                             </label>
                             <label>
                                 מחיר מבצע:
-                                <input type="number" name="מחיר מבצע" value={newProduct['מחיר מבצע']} onChange={handleInputChange} />
+                                <input type="number" name="מחיר מבצע" value={newProduct['מחיר מבצע']} onChange={(e) => handleInputChange(e, setNewProduct)} />
                             </label>
 
                             <label>
                                 תמונות:
-                                <input type="text" name="תמונות" value={newProduct.תמונות} onChange={handleInputChange} />
+                                <input type="text" name="תמונות" value={newProduct.תמונות} onChange={(e) => handleInputChange(e, setNewProduct)} />
                             </label>
 
-                            {/* Categories section */}
                             <label>
                                 קטגוריות:
                                 <div className="category-checklist-container">
@@ -343,7 +320,7 @@ const AdminPanel = () => {
                                                     id={`main-${index}`}
                                                     value={category.categoryName}
                                                     checked={selectedMainCategories.includes(category.categoryName)}
-                                                    onChange={() => handleMainCategoryChange(category.categoryName)}
+                                                    onChange={() => handleMainCategoryChange(category.categoryName, setSelectedMainCategories, selectedSubCategories, setSelectedSubCategories)}
                                                 />
                                             </div>
                                         ))}
@@ -365,7 +342,7 @@ const AdminPanel = () => {
                                                                     id={`sub-${index}-${subIndex}`}
                                                                     value={subCategory.subCategoryName}
                                                                     checked={selectedSubCategories[mainCategoryName]?.includes(subCategory.subCategoryName) || false}
-                                                                    onChange={() => handleSubCategoryChange(mainCategoryName, subCategory.subCategoryName)}
+                                                                    onChange={() => handleSubCategoryChange(mainCategoryName, subCategory.subCategoryName, selectedSubCategories, setSelectedSubCategories)}
                                                                 />
                                                             </div>
                                                         ))}
@@ -377,7 +354,7 @@ const AdminPanel = () => {
                                 </div>
                             </label>
 
-                            <button type="submit">שמור מוצר</button>
+                            <button type="submit">{isEditing ? "שמור שינויים" : "שמור מוצר"}</button>
                         </form>
                     </div>
                 </div>
@@ -395,7 +372,7 @@ const AdminPanel = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {products?.map((product) => (
+                    {filteredProducts?.map((product) => (
                         <tr key={product._id}>
                             <td className="admin-td"><img src={product["תמונות"]} alt={product.name} className="admin-img" /></td>
                             <td className="admin-td">{product.מזהה}</td>
@@ -403,7 +380,8 @@ const AdminPanel = () => {
                             <td className="admin-td">{product['מק"ט']}</td>
                             <td className="admin-td">{product.סוג}</td>
                             <td className="admin-td">
-                                <button>ערוך</button>
+                                <button onClick={() => openEditModal(product)}>ערוך</button>
+                                <button onClick={() => handleDelete(product._id)}>מחק</button>
                             </td>
                         </tr>
                     ))}

@@ -12,9 +12,9 @@ router.get("/getAll", productController.getAllProducts);
 router.get("/:id", productController.getProduct);
 
 // ראוט לעדכון מוצר לפי מזהה
-router.put("/:id", productController.updateProduct);
+router.put("/update/:id", productController.updateProduct);
 
 // ראוט למחיקת מוצר לפי מזהה
-router.delete("/:id", productController.deleteProduct);
+router.delete("/delete/:id", productController.deleteProduct);
 
 module.exports = router;

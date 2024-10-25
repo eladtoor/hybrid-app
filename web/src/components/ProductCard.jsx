@@ -7,84 +7,97 @@ const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
     const [showModal, setShowModal] = useState(false);
     const [selectedAttributes, setSelectedAttributes] = useState({});
+    const [selectedQuantity, setSelectedQuantity] = useState(1); // Default quantity is 1
+    const [totalPrice, setTotalPrice] = useState(product["מחיר רגיל"] || 0);
 
     useEffect(() => {
-        // Check if product.variations exists and is a valid array
         if (product && Array.isArray(product.variations) && product.variations.length > 0) {
             const attributeOptions = {};
-            console.log("Variations found:", product.variations); // Log the variations for debugging
-    
-            product.variations.forEach((variation, index) => {
-                // Check if variation.attributes is a valid object before iterating
+            const defaultAttributes = {};
+
+            product.variations.forEach((variation) => {
                 const attributes = variation.attributes;
-    
-                // Log to check if attributes exist for this variation
                 if (attributes && typeof attributes === 'object') {
-                    console.log(`Attributes for variation ${index}:`, attributes);
-    
-                    for (const [key, value] of Object.entries(attributes)) {
+                    for (const [key, { value }] of Object.entries(attributes)) {
                         if (!attributeOptions[key]) {
                             attributeOptions[key] = new Set();
                         }
                         attributeOptions[key].add(value);
                     }
-                } else {
-                    console.warn(`Attributes are missing or invalid for variation ${index}`, variation); // Warn about invalid attributes
                 }
             });
-    
-            // Set default selected attribute if there is only one value
-            const defaultAttributes = {};
+
             Object.entries(attributeOptions).forEach(([attributeName, values]) => {
-                if (values.size === 1) {
-                    defaultAttributes[attributeName] = [...values][0];
-                }
+                defaultAttributes[attributeName] = [...values][0];
             });
-    
+
             setSelectedAttributes(defaultAttributes);
-        } else {
-            console.warn("No valid variations found or variations is empty"); // Log if no valid variations exist
+            calculateTotalPrice(defaultAttributes, selectedQuantity); // Include selectedQuantity in calculation
         }
     }, [product.variations]);
-    
 
-    // פונקציה לפתיחה וסגירה של ה-Modal
     const toggleModal = () => {
         setShowModal(!showModal);
     };
 
-    // פונקציה לסגירת המודל גם בלחיצה על החלק הקהה מחוץ למודל
-    const handleCloseModalOnBackgroundClick = (e) => {
-        if (e.target.className === 'modal') {
-            toggleModal();
+    const handleAttributeChange = (attributeName, selectedValue) => {
+        setSelectedAttributes((prevSelectedAttributes) => {
+            const updatedAttributes = { ...prevSelectedAttributes, [attributeName]: selectedValue };
+            calculateTotalPrice(updatedAttributes, selectedQuantity);
+            return updatedAttributes;
+        });
+    };
+
+    const handleQuantityChange = (quantity) => {
+        setSelectedQuantity(quantity);
+        calculateTotalPrice(selectedAttributes, quantity);
+    };
+
+    const calculateTotalPrice = (updatedAttributes, quantity) => {
+        let updatedPrice = product["מחיר רגיל"] || 0;
+
+        if (product.variations && product.variations.length > 0) {
+            for (const variation of product.variations) {
+                const attributes = variation.attributes;
+                let match = true;
+
+                for (const [key, selectedValue] of Object.entries(updatedAttributes)) {
+                    if (!attributes || !attributes[key] || attributes[key].value !== selectedValue) {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    for (const attribute of Object.values(attributes || {})) {
+                        if (attribute && attribute.price) {
+                            updatedPrice += Number(attribute.price);
+                        }
+                    }
+                    break;
+                }
+            }
         }
+
+        setTotalPrice(updatedPrice * quantity);
     };
 
-    // פונקציה לעדכון הערך שנבחר ברדיו
-    const handleAttributeChange = (attributeName, value) => {
-        setSelectedAttributes((prevSelectedAttributes) => ({
-            ...prevSelectedAttributes,
-            [attributeName]: value,
-        }));
-    };
-
-    // פונקציה להצגת מאפיינים אם המוצר הוא מסוג variable
     const renderVariationAttributes = () => {
         if (product.variations && product.variations.length > 0) {
             const attributeOptions = {};
 
-            // איסוף כל הערכים של המאפיינים מכל הווריאציות
             product.variations.forEach((variation) => {
                 const attributes = variation.attributes;
-                for (const [key, value] of Object.entries(attributes)) {
-                    if (!attributeOptions[key]) {
-                        attributeOptions[key] = new Set();
+                if (attributes && typeof attributes === 'object') {
+                    for (const [key, { value }] of Object.entries(attributes)) {
+                        if (!attributeOptions[key]) {
+                            attributeOptions[key] = new Set();
+                        }
+                        attributeOptions[key].add(value);
                     }
-                    attributeOptions[key].add(value);
                 }
             });
 
-            // יצירת כפתורי רדיו עבור כל מאפיין
             return Object.entries(attributeOptions).map(([attributeName, values], index) => (
                 <div key={index} className="attribute">
                     <strong>{attributeName}:</strong>
@@ -111,7 +124,6 @@ const ProductCard = ({ product }) => {
 
     return (
         <>
-            {/* כל הכרטיס לחיץ */}
             <div className="product-card" onClick={toggleModal}>
                 <img src={product.תמונות} alt={product.שם} className="product-card-image" />
                 <h3 className="product-card-title">{product.שם}</h3>
@@ -119,28 +131,42 @@ const ProductCard = ({ product }) => {
                     {product["תיאור קצר"] ? product["תיאור קצר"] : product["תיאור"]}
                 </p>
                 <div className="product-card-footer">
-                    {product["מחיר רגיל"] && !isNaN(product["מחיר רגיל"]) ? (
-                        <span className="product-card-price">{`₪${Number(product["מחיר רגיל"]).toFixed(2)}`}</span>
-                    ) : (
-                        <span className="product-card-price">מחיר לא זמין</span>
-                    )}
+                    <span className="product-card-price">{`₪${Number(totalPrice).toFixed(2)}`}</span>
                 </div>
             </div>
 
-            {/* Modal הצגת */}
             {showModal && (
-                <div className="modal" onClick={handleCloseModalOnBackgroundClick}>
+                <div className="modal" onClick={(e) => e.target.className === 'modal' && toggleModal()}>
                     <div className="modal-content">
                         <span className="close" onClick={toggleModal}>&times;</span>
                         <h2>{product.שם}</h2>
                         <img src={product.תמונות} alt={product.שם} className="modal-image" />
                         <p>{product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}</p>
-                        <p>{`מחיר: ₪${product["מחיר רגיל"]}`}</p>
+                        <p>{`מחיר: ₪${totalPrice.toFixed(2)}`}</p>
 
-                        {/* הצגת attributes אם זה מוצר מסוג variable */}
                         {product.סוג === 'variable' && (
                             <div className="product-attributes">
                                 {renderVariationAttributes()}
+                            </div>
+                        )}
+
+                        {product.quantities && product.quantities.length > 0 && (
+                            <div className="quantity-options">
+                                <strong>בחר כמות:</strong>
+                                <div className="quantity-row">
+                                    {product.quantities.map((quantity, index) => (
+                                        <label key={index} style={{ marginRight: '10px' }}>
+                                            <input
+                                                type="radio"
+                                                name="quantity"
+                                                value={quantity}
+                                                checked={selectedQuantity === quantity}
+                                                onChange={() => handleQuantityChange(quantity)}
+                                            />
+                                            {quantity}
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         )}
 

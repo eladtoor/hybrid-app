@@ -182,6 +182,16 @@
   animation: fadeIn 0.5s ease;
 }
 
+.quantity-options {
+  margin-top: 10px;
+}
+
+.quantity-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
 /* Modal Responsive */
 @media (max-width: 768px) {
   .modal-content {

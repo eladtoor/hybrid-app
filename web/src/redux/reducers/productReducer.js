@@ -17,7 +17,6 @@ const productReducer = (state = initialState, action) => {
     case "FETCH_PRODUCTS_FAILURE":
       return { ...state, loading: false, error: action.payload };
 
-    // Case for creating a product
     case "CREATE_PRODUCT_REQUEST":
       return { ...state, loading: true };
 
@@ -25,15 +24,44 @@ const productReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        products: [...state.products, action.payload], // Append the new product to the existing products
+        products: [...state.products, action.payload],
       };
 
     case "CREATE_PRODUCT_FAILURE":
       return { ...state, loading: false, error: action.payload };
 
-    // New case to set products from localStorage
     case "SET_PRODUCTS_FROM_STORAGE":
       return { ...state, products: action.payload };
+
+    case "DELETE_PRODUCT_REQUEST":
+      return { ...state, loading: true };
+
+    case "DELETE_PRODUCT_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        products: state.products.filter(
+          (product) => product._id !== action.payload
+        ),
+      };
+
+    case "DELETE_PRODUCT_FAILURE":
+      return { ...state, loading: false, error: action.payload };
+
+    case "UPDATE_PRODUCT_REQUEST":
+      return { ...state, loading: true };
+
+    case "UPDATE_PRODUCT_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        products: state.products.map((product) =>
+          product._id === action.payload._id ? action.payload : product
+        ),
+      };
+
+    case "UPDATE_PRODUCT_FAILURE":
+      return { ...state, loading: false, error: action.payload };
 
     default:
       return state;
