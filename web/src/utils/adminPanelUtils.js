@@ -97,9 +97,16 @@ export const handleInputChange = (e, setNewProduct) => {
 };
 
 export const handleRadioChange = (e, setNewProduct) => {
+  const newType = e.target.value;
   setNewProduct((prevProduct) => ({
     ...prevProduct,
-    סוג: e.target.value,
+    סוג: newType,
+    attributes:
+      newType === "variable"
+        ? prevProduct.attributes || [
+            { name: "", values: [{ value: "", price: 0 }] },
+          ]
+        : [], // הוספת ערך ברירת מחדל אם הסוג הוא variable
   }));
 };
 

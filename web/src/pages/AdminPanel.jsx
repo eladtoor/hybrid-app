@@ -65,12 +65,19 @@ const AdminPanel = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // בדיקה אם המשתמש סימן לפחות קטגוריה ראשית אחת
+        if (selectedMainCategories.length === 0) {
+            alert("אנא סמן לפחות קטגוריה ראשית אחת.");
+            return;
+        }
+
         const selectedCategories = selectedMainCategories.map((mainCategoryName) => ({
             mainCategory: mainCategoryName,
             subCategories: selectedSubCategories[mainCategoryName] || []
         }));
 
-        let updatedProduct = { ...newProduct, קטגוריות: selectedCategories };
+        let updatedProduct = { ...newProduct, קטגוריות: selectedCategories, quantities: [...newProduct.quantities].sort((a, b) => a - b) };
         const categoriesString = updatedProduct.קטגוריות.map(category => {
             const mainCategory = category.mainCategory;
             const subCategories = category.subCategories;
@@ -144,11 +151,38 @@ const AdminPanel = () => {
     };
 
     const openEditModal = (product) => {
-        // אם המוצר הוא מסוג variable ואין לו attributes, נוודא שהשדה מוגדר
         const productToEdit = { ...product };
         if (productToEdit.סוג === 'variable' && !productToEdit.attributes) {
             productToEdit.attributes = [{ name: '', values: [{ value: '', price: '' }] }];
         }
+
+        // אם הקטגוריות אינן מערך, המרתן למערך
+        const categoriesArray = Array.isArray(product.קטגוריות)
+            ? product.קטגוריות
+            : product.קטגוריות.split(', ').map(cat => {
+                const [mainCategory, ...subCategories] = cat.split(' > ');
+                return {
+                    mainCategory: mainCategory.trim(),
+                    subCategories: subCategories.length ? [subCategories.join(' > ').trim()] : [],
+                };
+            });
+
+        // הגדרת קטגוריות ייחודיות ללא כפילויות
+        const uniqueCategories = {};
+        categoriesArray.forEach(cat => {
+            if (!uniqueCategories[cat.mainCategory]) {
+                uniqueCategories[cat.mainCategory] = new Set();
+            }
+            cat.subCategories.forEach(subCategory => uniqueCategories[cat.mainCategory].add(subCategory));
+        });
+
+        // שמירת הקטגוריות הראשיות ותתי-הקטגוריות המיוחדות במצב
+        setSelectedMainCategories(Object.keys(uniqueCategories));
+        const subCategories = {};
+        Object.entries(uniqueCategories).forEach(([mainCategory, subCategorySet]) => {
+            subCategories[mainCategory] = Array.from(subCategorySet);
+        });
+        setSelectedSubCategories(subCategories);
 
         setNewProduct(productToEdit);
         setIsEditing(true);
@@ -158,11 +192,18 @@ const AdminPanel = () => {
     return (
         <div className="admin-panel">
             <h1>פאנל ניהול</h1>
-            <button className="admin-button" onClick={() => {
-                setIsEditing(false);
-                setNewProduct(initialProductState);
-                setShowForm(true);
-            }}>הוסף מוצר חדש</button>
+            <button
+                className="admin-button"
+                onClick={() => {
+                    setIsEditing(false);
+                    setNewProduct(initialProductState);
+                    setSelectedMainCategories([]);  // איפוס קטגוריות ראשיות
+                    setSelectedSubCategories({});   // איפוס תתי קטגוריות
+                    setShowForm(true);
+                }}
+            >
+                הוסף מוצר חדש
+            </button>
 
             <input
                 type="text"
@@ -270,11 +311,18 @@ const AdminPanel = () => {
                                         onChange={(e) => setQuantityInput(e.target.value)}
                                     />
                                     <button type="button" onClick={handleAddQuantity}>הוסף כמות</button>
+
                                     <div className="quantities-display">
-                                        {newProduct.quantities.map((qty, idx) => (
-                                            <span key={idx} className="quantity-item">{qty}</span>
-                                        ))}
+                                        {newProduct.quantities.join(', ')}
                                     </div>
+
+                                    {/* כפתור לאיפוס הכמות */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setNewProduct((prevState) => ({ ...prevState, quantities: [] }))}
+                                    >
+                                        איפוס כמות
+                                    </button>
                                 </div>
                             )}
 

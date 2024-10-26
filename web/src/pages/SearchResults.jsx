@@ -18,13 +18,25 @@ const SearchResults = ({ products }) => {
             // נסה להמיר את query למספר במידה וזה מספר
             const queryAsNumber = Number(query);
 
-            // מסנן את המוצרים על פי השם, SKU, ו-ID, ומציג רק את 9 הקרובים ביותר
-            const results = products.filter(product =>
+            // מסנן את המוצרים על פי השם, SKU, ו-ID
+            const exactNameMatches = products.filter(product =>
+                product['שם'].toLowerCase() === lowerQuery
+            );
+
+            const partialMatches = products.filter(product =>
                 regex.test(product['שם']) || // התאמה לשם המוצר
                 regex.test(product['מק"ט']) || // התאמה ל-SKU
                 product['מזהה'] === query || // התאמה מדויקת למזהה כמחרוזת
                 product['מזהה'] === queryAsNumber // התאמה מדויקת למזהה כמספר
-            ).slice(0, 9); // הצגת 9 המוצרים הקרובים ביותר לתוצאה
+            );
+
+            // הסרת מוצרים עם התאמה מדויקת מרשימת התאמות חלקיות למניעת כפילות
+            const filteredPartialMatches = partialMatches.filter(product =>
+                !exactNameMatches.includes(product)
+            );
+
+            // חיבור תוצאות החיפוש ומגבלה של 9 תוצאות
+            const results = [...exactNameMatches, ...filteredPartialMatches].slice(0, 9);
 
             setFilteredProducts(results);
         }
