@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { saveCartToFirestore } from "../../utils/cartUtils"; // יבוא של פונקציות Firestore
+import { saveCartToFirestore } from "../../utils/cartUtils";
 
 const initialState = {
   cartItems: [],
@@ -10,48 +10,41 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const existingItem = state.cartItems.find(
-        (item) => item.sku === action.payload.sku
-      );
+      const { _id, quantity } = action.payload;
+      const existingItem = state.cartItems.find((item) => item._id === _id);
 
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += quantity; // הגדל את הכמות הקיימת במכפלת הכמות החדשה
       } else {
-        state.cartItems = [
-          ...state.cartItems,
-          { ...action.payload, price: action.payload.price || 0, quantity: 1 },
-        ];
+        state.cartItems = [...state.cartItems, { ...action.payload, quantity }];
       }
 
-      saveCartToFirestore(state.cartItems); // שמירת העגלה ל-Firestore
-    },
-    setCartItems: (state, action) => {
-      state.cartItems = action.payload;
-      console.log("in setcart", state.cartItems);
+      saveCartToFirestore(state.cartItems);
     },
     increaseQuantity: (state, action) => {
-      const item = state.cartItems.find(
-        (item) => item.sku === action.payload.sku
-      );
+      const { _id } = action.payload;
+      const item = state.cartItems.find((item) => item._id === _id);
       if (item) {
-        item.quantity += 1;
-        saveCartToFirestore(state.cartItems); // שמירת השינויים ב-Firestore
+        item.quantity += item.packageSize || 1; // הגדלת הכמות לפי גודל החבילה או 1 כברירת מחדל
+        saveCartToFirestore(state.cartItems);
       }
     },
     decreaseQuantity: (state, action) => {
-      const item = state.cartItems.find(
-        (item) => item.sku === action.payload.sku
-      );
-      if (item && item.quantity > 1) {
-        item.quantity -= 1;
-        saveCartToFirestore(state.cartItems); // שמירת השינויים ב-Firestore
+      const { _id } = action.payload;
+      const item = state.cartItems.find((item) => item._id === _id);
+      if (item && item.quantity > item.packageSize) {
+        item.quantity -= item.packageSize || 1;
+        saveCartToFirestore(state.cartItems);
       }
     },
     removeFromCart: (state, action) => {
       state.cartItems = state.cartItems.filter(
-        (item) => item.sku !== action.payload.sku
+        (item) => item._id !== action.payload._id
       );
-      saveCartToFirestore(state.cartItems); // שמירת השינויים ב-Firestore
+      saveCartToFirestore(state.cartItems);
+    },
+    setCartItems: (state, action) => {
+      state.cartItems = action.payload;
     },
   },
 });

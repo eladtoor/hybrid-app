@@ -3,34 +3,32 @@ import { useSelector, useDispatch } from 'react-redux';
 import CartItem from '../components/CartItem';
 import '../styles/CartPage.css';
 import { increaseQuantity, decreaseQuantity, removeFromCart, setCartItems } from '../redux/slices/cartSlice';
-import { loadCartFromFirestore } from '../utils/cartUtils'; // הפונקציה לשליפת העגלה מ-Firestore
+import { loadCartFromFirestore } from '../utils/cartUtils';
 
 const CartPage = () => {
     const cartItems = useSelector((state) => state.cart.cartItems);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        // שליפת העגלה מ-Firestore עם הטעינה של העמוד
         const fetchCart = async () => {
             const cartFromFirestore = await loadCartFromFirestore();
             if (cartFromFirestore) {
-                dispatch(setCartItems(cartFromFirestore)); // שמירת הנתונים ב-Redux
+                dispatch(setCartItems(cartFromFirestore));
             }
         };
+        fetchCart();
+    }, [dispatch]);
 
-        fetchCart(); // קריאה לפונקציה שמבצעת את השליפה
-    }, [dispatch]); // הפונקציה תפעל רק פעם אחת לאחר טעינת העמוד
-
-    const handleIncrease = (sku) => {
-        dispatch(increaseQuantity({ sku }));
+    const handleIncrease = (_id) => {
+        dispatch(increaseQuantity({ _id }));
     };
 
-    const handleDecrease = (sku) => {
-        dispatch(decreaseQuantity({ sku }));
+    const handleDecrease = (_id) => {
+        dispatch(decreaseQuantity({ _id }));
     };
 
-    const handleRemove = (sku) => {
-        dispatch(removeFromCart({ sku }));
+    const handleRemove = (_id) => {
+        dispatch(removeFromCart({ _id }));
     };
 
     const totalPrice = cartItems.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0);
@@ -43,11 +41,11 @@ const CartPage = () => {
                     {cartItems.length > 0 ? (
                         cartItems.map(item => (
                             <CartItem
-                                key={item['מק"ט']}
+                                key={item._id}
                                 item={item}
-                                onIncrease={() => handleIncrease(item['מק"ט'])}
-                                onDecrease={() => handleDecrease(item['מק"ט'])}
-                                onRemove={() => handleRemove(item['מק"ט'])}
+                                onIncrease={() => handleIncrease(item._id)}
+                                onDecrease={() => handleDecrease(item._id)}
+                                onRemove={() => handleRemove(item._id)}
                             />
                         ))
                     ) : (

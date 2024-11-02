@@ -141,12 +141,14 @@ const AdminPanel = () => {
     };
 
     const handleAddQuantity = () => {
-        if (quantityInput && !isNaN(quantityInput)) {
+        if (quantityInput && !isNaN(quantityInput) && Number(quantityInput) > 0) { // בדיקה אם המספר חיובי
             setNewProduct(prevState => ({
                 ...prevState,
                 quantities: [...prevState.quantities, Number(quantityInput)]
             }));
             setQuantityInput('');
+        } else {
+            alert("אנא הזן כמות חיובית בלבד.");
         }
     };
 
@@ -306,6 +308,7 @@ const AdminPanel = () => {
                                 <div className="quantity-input-section">
                                     <input
                                         type="number"
+                                        min="1" // הגבלת המינימום ל-1
                                         placeholder="הכנס כמות"
                                         value={quantityInput}
                                         onChange={(e) => setQuantityInput(e.target.value)}

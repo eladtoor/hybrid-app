@@ -1,32 +1,42 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebase"; // נוודא שהפיירבייס מוגדר
+import { auth, db } from "../firebase"; // ודא שהפיירבייס מוגדר
 
 export const saveCartToFirestore = async (cartItems) => {
   const user = auth.currentUser;
-  if (!user) return;
+  if (!user) {
+    console.warn("No user is logged in. Cannot save cart to Firestore.");
+    return;
+  }
 
   const cartRef = doc(db, "carts", user.uid);
   try {
     await setDoc(cartRef, { cartItems });
+    console.log("Cart saved successfully to Firestore.");
   } catch (error) {
     console.error("Error saving cart to Firestore:", error);
   }
 };
 
 export const loadCartFromFirestore = async () => {
-  const userFromStorage = JSON.parse(localStorage.getItem("user"));
-
-  const user = auth.currentUser || userFromStorage;
-  console.log(auth);
-
-  if (!user) return [];
+  const user = auth.currentUser;
+  if (!user) {
+    console.warn("No user is logged in. Cannot load cart from Firestore.");
+    return [];
+  }
 
   const cartRef = doc(db, "carts", user.uid);
-  const cartSnap = await getDoc(cartRef);
+  try {
+    const cartSnap = await getDoc(cartRef);
 
-  if (cartSnap.exists()) {
-    return cartSnap.data().cartItems || [];
-  } else {
+    if (cartSnap.exists()) {
+      console.log("Cart loaded successfully from Firestore.");
+      return cartSnap.data().cartItems || [];
+    } else {
+      console.log("No cart data found for the user in Firestore.");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error loading cart from Firestore:", error);
     return [];
   }
 };

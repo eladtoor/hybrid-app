@@ -6,8 +6,9 @@ import '../styles/ProductCard.css';
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
     const [showModal, setShowModal] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false); // מצב להודעת הצלחה
     const [selectedAttributes, setSelectedAttributes] = useState({});
-    const [selectedQuantity, setSelectedQuantity] = useState(1); // Default quantity is 1
+    const [selectedQuantity, setSelectedQuantity] = useState(1); // ברירת מחדל: כמות 1
     const [totalPrice, setTotalPrice] = useState(product["מחיר רגיל"] || 0);
 
     useEffect(() => {
@@ -32,12 +33,13 @@ const ProductCard = ({ product }) => {
             });
 
             setSelectedAttributes(defaultAttributes);
-            calculateTotalPrice(defaultAttributes, selectedQuantity); // Include selectedQuantity in calculation
+            calculateTotalPrice(defaultAttributes, selectedQuantity); // מחשבת המחיר עם הכמות שנבחרה
         }
     }, [product.variations]);
 
     const toggleModal = () => {
         setShowModal(!showModal);
+        setShowSuccessMessage(false); // מסתירה את ההודעה עם סגירת המודל
     };
 
     const handleAttributeChange = (attributeName, selectedValue) => {
@@ -122,6 +124,17 @@ const ProductCard = ({ product }) => {
         return null;
     };
 
+    const handleAddToCart = () => {
+        dispatch(addToCart({ ...product, price: totalPrice, quantity: selectedQuantity, packageSize: selectedQuantity })); // שליחת המחיר המחושב
+        setShowModal(false); // סגירת המודל
+        setShowSuccessMessage(true); // הצגת הודעת הצלחה
+
+        // הסתרת ההודעה לאחר 3 שניות
+        setTimeout(() => {
+            setShowSuccessMessage(false);
+        }, 3000);
+    };
+
     return (
         <>
             <div className="product-card" onClick={toggleModal}>
@@ -170,10 +183,20 @@ const ProductCard = ({ product }) => {
                             </div>
                         )}
 
-                        <button className="product-card-button" onClick={() => dispatch(addToCart(product))}>
+                        <button
+                            className="product-card-button"
+                            onClick={handleAddToCart}
+                        >
                             הוסף לעגלה
                         </button>
                     </div>
+                </div>
+            )}
+
+            {showSuccessMessage && (
+                <div className="success-message">
+                    <span>✔ המוצר התווסף בהצלחה לעגלה!</span>
+                    <button onClick={() => setShowSuccessMessage(false)} className="close-button">×</button>
                 </div>
             )}
         </>
