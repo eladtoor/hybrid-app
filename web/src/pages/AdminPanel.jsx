@@ -92,7 +92,11 @@ const AdminPanel = () => {
             delete updatedProduct['מחיר מבצע'];
         }
 
-        if (updatedProduct.סוג === 'variable') {
+        // אם סוג המוצר הוא "סימפל", הסר את כל המאפיינים המיוחדים
+        if (updatedProduct.סוג === 'simple') {
+            updatedProduct.variations = [];
+            updatedProduct.attributes = [];
+        } else if (updatedProduct.סוג === 'variable') {
             const attributeNames = updatedProduct.attributes.map((attr) => attr.name);
             const attributeValues = updatedProduct.attributes.map((attr) => attr.values);
             const variations = generateCombinations(attributeValues).map((combination, index) => {
@@ -118,12 +122,9 @@ const AdminPanel = () => {
             });
 
             updatedProduct = { ...updatedProduct, variations };
-            delete updatedProduct.attributes;
         }
 
         if (isEditing) {
-            console.log(updateProduct, "PRODUCT AFTER EDIT");  // pipipi
-
             dispatch(updateProduct(updatedProduct));
             setIsEditing(false);
         } else {

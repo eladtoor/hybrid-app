@@ -222,6 +222,20 @@
   margin-left: 20px;
 }
 
+.alert {
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.alert-red {
+  background-color: #ffdddd;
+  color: #a94442;
+  border: 1px solid #f5c6cb;
+}
+
 /* Modal Responsive */
 @media (max-width: 768px) {
   .modal-content {

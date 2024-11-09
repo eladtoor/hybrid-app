@@ -10,38 +10,41 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const { _id, quantity } = action.payload;
-      const existingItem = state.cartItems.find((item) => item._id === _id);
+      const existingItem = state.cartItems.find(
+        (item) => item._id === action.payload._id
+      );
 
       if (existingItem) {
-        existingItem.quantity += quantity; // הגדל את הכמות הקיימת במכפלת הכמות החדשה
+        existingItem.quantity += action.payload.quantity;
       } else {
-        state.cartItems = [...state.cartItems, { ...action.payload, quantity }];
+        state.cartItems.push({
+          ...action.payload,
+          price: action.payload.price, // המחיר ליחידה
+          quantity: action.payload.quantity, // כמות ראשונית
+        });
       }
-
-      saveCartToFirestore(state.cartItems);
+      saveCartToFirestore(state.cartItems); // עדכן לאחר השינוי
     },
     increaseQuantity: (state, action) => {
-      const { _id } = action.payload;
-      const item = state.cartItems.find((item) => item._id === _id);
+      const item = state.cartItems.find(
+        (item) => item._id === action.payload._id
+      );
       if (item) {
-        item.quantity += item.packageSize || 1; // הגדלת הכמות לפי גודל החבילה או 1 כברירת מחדל
-        saveCartToFirestore(state.cartItems);
+        item.quantity += action.payload.quantity;
       }
     },
     decreaseQuantity: (state, action) => {
-      const { _id } = action.payload;
-      const item = state.cartItems.find((item) => item._id === _id);
-      if (item && item.quantity > item.packageSize) {
-        item.quantity -= item.packageSize || 1;
-        saveCartToFirestore(state.cartItems);
+      const item = state.cartItems.find(
+        (item) => item._id === action.payload._id
+      );
+      if (item && item.quantity > action.payload.quantity) {
+        item.quantity -= action.payload.quantity;
       }
     },
     removeFromCart: (state, action) => {
       state.cartItems = state.cartItems.filter(
         (item) => item._id !== action.payload._id
       );
-      saveCartToFirestore(state.cartItems);
     },
     setCartItems: (state, action) => {
       state.cartItems = action.payload;
@@ -56,4 +59,5 @@ export const {
   removeFromCart,
   setCartItems,
 } = cartSlice.actions;
+
 export default cartSlice.reducer;

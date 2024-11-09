@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebase"; // ודא שהפיירבייס מוגדר
+import { auth, db } from "../firebase";
 
 export const saveCartToFirestore = async (cartItems) => {
   const user = auth.currentUser;

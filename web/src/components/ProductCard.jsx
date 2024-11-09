@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/slices/cartSlice';
 import '../styles/ProductCard.css';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase';
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [showLoginAlert, setShowLoginAlert] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [showSuccessMessage, setShowSuccessMessage] = useState(false); // מצב להודעת הצלחה
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [selectedAttributes, setSelectedAttributes] = useState({});
-    const [selectedQuantity, setSelectedQuantity] = useState(1); // ברירת מחדל: כמות 1
+    const [selectedQuantity, setSelectedQuantity] = useState(1);
     const [totalPrice, setTotalPrice] = useState(product["מחיר רגיל"] || 0);
 
     useEffect(() => {
@@ -33,13 +37,13 @@ const ProductCard = ({ product }) => {
             });
 
             setSelectedAttributes(defaultAttributes);
-            calculateTotalPrice(defaultAttributes, selectedQuantity); // מחשבת המחיר עם הכמות שנבחרה
+            calculateTotalPrice(defaultAttributes, selectedQuantity);
         }
     }, [product.variations]);
 
     const toggleModal = () => {
         setShowModal(!showModal);
-        setShowSuccessMessage(false); // מסתירה את ההודעה עם סגירת המודל
+        setShowSuccessMessage(false);
     };
 
     const handleAttributeChange = (attributeName, selectedValue) => {
@@ -125,11 +129,16 @@ const ProductCard = ({ product }) => {
     };
 
     const handleAddToCart = () => {
-        dispatch(addToCart({ ...product, price: totalPrice, quantity: selectedQuantity, packageSize: selectedQuantity })); // שליחת המחיר המחושב
-        setShowModal(false); // סגירת המודל
-        setShowSuccessMessage(true); // הצגת הודעת הצלחה
+        const user = auth.currentUser;
+        if (!user) {
+            setShowLoginAlert(true);
+            setTimeout(() => setShowLoginAlert(false), 3000);
+            return;
+        }
+        dispatch(addToCart({ ...product, price: totalPrice, quantity: selectedQuantity, packageSize: selectedQuantity }));
+        setShowModal(false);
+        setShowSuccessMessage(true);
 
-        // הסתרת ההודעה לאחר 3 שניות
         setTimeout(() => {
             setShowSuccessMessage(false);
         }, 3000);
@@ -144,7 +153,7 @@ const ProductCard = ({ product }) => {
                     {product["תיאור קצר"] ? product["תיאור קצר"] : product["תיאור"]}
                 </p>
                 <div className="product-card-footer">
-                    <span className="product-card-price">{`₪${Number(totalPrice).toFixed(2)}`}</span>
+                    <span className="product-card-price">{`₪${Number(product["מחיר רגיל"]).toFixed(2)}`}</span>
                 </div>
             </div>
 
@@ -189,6 +198,11 @@ const ProductCard = ({ product }) => {
                         >
                             הוסף לעגלה
                         </button>
+                        {showLoginAlert && (
+                            <div className="alert alert-red">
+                                אנא התחבר כדי להוסיף מוצרים לעגלה
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

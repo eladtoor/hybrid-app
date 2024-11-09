@@ -17,6 +17,7 @@ import { fetchProducts } from "./redux/actions/productActions";
 import SearchResults from "./pages/SearchResults";
 import AdminPanel from "./pages/AdminPanel"; // Import AdminPanel
 import AdminRoute from "./components/AdminRoute"; // Import the AdminRoute component
+import UserManagement from "./pages/UserManagement";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -81,10 +82,8 @@ function App() {
           <Route path="/profile" element={<UserProfile />} />
 
           {/* Admin Panel Route - Protected */}
-          <Route
-            path="/admin"
-            element={<AdminRoute element={<AdminPanel />} />}
-          />
+          <Route path="/admin-panel" element={<AdminPanel />} />
+          <Route path="/user-management" element={<UserManagement />} />
         </Routes>
 
         <Footer />

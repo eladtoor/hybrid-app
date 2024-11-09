@@ -1,82 +1,132 @@
 .cart-item {
-  position: relative; /* כדי שה-X ימוקם ביחס לכרטיסיה */
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-radius: 10px;
-  background-color: white;
+  border-radius: 12px;
+  background-color: #ffffff;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-  
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  direction: rtl; /* שינוי כיוון לטקסט ימין */
 }
 
 .cart-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 .cart-item-image {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
   border-radius: 10px;
+  border: 2px solid #f0f0f0;
+  margin-left: 15px;
 }
 
 .cart-item-details {
   flex-grow: 1;
-  margin-left: 20px;
-  text-align: center; /* ממקם את התוכן במרכז */
+  margin-right: 20px;
+  text-align: right; /* יישור טקסט לימין */
 }
 
-.cart-item-details h4, .cart-item-details p {
-  margin-bottom: 10px;
+.cart-item-details h4 {
+  font-size: 24px; /* הגדלת גודל הפונט */
+  color: #333;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-.cart-item-quantity {
+.cart-item-details p {
+  font-size: 20px; /* הגדלת גודל הפונט */
+  color: #666;
+  margin: 5px 0;
+}
+
+.total-quantity,
+.total-price {
+  font-size: 22px; /* הגדלת גודל הפונט */
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.quantity-options {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
   justify-content: center;
-  margin-top: 10px;
+  align-items: center;
+}
+
+.package-quantity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #e6f7ff; /* צבע רקע רך */
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  width: 90px;
+  text-align: center;
+}
+
+.package-quantity-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
 .quantity-button {
-  background-color: #007bff;
-  color: white;
+  background-color: #f0f0f0; /* צבע כפתור */
+  color: black;
   border: none;
-  padding: 10px;
-  font-size: 18px;
+  font-size: 28px; /* הגדלת גודל הפונט */
   cursor: pointer;
-  border-radius: 5px;
-  margin: 0 5px;
-  transition: background-color 0.3s;
+  border-radius: 50%;
+  width: 50px; /* הגדלת רוחב */
+  height: 50px; /* הגדלת גובה */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* צל לתחושה מודרנית */
 }
 
 .quantity-button:hover {
-  background-color: #0056b3;
+  background-color: #007bff; /* גוון כהה יותר במעבר עכבר */
+  transform: scale(1.1); /* הגדלה במעבר */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25); /* צל חזק יותר */
 }
 
-.quantity-input {
-  width: 50px;
-  text-align: center;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 5px;
+.quantity-display {
+  font-size: 22px; /* הגדלת גודל הפונט */
+  font-weight: bold;
+  color: #333;
+  margin-top: 10px;
 }
 
 .price {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 22px; /* הגדלת גודל הפונט */
+  font-weight: 700;
+  color: #333;
 }
 
 .remove-item {
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 26px; /* הגדלת גודל הפונט */
   cursor: pointer;
-  color: red;
+  color: #ff4d4f;
   position: absolute;
   top: 10px;
-  left: 10px; /* העברת ה-X לצד שמאל */
+  left: 10px;
+  transition: color 0.3s ease;
+}
+
+.remove-item:hover {
+  color: #d9363e;
 }

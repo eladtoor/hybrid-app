@@ -10,7 +10,8 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 const NavBar = ({ categories }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchVisible, setSearchVisible] = useState(false);
-    const [dropdownVisible, setDropdownVisible] = useState(false);
+    const [userDropdownVisible, setUserDropdownVisible] = useState(false);
+    const [adminDropdownVisible, setAdminDropdownVisible] = useState(false);
     const user = useSelector(state => state?.user?.user);
     const location = useLocation();
 
@@ -24,7 +25,6 @@ const NavBar = ({ categories }) => {
     }, [user]);
 
     useEffect(() => {
-        // סגירת תיבת החיפוש כאשר המשתמש עובר לעמוד החיפוש
         if (location.pathname === '/search') {
             setSearchVisible(false);
         }
@@ -36,14 +36,14 @@ const NavBar = ({ categories }) => {
 
     const handleSearch = () => {
         if (searchQuery.trim()) {
-            navigate(`/search?query=${searchQuery.trim()}`); // העברה לדף תוצאות חיפוש
-            setSearchVisible(false)
+            navigate(`/search?query=${searchQuery.trim()}`);
+            setSearchVisible(false);
         }
     };
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
-            handleSearch(); // העברה לדף תוצאות חיפוש בלחיצה על Enter
+            handleSearch();
         }
     };
 
@@ -59,13 +59,8 @@ const NavBar = ({ categories }) => {
     };
 
     const handleCartClick = (e) => {
-        e.preventDefault(); // מניעת ריענון העמוד
-        navigate('/cart');
-    };
-
-    const handleAdminClick = (e) => {
         e.preventDefault();
-        navigate('/admin');
+        navigate('/cart');
     };
 
     return (
@@ -76,7 +71,6 @@ const NavBar = ({ categories }) => {
                 </Link>
 
                 <ul className="navbar-categories">
-                    {/* כפתור טמבור עם דרופדאון של קטגוריות */}
                     {categories && categories.companyCategories && (
                         <li className="category-dropdown">
                             <button className="category-dropdown-button">{categories.companyName}</button>
@@ -99,13 +93,13 @@ const NavBar = ({ categories }) => {
                     {(user || JSON.parse(localStorage.getItem('user'))) ? (
                         <div
                             className="user-dropdown"
-                            onMouseEnter={() => setDropdownVisible(true)}
-                            onMouseLeave={() => setDropdownVisible(false)}
+                            onMouseEnter={() => setUserDropdownVisible(true)}
+                            onMouseLeave={() => setUserDropdownVisible(false)}
                         >
                             <a href="#">
                                 <i className="fa fa-user"></i>
                             </a>
-                            {dropdownVisible && (
+                            {userDropdownVisible && (
                                 <div className="user-dropdown-content">
                                     <button onClick={() => navigate('/profile')}>הפרופיל שלי</button>
                                     <button onClick={handleSignOut}>התנתק</button>
@@ -119,9 +113,21 @@ const NavBar = ({ categories }) => {
                     )}
 
                     {user?.isAdmin && (
-                        <a href="#" onClick={handleAdminClick}>
-                            <i className="fa fa-cogs"></i> {/* Admin Icon */}
-                        </a>
+                        <div
+                            className="user-dropdown"
+                            onMouseEnter={() => setAdminDropdownVisible(true)}
+                            onMouseLeave={() => setAdminDropdownVisible(false)}
+                        >
+                            <a href="#">
+                                <i className="fa fa-cogs"></i>
+                            </a>
+                            {adminDropdownVisible && (
+                                <div className="user-dropdown-content">
+                                    <button onClick={() => navigate('/admin-panel')}>עריכת מוצרים</button>
+                                    <button onClick={() => navigate('/user-management')}>ניהול משתמשים</button>
+                                </div>
+                            )}
+                        </div>
                     )}
 
                     <a href="/cart" onClick={handleCartClick}>
@@ -137,7 +143,7 @@ const NavBar = ({ categories }) => {
                         placeholder="חפש מוצרים..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleKeyPress} // מאפשר חיפוש בלחיצה על Enter
+                        onKeyDown={handleKeyPress}
                     />
                     <button onClick={handleSearch}>
                         <i className="fa fa-search"></i>
