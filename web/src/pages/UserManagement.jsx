@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 import '../styles/UserManagement.css';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUserPurchases, setSelectedUserPurchases] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUserName, setSelectedUserName] = useState('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userType, setUserType] = useState('regular');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -24,28 +27,38 @@ const UserManagement = () => {
     fetchUsers();
   }, []);
 
-  const handleEditUser = (userId) => {
-    console.log(`Editing user with ID: ${userId}`);
-    // כאן תוכל להוסיף את הלוגיקה לעריכת משתמשים
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setIsAdmin(user.isAdmin);
+    setUserType(user.userType || 'regular');
+    setIsEditModalOpen(true);
   };
 
-  const handleViewPurchaseHistory = async (userId, userName) => {
-    try {
-      const purchasesCollection = collection(db, `users/${userId}/purchases`);
-      const purchaseDocs = await getDocs(purchasesCollection);
-      const purchasesData = purchaseDocs.docs.map(doc => doc.data());
+  const handleViewPurchaseHistory = (userId, userName) => {
+    navigate(`/purchase-history/${userId}/${userName}`);
+  };
 
-      setSelectedUserPurchases(purchasesData || []); // הגדרת ברירת מחדל של מערך ריק
-      setSelectedUserName(userName);
-      setIsModalOpen(true);
-    } catch (error) {
-      console.error("Error fetching purchase history:", error);
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleSaveChanges = async () => {
+    if (selectedUser) {
+      const userRef = doc(db, 'users', selectedUser.id);
+      try {
+        await updateDoc(userRef, {
+          isAdmin,
+          userType,
+        });
+        setUsers(users.map(user =>
+          user.id === selectedUser.id ? { ...user, isAdmin, userType } : user
+        ));
+        closeEditModal();
+      } catch (error) {
+        console.error("Error updating user:", error);
+      }
     }
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedUserPurchases([]);
   };
 
   return (
@@ -58,7 +71,7 @@ const UserManagement = () => {
             <th>אימייל</th>
             <th>טלפון</th>
             <th>כתובת</th>
-            <th>סטטוס</th>
+            <th>סוג משתמש</th>
             <th>פעולות</th>
           </tr>
         </thead>
@@ -68,10 +81,22 @@ const UserManagement = () => {
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.phone || 'לא זמין'}</td>
-              <td>{user.address || 'לא זמין'}</td>
-              <td>{user.status || 'פעיל'}</td>
+              <td>
+                {user.address
+                  ? [
+                    user.address.city && `${user.address.city}`,
+                    user.address.street && `${user.address.street}`,
+                    user.address.apartment && `דירה ${user.address.apartment}`,
+                    user.address.floor && `קומה ${user.address.floor}`,
+                    user.address.entrance && `כניסה ${user.address.entrance}`
+                  ]
+                    .filter(Boolean)
+                    .join(', ')
+                  : 'לא זמין'}
+              </td>
+              <td>{user.userType === 'agent' ? 'סוכן' : 'רגיל'}</td>
               <td className="action-buttons">
-                <button onClick={() => handleEditUser(user.id)}>עריכה</button>
+                <button onClick={() => handleEditUser(user)}>עריכה</button>
                 <button onClick={() => handleViewPurchaseHistory(user.id, user.name)}>הצג היסטוריית רכישות</button>
               </td>
             </tr>
@@ -79,39 +104,44 @@ const UserManagement = () => {
         </tbody>
       </table>
 
-      {isModalOpen && (
+      {/* מודל לעריכת משתמש */}
+      {isEditModalOpen && (
         <div className="modal">
           <div className="modal-content">
-            <span className="close" onClick={closeModal}>&times;</span>
-            <h2>היסטוריית רכישות עבור {selectedUserName}</h2>
-            {selectedUserPurchases.length > 0 ? (
-              <ul className="purchase-list">
-                {selectedUserPurchases.map((purchase, index) => (
-                  <li key={index}>
-                    <p>תאריך רכישה: {purchase.date}</p>
-                    <p>סכום: ₪{purchase.totalPrice}</p>
-                    <p>פריטים:
-                      {purchase.cartItems.map(item => <p>
-                        <h3>{item.name}</h3>
-                        <p> כמות: {item.quantity}</p>
-                        <p> מחיר ליחידה: {item.price}</p>
+            <span className="close" onClick={closeEditModal}>&times;</span>
+            <h2>עריכת משתמש - {selectedUser?.name}</h2>
 
+            <div className="form-group">
+              <p>האם היוזר אדמין?</p>
+              <label>
+                <input
+                  type="radio"
+                  name="isAdmin"
+                  checked={isAdmin === true}
+                  onChange={() => setIsAdmin(true)}
+                />
+                כן
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="isAdmin"
+                  checked={isAdmin === false}
+                  onChange={() => setIsAdmin(false)}
+                />
+                לא
+              </label>
+            </div>
 
-                      </p>)}
-                    </p>
-                    <ul>
-                      {(purchase.items || []).map((item, itemIndex) => (
-                        <li key={itemIndex}>
-                          {item.name} - כמות: {item.quantity}, מחיר ליחידה: ₪{item.unitPrice}
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>אין רכישות להצגה עבור משתמש זה.</p>
-            )}
+            <div className="form-group">
+              <p>סוג משתמש:</p>
+              <select value={userType} onChange={(e) => setUserType(e.target.value)}>
+                <option value="regular">רגיל</option>
+                <option value="agent">סוכן</option>
+              </select>
+            </div>
+
+            <button onClick={handleSaveChanges}>שמור שינויים</button>
           </div>
         </div>
       )}

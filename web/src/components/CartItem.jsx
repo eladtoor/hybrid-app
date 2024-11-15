@@ -3,7 +3,7 @@ import '../styles/CartItem.css';
 
 const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
     // הגדרת ערך ברירת מחדל ל- price ול- quantity אם הם לא קיימים
-    const unitPrice = item["מחיר רגיל"] || 0;
+    const unitPrice = item.unitPrice || 0;
     const totalQuantity = item.quantity || 1;
 
     // פונקציות להוספת או הפחתת הכמות לפי גודל החבילה

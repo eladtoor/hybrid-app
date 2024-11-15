@@ -1,5 +1,5 @@
 // userUtils.js
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase"; // ייבוא החיבור ל-Firebase Firestore
 
 // פונקציה לשליפת נתוני המשתמש מה-Firestore
@@ -21,5 +21,21 @@ export const fetchUserDataFromFirestore = async (uid) => {
   } catch (error) {
     console.error("Error fetching user data from Firestore:", error);
     return null;
+  }
+};
+
+// פונקציה לעדכון נתוני המשתמש ב-Firestore
+export const updateUserDataInFirestore = async (uid, updatedData) => {
+  if (!uid || !updatedData) {
+    console.error("UID or updated data is missing. Cannot update user data.");
+    return;
+  }
+
+  try {
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, updatedData, { merge: true }); // שמירה עם merge כדי לעדכן את הנתונים הקיימים
+    console.log("User data updated successfully.");
+  } catch (error) {
+    console.error("Error updating user data in Firestore:", error);
   }
 };

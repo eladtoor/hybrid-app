@@ -1,26 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom'; // ייבוא useNavigate
+import { useNavigate } from 'react-router-dom';
 import CartItem from '../components/CartItem';
 import '../styles/CartPage.css';
 import { increaseQuantity, decreaseQuantity, removeFromCart, setCartItems } from '../redux/slices/cartSlice';
 import { loadCartFromFirestore, saveCartToFirestore } from '../utils/cartUtils';
 import { auth, db } from '../firebase';
-import { doc, setDoc, collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, setDoc } from 'firebase/firestore';
 
 const CartPage = () => {
     const cartItems = useSelector((state) => state.cart.cartItems);
+    const user = useSelector((state) => state.user.user);
+    const [temporaryAddress, setTemporaryAddress] = useState({
+        city: user?.address?.city || '',
+        street: user?.address?.street || '',
+        apartment: user?.address?.apartment || '',
+        floor: user?.address?.floor || '',
+        entrance: user?.address?.entrance || ''
+    });
+    const [isEditingAddress, setIsEditingAddress] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-
     useEffect(() => {
-        const user = auth.currentUser;
-        if (!user) {
-            navigate('/login'); // אם המשתמש לא מחובר, נעבור לעמוד התחברות
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            navigate('/login');
             return;
         }
-
         const fetchCart = async () => {
             const cartFromFirestore = await loadCartFromFirestore();
             if (cartFromFirestore.length > 0) {
@@ -31,41 +38,64 @@ const CartPage = () => {
     }, [dispatch, navigate]);
 
     const handleCheckout = async () => {
-        const user = auth.currentUser;
-        if (!user) {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
             console.warn("No user is logged in. Cannot proceed to checkout.");
             return;
         }
-
-        // הכנת רשימת מוצרים עם המידע הרלוונטי בלבד
         const cartItemsForPurchase = cartItems.map(item => ({
             _id: item._id,
             name: item.שם,
-            price: item["מחיר רגיל"] || 0,
+            price: item.unitPrice || 0,
             quantity: item.quantity,
             imageUrl: item.תמונות,
             sku: item['מק"ט'],
             category: item.קטגוריות || "לא מוגדר",
         }));
-
         const purchaseData = {
             purchaseId: `purchase_${Date.now()}`,
             cartItems: cartItemsForPurchase,
             totalPrice: cartItemsForPurchase.reduce((acc, item) => acc + item.price * item.quantity, 0),
             date: new Date().toISOString(),
-            status: "pending", // אפשר לעדכן ל"completed" לאחר הצלחת התשלום
+            status: "pending",
+            shippingAddress: temporaryAddress
         };
-
         try {
-            const purchasesRef = collection(db, "users", user.uid, "purchases");
+            const purchasesRef = collection(db, "users", currentUser.uid, "purchases");
             await addDoc(purchasesRef, purchaseData);
-            console.log("Purchase saved successfully!");
-
-            // איפוס העגלה ב-Redux וב-Firestore
             dispatch(setCartItems([]));
             saveCartToFirestore([]);
         } catch (error) {
             console.error("Error saving purchase:", error);
+        }
+    };
+
+    const handleEditAddressToggle = () => {
+        setIsEditingAddress(!isEditingAddress);
+    };
+
+    const handleAddressChange = (e) => {
+        const { name, value } = e.target;
+        setTemporaryAddress((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const saveTemporaryAddressToFirestore = async () => {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+
+        try {
+            const cartRef = doc(db, "carts", currentUser.uid);
+            const existingCart = (await loadCartFromFirestore()) || [];
+
+            await setDoc(cartRef, {
+                cartItems: existingCart,
+                cartAddress: temporaryAddress
+            }, { merge: true });
+
+            console.log("Temporary address saved to Firestore under carts.");
+            setIsEditingAddress(false);
+        } catch (error) {
+            console.error("Error saving temporary address to Firestore:", error);
         }
     };
 
@@ -92,7 +122,7 @@ const CartPage = () => {
     };
 
     const totalPrice = cartItems.reduce((acc, item) => {
-        const itemPrice = item["מחיר רגיל"] || 0;
+        const itemPrice = item.unitPrice || 0;
         const itemQuantity = item.quantity || 1;
         return acc + itemPrice * itemQuantity;
     }, 0);
@@ -117,12 +147,70 @@ const CartPage = () => {
                     )}
                 </div>
                 <div className="vertical-divider"></div>
-                <div className="cart-summary">
-                    <h2>סיכום הזמנה</h2>
-                    <p>סה"כ לתשלום: ₪{totalPrice.toFixed(2)}</p>
-                    <p>משלוח: חינם</p>
-                    <p>סה"כ כולל משלוח: ₪{totalPrice.toFixed(2)}</p>
-                    <button className="checkout-button" onClick={handleCheckout}>מעבר לתשלום</button>
+                <div className="cart-summary-container">
+                    <div className="cart-summary">
+                        <h2>סיכום הזמנה</h2>
+                        <p>סה"כ לתשלום: ₪{totalPrice.toFixed(2)}</p>
+                        <p>משלוח: חינם</p>
+                        <p>סה"כ כולל משלוח: ₪{totalPrice.toFixed(2)}</p>
+                        <button className="checkout-button" onClick={handleCheckout}>מעבר לתשלום</button>
+                    </div>
+                    <div className="address-card">
+                        <h3>כתובת למשלוח</h3>
+                        {isEditingAddress ? (
+                            <div className="address-form">
+                                <input
+                                    type="text"
+                                    name="city"
+                                    value={temporaryAddress.city}
+                                    placeholder="עיר"
+                                    onChange={handleAddressChange}
+                                />
+                                <input
+                                    type="text"
+                                    name="street"
+                                    value={temporaryAddress.street}
+                                    placeholder="רחוב"
+                                    onChange={handleAddressChange}
+                                />
+                                <input
+                                    type="text"
+                                    name="apartment"
+                                    value={temporaryAddress.apartment}
+                                    placeholder="דירה"
+                                    onChange={handleAddressChange}
+                                />
+                                <input
+                                    type="text"
+                                    name="floor"
+                                    value={temporaryAddress.floor}
+                                    placeholder="קומה"
+                                    onChange={handleAddressChange}
+                                />
+                                <input
+                                    type="text"
+                                    name="entrance"
+                                    value={temporaryAddress.entrance}
+                                    placeholder="כניסה"
+                                    onChange={handleAddressChange}
+                                />
+                                <button onClick={saveTemporaryAddressToFirestore} className="save-address-button">
+                                    שמור כתובת
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="address-details">
+                                <p>עיר: {temporaryAddress.city || 'לא זמין'}</p>
+                                <p>רחוב: {temporaryAddress.street || 'לא זמין'}</p>
+                                <p>דירה: {temporaryAddress.apartment || 'לא זמין'}</p>
+                                <p>קומה: {temporaryAddress.floor || 'לא זמין'}</p>
+                                <p>כניסה: {temporaryAddress.entrance || 'לא זמין'}</p>
+                                <button onClick={handleEditAddressToggle} className="edit-address-button">
+                                    ערוך כתובת
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -13,6 +13,7 @@ const ProductCard = ({ product }) => {
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [selectedAttributes, setSelectedAttributes] = useState({});
     const [selectedQuantity, setSelectedQuantity] = useState(1);
+    const [updatedPrice, setUpdatedPrice] = useState(product["מחיר רגיל"]);
     const [totalPrice, setTotalPrice] = useState(product["מחיר רגיל"] || 0);
 
     useEffect(() => {
@@ -60,7 +61,7 @@ const ProductCard = ({ product }) => {
     };
 
     const calculateTotalPrice = (updatedAttributes, quantity) => {
-        let updatedPrice = product["מחיר רגיל"] || 0;
+        let updatedPriceTemp = product["מחיר רגיל"] || 0;
 
         if (product.variations && product.variations.length > 0) {
             for (const variation of product.variations) {
@@ -77,14 +78,14 @@ const ProductCard = ({ product }) => {
                 if (match) {
                     for (const attribute of Object.values(attributes || {})) {
                         if (attribute && attribute.price) {
-                            updatedPrice += Number(attribute.price);
+                            updatedPriceTemp += Number(attribute.price);
                         }
                     }
                     break;
                 }
             }
         }
-
+        setUpdatedPrice(updatedPriceTemp)
         setTotalPrice(updatedPrice * quantity);
     };
 
@@ -135,7 +136,9 @@ const ProductCard = ({ product }) => {
             setTimeout(() => setShowLoginAlert(false), 3000);
             return;
         }
-        dispatch(addToCart({ ...product, price: totalPrice, quantity: selectedQuantity, packageSize: selectedQuantity }));
+        console.log(totalPrice, "מחיר בכרטיס מוצר");
+
+        dispatch(addToCart({ ...product, price: totalPrice, unitPrice: updatedPrice, quantity: selectedQuantity, packageSize: selectedQuantity }));
         setShowModal(false);
         setShowSuccessMessage(true);
 
@@ -164,7 +167,7 @@ const ProductCard = ({ product }) => {
                         <h2>{product.שם}</h2>
                         <img src={product.תמונות} alt={product.שם} className="modal-image" />
                         <p>{product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}</p>
-                        <p>{`מחיר: ₪${totalPrice.toFixed(2)}`}</p>
+                        <p>{`מחיר: ₪${updatedPrice.toFixed(2) * selectedQuantity}`}</p>
 
                         {product.סוג === 'variable' && (
                             <div className="product-attributes">
@@ -184,6 +187,7 @@ const ProductCard = ({ product }) => {
                                                 value={quantity}
                                                 checked={selectedQuantity === quantity}
                                                 onChange={() => handleQuantityChange(quantity)}
+
                                             />
                                             {quantity}
                                         </label>

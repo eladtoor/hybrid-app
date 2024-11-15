@@ -19,7 +19,8 @@ const cartSlice = createSlice({
       } else {
         state.cartItems.push({
           ...action.payload,
-          price: action.payload.price, // המחיר ליחידה
+          price: action.payload.price,
+          unitPrice: action.payload.unitPrice, // המחיר ליחידה
           quantity: action.payload.quantity, // כמות ראשונית
         });
       }

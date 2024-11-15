@@ -9,6 +9,11 @@ import '../styles/UserInfoForm.css';
 const UserInfoForm = () => {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [city, setCity] = useState('');        // עיר
+    const [street, setStreet] = useState('');    // רחוב
+    const [apartment, setApartment] = useState(''); // דירה
+    const [floor, setFloor] = useState('');      // קומה
+    const [entrance, setEntrance] = useState(''); // כניסה
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -17,28 +22,28 @@ const UserInfoForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-
-
-
             if (!currentUser || !currentUser.uid) {
-                throw new Error("user not authnticated or missing uid")
+                throw new Error("user not authenticated or missing uid");
             }
 
-            // שילוב המידע החדש עם המידע מהמשתמש הנוכחי
             const updatedUser = {
                 ...currentUser,
-                name: name || currentUser.name,  // אם הוזן שם חדש, עדכן, אחרת שמור את הקיים
-                phone: phone || currentUser.phone // אם הוזן טלפון חדש, עדכן, אחרת שמור את הקיים
+                name: name || currentUser.name,
+                phone: phone || currentUser.phone,
+                address: {
+                    city: city,
+                    street: street,
+                    apartment: apartment,
+                    floor: floor,
+                    entrance: entrance
+                },
+                userType: "רגיל"
             };
 
             // שמירת המידע ב-Redux
-            dispatch(setUser({ ...currentUser, name, phone }));
+            dispatch(setUser(updatedUser));
 
-            //שמירת המידע בלוקל סוטרייג'
-
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-
-            // עדכון המידע ב-localStorage
+            // שמירת המידע ב-Local Storage
             localStorage.setItem('user', JSON.stringify(updatedUser));
 
             // עדכון Firestore
@@ -54,7 +59,7 @@ const UserInfoForm = () => {
     return (
         <div className="user-info-form">
             <div className="form-container">
-                <h2>אנא הזן את שמך ומספר הפלאפון</h2>
+                <h2>אנא הזן את פרטיך</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>שם:</label>
@@ -73,6 +78,50 @@ const UserInfoForm = () => {
                             onChange={(e) => setPhone(e.target.value)}
                             required
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>עיר:</label>
+                        <input
+                            type="text"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>רחוב:</label>
+                        <input
+                            type="text"
+                            value={street}
+                            onChange={(e) => setStreet(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className='address-row'>
+                        <div className="form-group">
+                            <label>דירה:</label>
+                            <input
+                                type="text"
+                                value={apartment}
+                                onChange={(e) => setApartment(e.target.value)}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>קומה:</label>
+                            <input
+                                type="text"
+                                value={floor}
+                                onChange={(e) => setFloor(e.target.value)}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>כניסה:</label>
+                            <input
+                                type="text"
+                                value={entrance}
+                                onChange={(e) => setEntrance(e.target.value)}
+                            />
+                        </div>
                     </div>
                     <button type="submit" className="submit-btn">המשך</button>
                 </form>

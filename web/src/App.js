@@ -18,6 +18,7 @@ import SearchResults from "./pages/SearchResults";
 import AdminPanel from "./pages/AdminPanel"; // Import AdminPanel
 import AdminRoute from "./components/AdminRoute"; // Import the AdminRoute component
 import UserManagement from "./pages/UserManagement";
+import PurchaseHistory from "./pages/PurchaseHistory";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -84,6 +85,10 @@ function App() {
           {/* Admin Panel Route - Protected */}
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/user-management" element={<UserManagement />} />
+          <Route
+            path="/purchase-history/:userId/:userName"
+            element={<PurchaseHistory />}
+          />
         </Routes>
 
         <Footer />
