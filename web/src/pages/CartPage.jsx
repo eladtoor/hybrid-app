@@ -6,17 +6,17 @@ import '../styles/CartPage.css';
 import { increaseQuantity, decreaseQuantity, removeFromCart, setCartItems } from '../redux/slices/cartSlice';
 import { loadCartFromFirestore, saveCartToFirestore } from '../utils/cartUtils';
 import { auth, db } from '../firebase';
-import { collection, addDoc, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 
 const CartPage = () => {
     const cartItems = useSelector((state) => state.cart.cartItems);
     const user = useSelector((state) => state.user.user);
     const [temporaryAddress, setTemporaryAddress] = useState({
-        city: user?.address?.city || '',
-        street: user?.address?.street || '',
-        apartment: user?.address?.apartment || '',
-        floor: user?.address?.floor || '',
-        entrance: user?.address?.entrance || ''
+        city: '',
+        street: '',
+        apartment: '',
+        floor: '',
+        entrance: ''
     });
     const [isEditingAddress, setIsEditingAddress] = useState(false);
     const dispatch = useDispatch();
@@ -28,12 +28,37 @@ const CartPage = () => {
             navigate('/login');
             return;
         }
+
+        const fetchUserData = async () => {
+            try {
+                // Fetch user's address from Firestore
+                const userRef = doc(db, "users", currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    if (userData.address) {
+                        setTemporaryAddress({
+                            city: userData.address.city || '',
+                            street: userData.address.street || '',
+                            apartment: userData.address.apartment || '',
+                            floor: userData.address.floor || '',
+                            entrance: userData.address.entrance || ''
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching user data from Firestore:", error);
+            }
+        };
+
         const fetchCart = async () => {
             const cartFromFirestore = await loadCartFromFirestore();
             if (cartFromFirestore.length > 0) {
                 dispatch(setCartItems(cartFromFirestore));
             }
         };
+
+        fetchUserData();
         fetchCart();
     }, [dispatch, navigate]);
 
@@ -43,6 +68,7 @@ const CartPage = () => {
             console.warn("No user is logged in. Cannot proceed to checkout.");
             return;
         }
+
         const cartItemsForPurchase = cartItems.map(item => ({
             _id: item._id,
             name: item.שם,
@@ -52,6 +78,7 @@ const CartPage = () => {
             sku: item['מק"ט'],
             category: item.קטגוריות || "לא מוגדר",
         }));
+
         const purchaseData = {
             purchaseId: `purchase_${Date.now()}`,
             cartItems: cartItemsForPurchase,
@@ -60,6 +87,7 @@ const CartPage = () => {
             status: "pending",
             shippingAddress: temporaryAddress
         };
+
         try {
             const purchasesRef = collection(db, "users", currentUser.uid, "purchases");
             await addDoc(purchasesRef, purchaseData);

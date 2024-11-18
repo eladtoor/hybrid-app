@@ -11,11 +11,15 @@ const UserProfile = () => {
     const dispatch = useDispatch();
 
     const user = useSelector((state) => state.user.user);
+    console.log(user);
+
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const storedUser = user || JSON.parse(localStorage.getItem('user'));
+
+
 
                 if (storedUser && storedUser.uid) {
                     setFormData(storedUser);

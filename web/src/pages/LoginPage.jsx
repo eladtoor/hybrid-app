@@ -5,8 +5,8 @@ import { setUser } from '../redux/reducers/userReducer';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'; // ייבוא של getDoc לבדוק את המידע של המשתמש
-import { db } from '../firebase'; // ייבוא ה- Firestore
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 import '../styles/LoginPage.css';
 
 const LoginPage = () => {
@@ -20,40 +20,45 @@ const LoginPage = () => {
             .then(async (result) => {
                 const user = result.user;
 
-                // יצירת אובייקט מלא עם המידע מגוגל
-                const fullUser = {
+                // Initializing the full user object
+                let fullUser = {
                     uid: user.uid,
                     displayName: user.displayName,
-                    email: user.email,  // המייל מגוגל
-                    name: "",  // שם ריק עד שהמשתמש יזין
-                    phone: "",  // טלפון ריק עד שהמשתמש יזין
-                    isAdmin: false,  // ברירת מחדל אינה מנהל
+                    email: user.email,
+                    name: "", // Default empty
+                    phone: "", // Default empty
+                    isAdmin: false,
                 };
 
-                // בדיקה אם המשתמש הוא מנהל על פי Firestore
-                const q = query(collection(db, "admins"), where("email", "==", user.email));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    // אם המשתמש קיים ברשימת המנהלים
+                // Check if the user is an admin
+                const adminQuery = query(collection(db, "admins"), where("email", "==", user.email));
+                const adminSnapshot = await getDocs(adminQuery);
+                if (!adminSnapshot.empty) {
                     fullUser.isAdmin = true;
                 }
 
-                // שמירת המידע המלא ב-Redux
-                dispatch(setUser(fullUser));
-
-                // שמירת המידע ב-localStorage
-                localStorage.setItem('user', JSON.stringify(fullUser));
-
-                // בדיקה אם המידע הנוסף (שם וטלפון) כבר קיים ב-Firestore
+                // Fetch additional details from Firestore if they exist
                 const userRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userRef);
 
-                if (userSnap.exists() && userSnap.data().name && userSnap.data().phone) {
-                    // אם המידע קיים, נעביר לדף הבית
+                if (userSnap.exists()) {
+                    const firestoreData = userSnap.data();
+                    fullUser = {
+                        ...fullUser,
+                        ...firestoreData, // Merge existing Firestore data into fullUser
+                    };
+                }
+
+                // Save full user data in Redux
+                dispatch(setUser(fullUser));
+
+                // Save full user data in localStorage
+                localStorage.setItem('user', JSON.stringify(fullUser));
+
+                // Navigate to the appropriate page
+                if (fullUser.name && fullUser.phone) {
                     navigate('/');
                 } else {
-                    // אם המידע לא קיים, נעביר אותו לעמוד למילוי פרטים נוספים
                     navigate('/user-info');
                 }
             })
