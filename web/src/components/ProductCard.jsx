@@ -13,7 +13,7 @@ const ProductCard = ({ product }) => {
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [selectedAttributes, setSelectedAttributes] = useState({});
     const [selectedQuantity, setSelectedQuantity] = useState(1);
-    const [updatedPrice, setUpdatedPrice] = useState(product["מחיר רגיל"]);
+    const [updatedPrice, setUpdatedPrice] = useState(product["מחיר רגיל"] || 0);
     const [totalPrice, setTotalPrice] = useState(product["מחיר רגיל"] || 0);
 
     useEffect(() => {

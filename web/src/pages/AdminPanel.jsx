@@ -28,13 +28,14 @@ const initialProductState = {
     'מחיר רגיל': '',
     קטגוריות: [],
     תמונות: '',
+    materialGroup: '',
     variations: [],
     attributes: [{ name: '', values: [{ value: '', price: '' }] }],
     quantities: []
 };
 
 const AdminPanel = () => {
-    const navigate = useNavigate();
+
     const dispatch = useDispatch();
 
     const products = useSelector((state) => state.products.products);
@@ -44,14 +45,22 @@ const AdminPanel = () => {
     const [selectedMainCategories, setSelectedMainCategories] = useState([]);
     const [selectedSubCategories, setSelectedSubCategories] = useState({});
     const [showForm, setShowForm] = useState(false);
-    const [isEditing, setIsEditing] = useState(false); // מצב עריכה
+    const [isEditing, setIsEditing] = useState(false);
     const [newProduct, setNewProduct] = useState(initialProductState);
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [quantityEnabled, setQuantityEnabled] = useState(false);
     const [quantityInput, setQuantityInput] = useState('');
+    const [materialGroups, setMaterialGroups] = useState([]);
+    const [editedPrices, setEditedPrices] = useState({});
+
+    const [editedTransportPrices, setEditedTransportPrices] = useState({});
+    const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
+
+
         dispatch(fetchProducts());
     }, [dispatch]);
 
@@ -62,6 +71,102 @@ const AdminPanel = () => {
     useEffect(() => {
         setFilteredProducts(handleSearch(searchQuery, products));
     }, [searchQuery, products]);
+
+
+    // Fetch material group settings
+    useEffect(() => {
+        const fetchMaterialGroups = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch('/api/materialGroups');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Material Groups:', data);
+
+                // Set the fetched material groups to state
+                setMaterialGroups(data);
+
+                // Initialize state for editing both minPrice and transportationPrice
+                const initialPrices = {};
+                const initialTransportPrices = {};
+                data.forEach((group) => {
+                    initialPrices[group.groupName] = group.minPrice;
+                    initialTransportPrices[group.groupName] = group.transportationPrice;
+                });
+
+                setEditedPrices(initialPrices);
+                setEditedTransportPrices(initialTransportPrices);
+            } catch (error) {
+                console.error('Error fetching material groups:', error);
+            }
+            setLoading(false);
+        };
+
+        fetchMaterialGroups();
+    }, []);
+
+
+
+
+    const handlePriceChange = (groupName, key, value) => {
+        setEditedPrices((prevPrices) => ({
+            ...prevPrices,
+            [groupName]: {
+                ...prevPrices[groupName],
+                [key]: value,
+            },
+        }));
+    };
+
+
+
+
+
+
+    const handleSaveChanges = async () => {
+        try {
+            const updates = materialGroups.map(async (group) => {
+                const updatedValues = editedPrices[group.groupName] || {};
+                const minPrice = updatedValues.minPrice ?? group.minPrice; // Use edited or original minPrice
+                const transportationPrice =
+                    updatedValues.transportationPrice ?? group.transportationPrice; // Use edited or original transportationPrice
+
+                const response = await fetch('/api/materialGroups', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        groupName: group.groupName,
+                        minPrice,
+                        transportationPrice,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to update ${group.groupName}`);
+                }
+
+                return response.json();
+            });
+
+            const updatedGroups = await Promise.all(updates);
+            setMaterialGroups((prevGroups) =>
+                prevGroups.map((group) =>
+                    updatedGroups.find((updated) => updated.groupName === group.groupName) || group
+                )
+            );
+            alert('Prices updated successfully!');
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            alert('Failed to save changes.');
+        }
+    };
+
+
+
+
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -155,6 +260,7 @@ const AdminPanel = () => {
 
     const openEditModal = (product) => {
         const productToEdit = { ...product };
+        productToEdit.materialGroup = productToEdit.materialGroup || ''; // Ensure material group is set
         if (productToEdit.סוג === 'variable' && !productToEdit.attributes) {
             productToEdit.attributes = [{ name: '', values: [{ value: '', price: '' }] }];
         }
@@ -195,6 +301,61 @@ const AdminPanel = () => {
     return (
         <div className="admin-panel">
             <h1>פאנל ניהול</h1>
+            <h2>ניהול מחירי מינימום לקבוצות חומרים</h2>
+            {loading ? (
+                <p>טוען...</p>
+            ) : (
+                <>
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>שם הקבוצה</th>
+                                <th>מחיר מינימום נוכחי</th>
+                                <th>מחיר הובלה</th>
+                                <th>עדכן מחיר מינימום ומחיר הובלה</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {materialGroups.map((group) => (
+                                <tr key={group.groupName}>
+                                    <td>
+                                        {group.groupName === 'Colors and Accessories' && 'צבעים ומוצרים נלווים'}
+                                        {group.groupName === 'Powders' && 'אבקות (דבקים וטייח)'}
+                                        {group.groupName === 'Gypsum and Tracks' && 'גבס ומסלולים'}
+                                    </td>
+                                    <td>{group.minPrice}₪</td>
+                                    <td>{group.transportationPrice}₪</td>
+                                    <td>
+                                        <input
+                                            type="number"
+                                            value={editedPrices[group.groupName]?.minPrice ?? group.minPrice}
+                                            onChange={(e) =>
+                                                handlePriceChange(group.groupName, 'minPrice', e.target.value === '' ? null : Number(e.target.value))
+                                            }
+                                        />
+                                        <input
+                                            type="number"
+                                            value={editedPrices[group.groupName]?.transportationPrice ?? group.transportationPrice}
+                                            onChange={(e) =>
+                                                handlePriceChange(group.groupName, 'transportationPrice', e.target.value === '' ? null : Number(e.target.value))
+                                            }
+                                        />
+
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <button
+                        onClick={handleSaveChanges}
+                        className="admin-button"
+                    >
+                        עדכן מחירים
+                    </button>
+
+                </>
+
+            )}
             <button
                 className="admin-button"
                 onClick={() => {
@@ -220,13 +381,32 @@ const AdminPanel = () => {
                 <div className="modal">
                     <div className="modal-content">
                         <span className="close" onClick={() => setShowForm(false)}>&times;</span>
+                        {console.log("got to adminpan")}
                         <h2>{isEditing ? "ערוך מוצר" : "הוסף מוצר חדש"}</h2>
                         <form onSubmit={handleSubmit}>
                             <label>
                                 מזהה:
                                 <input type="number" name="מזהה" value={newProduct.מזהה} onChange={(e) => handleInputChange(e, setNewProduct)} required />
                             </label>
-
+                            <label>
+                                קבוצת חומרים:
+                                <select
+                                    name="materialGroup"
+                                    value={newProduct.materialGroup || ''}
+                                    onChange={(e) =>
+                                        setNewProduct((prev) => ({
+                                            ...prev,
+                                            materialGroup: e.target.value
+                                        }))
+                                    }
+                                    required
+                                >
+                                    <option value="">בחר קבוצת חומרים</option>
+                                    <option value="Colors and Accessories">צבעים ומוצרים נלווים</option>
+                                    <option value="Powders">אבקות (דבקים וטייח)</option>
+                                    <option value="Gypsum and Tracks">גבס ומסלולים</option>
+                                </select>
+                            </label>
                             <label>
                                 סוג:
                                 <div className="radio-group">

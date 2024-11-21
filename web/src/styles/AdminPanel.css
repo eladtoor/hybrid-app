@@ -1,3 +1,4 @@
+/* General styling for the admin panel */
 .admin-panel {
   padding: 20px;
   max-width: 1200px;
@@ -16,7 +17,7 @@
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
   margin-bottom: 20px;
   display: block;
   margin-left: auto;
@@ -27,26 +28,29 @@
   background-color: #0056b3;
 }
 
+/* Table styling */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  background-color: #fff;
 }
 
-.admin-table,
-.admin-th,
-.admin-td {
+.admin-table th,
+.admin-table td {
   border: 1px solid #ddd;
-}
-
-.admin-th,
-.admin-td {
   padding: 12px;
   text-align: left;
 }
 
-.admin-th {
-  background-color: #f2f2f2;
+.admin-table th {
+  background-color: #f9f9f9;
+  font-weight: bold;
+  text-align: center;
+}
+
+.admin-table td {
+  text-align: center;
 }
 
 .admin-img {
@@ -55,6 +59,7 @@
   object-fit: cover;
 }
 
+/* Modal styling */
 .modal {
   display: flex;
   position: fixed;
@@ -64,18 +69,19 @@
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {
   background-color: #fefefe;
   margin: 100px auto;
   padding: 20px;
-  border: 1px solid #888;
+  border: 1px solid #ccc;
   width: 90%;
-  max-height: 65%;
+  max-height: 70%;
   overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .radio-group {
@@ -85,45 +91,53 @@
   margin-bottom: 10px;
 }
 
+/* Close button styling */
 .close {
   color: #aaa;
   float: right;
   font-size: 28px;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .close:hover,
 .close:focus {
-  color: black;
+  color: #555;
   text-decoration: none;
-  cursor: pointer;
 }
 
+/* Form elements styling */
 label {
   display: block;
   margin-bottom: 10px;
+  font-weight: bold;
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
-button[type="submit"] {
+button[type="submit"],
+button[type="button"] {
   background-color: #007bff;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-right: 10px;
+  transition: background-color 0.3s ease;
 }
 
-button[type="submit"]:hover {
+button[type="submit"]:hover,
+button[type="button"]:hover {
   background-color: #0056b3;
 }
 
@@ -135,6 +149,10 @@ button[type="submit"]:hover {
 /* Categories section */
 .category-checklist-container {
   margin-top: 20px;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
 }
 
 /* Styling for main categories */
@@ -148,25 +166,28 @@ button[type="submit"]:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 100px;
+  min-width: 120px;
 }
 
 .main-categories label {
   margin-bottom: 5px;
   text-align: center;
+  font-weight: bold;
 }
 
-/* Styling for subcategory section */
+/* Styling for subcategories */
 .sub-category-section {
-  margin-top: 20px; /* Adds space between main categories and subcategories */
+  margin-top: 20px;
 }
 
 .sub-category-group {
-  margin-bottom: 15px; /* Adds space between subcategory groups */
+  margin-bottom: 15px;
 }
 
 .sub-category-group h4 {
-  margin-bottom: 10px; /* Adds space between the title and subcategory checkboxes */
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .sub-categories {
@@ -185,4 +206,33 @@ button[type="submit"]:hover {
 .sub-categories label {
   margin-bottom: 5px;
   text-align: center;
+  font-weight: bold;
+}
+
+/* Responsive styling */
+@media screen and (max-width: 768px) {
+  .admin-panel {
+    padding: 10px;
+  }
+
+  .admin-button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-height: 80%;
+  }
+
+  .main-categories div,
+  .sub-categories div {
+    min-width: 80px;
+  }
 }

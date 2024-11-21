@@ -13,7 +13,14 @@ const productSchema = new mongoose.Schema({
   תמונות: { type: String }, // Image URL
   quantities: { type: [Number], default: [] }, // Quantities as an array of numbers
 
-  // Disable _id generation in variations
+  // New field for material groups
+  materialGroup: {
+    type: String,
+    enum: ["Colors and Accessories", "Powders", "Gypsum and Tracks"],
+    default: null, // Optional, or set a default group like 'Colors and Accessories'
+  },
+
+  // Variations
   variations: [
     {
       _id: false, // Disable automatic generation of _id for variations

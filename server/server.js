@@ -6,6 +6,7 @@ require("dotenv").config();
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
+const materialGroupRoutes = require("./routes/materialGroupRoutes");
 
 const app = express();
 
@@ -26,7 +27,7 @@ mongoose
 
 // CORS setup (for development, allowing all origins)
 const corsOptions = {
-  origin: '*', // Allow all origins for development
+  origin: "*", // Allow all origins for development
 };
 
 app.use(cors(corsOptions)); // Use the simplified CORS setup
@@ -36,6 +37,7 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api", categoryRoutes);
+app.use("/api/materialGroups", materialGroupRoutes);
 
 // Basic test route
 app.get("/", (req, res) => {

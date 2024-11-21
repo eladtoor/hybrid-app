@@ -1,9 +1,25 @@
 import { configureStore } from "@reduxjs/toolkit";
-import rootReducer from "../redux/reducers/index.js"; // ייבוא ה-rootReducer המעודכן
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import rootReducer from "../redux/reducers/index"; // Your combined reducers
+
+const persistConfig = {
+  key: "root",
+  storage,
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const store = configureStore({
-  reducer: rootReducer, // עכשיו rootReducer כולל את כל ה-reducers
-  devTools: process.env.NODE_ENV !== "production", // תמיכה ב-Redux DevTools
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these actions from Redux Persist
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+      },
+    }),
 });
 
+export const persistor = persistStore(store);
 export default store;
