@@ -11,20 +11,19 @@ const UserProfile = () => {
     const dispatch = useDispatch();
 
     const user = useSelector((state) => state.user.user);
-    console.log(user);
 
+    const getBaseUrl = () => {
+        return process.env.NODE_ENV === 'production' ? 'https://your-production-domain.com' : 'http://localhost:3000';
+    };
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const storedUser = user || JSON.parse(localStorage.getItem('user'));
 
-
-
                 if (storedUser && storedUser.uid) {
                     setFormData(storedUser);
                 } else if (user?.uid || storedUser?.uid) {
-                    // נוודא שיש UID זמין
                     const userId = user?.uid || storedUser.uid;
                     const userData = await fetchUserDataFromFirestore(userId);
                     if (userData) {
@@ -34,14 +33,14 @@ const UserProfile = () => {
                     }
                 }
             } catch (error) {
-                console.error("Error fetching user data:", error);
+                console.error("שגיאה בטעינת נתוני המשתמש:", error);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchUserData();
-    }, [user, dispatch]); // נוודא שהקריאה מתבצעת רק אם המשתמש ב-Redux מתעדכן
+    }, [user, dispatch]);
 
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
@@ -69,6 +68,14 @@ const UserProfile = () => {
         }));
     };
 
+    const handleCopyToClipboard = (link) => {
+        navigator.clipboard.writeText(link).then(() => {
+            alert("הקישור הועתק ללוח!");
+        }).catch((error) => {
+            console.error("שגיאה בהעתקת הקישור: ", error);
+        });
+    };
+
     const handleSave = async () => {
         const currentUser = user || JSON.parse(localStorage.getItem('user'));
 
@@ -82,9 +89,9 @@ const UserProfile = () => {
             dispatch(setUser(formData));
             localStorage.setItem('user', JSON.stringify(formData));
             setIsEditing(false);
-            alert("הנתונים נשמרו בהצלחה");
+            alert("הנתונים נשמרו בהצלחה.");
         } catch (error) {
-            console.error("Error saving user data: ", error);
+            console.error("שגיאה בשמירת נתוני המשתמש: ", error);
         }
     };
 
@@ -107,6 +114,20 @@ const UserProfile = () => {
                     <p><strong>קומה:</strong> {isEditing ? <input type="text" name="floor" value={formData.address?.floor || ''} onChange={handleAddressChange} /> : formData.address?.floor}</p>
                     <p><strong>כניסה:</strong> {isEditing ? <input type="text" name="entrance" value={formData.address?.entrance || ''} onChange={handleAddressChange} /> : formData.address?.entrance}</p>
                 </div>
+
+                {formData.userType === 'agent' && formData.referralLink && (
+                    <div className="agent-invite">
+                        <h3>קישור הזמנה שלך</h3>
+                        <p>שתף קישור זה כדי להזמין משתמשים:</p>
+                        <div className="referral-link-container">
+                            <a href={`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`} target="_blank" rel="noopener noreferrer">
+                                {`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`}
+                            </a>
+                            <button onClick={() => handleCopyToClipboard(`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`)}>העתק קישור</button>
+
+                        </div>
+                    </div>
+                )}
             </div>
 
             <button onClick={handleEditToggle}>{isEditing ? "ביטול" : "ערוך"}</button>

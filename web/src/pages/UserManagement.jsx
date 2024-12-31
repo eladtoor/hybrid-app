@@ -16,10 +16,11 @@ const UserManagement = () => {
   const [productDiscounts, setProductDiscounts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // משיכת מוצרים מ-Redux
+  // Redux products
   const products = useSelector((state) => state.products.products);
 
   useEffect(() => {
@@ -35,7 +36,7 @@ const UserManagement = () => {
     };
 
     fetchUsers();
-    dispatch(fetchProducts()); // משיכת מוצרים מ-Redux
+    dispatch(fetchProducts()); // Fetch products from Redux
   }, [dispatch]);
 
   useEffect(() => {
@@ -44,9 +45,14 @@ const UserManagement = () => {
         product['שם'].toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.מזהה.toString().includes(searchQuery)
       )
-      .slice(0, 3); // מגביל ל-3 תוצאות בלבד
+      .slice(0, 3); // Limit to 3 results
     setFilteredProducts(filtered);
   }, [searchQuery, products]);
+
+  const generateReferralLink = (userId) => {
+    const referralCode = `agent-${userId}-${Date.now()}`;
+    return `https://yourapp.com/register?ref=${referralCode}`;
+  };
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
@@ -100,24 +106,27 @@ const UserManagement = () => {
         };
 
         if (userType === 'agent') {
-          updateData.productDiscounts = productDiscounts; // שמירת ההנחות למוצרים ספציפיים בפיירבייס
+          updateData.productDiscounts = deleteField();
+          if (!selectedUser.referralLink) {
+            updateData.referralLink = generateReferralLink(selectedUser.id);
+          }
         } else {
           updateData.cartDiscount = deleteField();
-          updateData.productDiscounts = deleteField();
+          updateData.productDiscounts = productDiscounts;
+          updateData.referralLink = deleteField();
         }
 
-        // עדכון בפיירבייס
         await updateDoc(userRef, updateData);
 
-        // עדכון המצב המקומי
         setUsers(users.map(user =>
           user.id === selectedUser.id
             ? {
               ...user,
               isAdmin,
               userType,
-              cartDiscount: userType === 'regular' ? undefined : selectedUser.cartDiscount || 0,
-              productDiscounts: userType === 'regular' ? undefined : productDiscounts,
+              cartDiscount: userType === 'agent' ? selectedUser.cartDiscount : undefined,
+              productDiscounts: userType === 'regular' ? productDiscounts : undefined,
+              referralLink: userType === 'agent' ? updateData.referralLink || user.referralLink : undefined,
             }
             : user
         ));
@@ -179,7 +188,6 @@ const UserManagement = () => {
         </tbody>
       </table>
 
-      {/* מודל לעריכת משתמש */}
       {isEditModalOpen && (
         <div className="modal">
           <div className="modal-content">
@@ -206,24 +214,23 @@ const UserManagement = () => {
               </select>
             </div>
 
-            {/* שדה להנחה כללית לעגלה */}
             {userType === 'agent' && (
-              <>
-                <div className="form-group">
-                  <p>הנחה כללית לעגלה (%):</p>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={selectedUser.cartDiscount || 0}
-                    onChange={(e) =>
-                      setSelectedUser({ ...selectedUser, cartDiscount: e.target.value })
-                    }
-                  />
-                </div>
+              <div className="form-group">
+                <p>הנחה כללית לעגלה (%):</p>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={selectedUser.cartDiscount || 0}
+                  onChange={(e) =>
+                    setSelectedUser({ ...selectedUser, cartDiscount: parseFloat(e.target.value) || 0 })
+                  }
+                />
+              </div>
+            )}
 
-                {/* הנחות למוצרים ספציפיים */}
-                {/* הנחות למוצרים ספציפיים */}
+            {userType === 'regular' && (
+              <>
                 <h3>הנחות למוצרים ספציפיים</h3>
                 <div className="product-discount-section">
                   <input
@@ -235,7 +242,7 @@ const UserManagement = () => {
                   />
                   {searchQuery && (
                     <ul className="search-results">
-                      {filteredProducts.slice(0, 3).map((product) => ( // מגביל ל-3 תוצאות בלבד
+                      {filteredProducts.map((product) => (
                         <li key={product._id} onClick={() => handleAddProductDiscount(product)}>
                           <img src={product["תמונות"]} alt={product["שם"]} className="product-thumbnail" />
                           <span>{product["שם"]} ({product.מזהה})</span>
