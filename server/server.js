@@ -42,7 +42,7 @@ app.use("/api/materialGroups", materialGroupRoutes);
 
 // Serve frontend build folder in production
 if (process.env.NODE_ENV === "production") {
-  const buildPath = path.join(__dirname, "build"); // Adjust if your build folder is located elsewhere
+  const buildPath = path.join(__dirname, "../web/build"); // Updated to point to ../web/build
 
   // Serve static files from the React app
   app.use(express.static(buildPath));
