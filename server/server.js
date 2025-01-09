@@ -40,18 +40,10 @@ app.use("/api/products", productRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/materialGroups", materialGroupRoutes);
 
-// Serve frontend build folder in production
-if (process.env.NODE_ENV === "production") {
-  const buildPath = path.join(__dirname, "../web/build"); // Updated to point to ../web/build
-
-  // Serve static files from the React app
-  app.use(express.static(buildPath));
-
-  // Handle React routing, return index.html
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(buildPath, "index.html"));
-  });
-}
+app.use(express.static(path.join(__dirname, "build"))); // Serve frontend files
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html")); // Redirect all to React index.html
+});
 
 // Basic test route (used only in development mode)
 app.get("/", (req, res) => {
