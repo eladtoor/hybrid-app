@@ -115,7 +115,7 @@ const UserProfile = () => {
                     <p><strong>כניסה:</strong> {isEditing ? <input type="text" name="entrance" value={formData.address?.entrance || ''} onChange={handleAddressChange} /> : formData.address?.entrance}</p>
                 </div>
 
-                {formData.userType === 'agent' && formData.referralLink && (
+                {formData.userType === 'סוכן' && formData.referralLink && (
                     <div className="agent-invite">
                         <h3>קישור הזמנה שלך</h3>
                         <p>שתף קישור זה כדי להזמין משתמשים:</p>

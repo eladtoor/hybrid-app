@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from "firebase/auth"; // Import Firebase Auth Listener
+import { onAuthStateChanged } from "firebase/auth";
 import CartItem from '../components/CartItem';
 import '../styles/CartPage.css';
 import { increaseQuantity, decreaseQuantity, removeFromCart, setCartItems } from '../redux/slices/cartSlice';
@@ -11,12 +11,13 @@ import { collection, addDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 
 const CartPage = () => {
     const cartItems = useSelector((state) => state.cart.cartItems);
-    const user = useSelector((state) => state.user.user); // Fetch from Redux state
-    const [isAuthenticated, setIsAuthenticated] = useState(false); // Local state to handle auth status
+    const user = useSelector((state) => state.user.user);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [materialGroups, setMaterialGroups] = useState([]);
     const [transportationCosts, setTransportationCosts] = useState(0);
-
     const [progressData, setProgressData] = useState({});
+    const [cartDiscount, setCartDiscount] = useState(0);
+    const [discountedTotal, setDiscountedTotal] = useState(0);
     const [temporaryAddress, setTemporaryAddress] = useState({
         city: '',
         street: '',
@@ -24,30 +25,27 @@ const CartPage = () => {
         floor: '',
         entrance: ''
     });
-
     const [isEditingAddress, setIsEditingAddress] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // Check authentication state
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             if (currentUser) {
-                setIsAuthenticated(true); // Set auth status
+                setIsAuthenticated(true);
             } else {
                 setIsAuthenticated(false);
-                navigate('/login'); // Redirect to login page if not authenticated
+                navigate('/login');
             }
         });
-        return () => unsubscribe(); // Cleanup listener
+        return () => unsubscribe();
     }, [navigate]);
 
     useEffect(() => {
-        if (!isAuthenticated) return; // Ensure the user is authenticated before fetching data
+        if (!isAuthenticated) return;
 
         const fetchUserData = async () => {
             try {
-                // Fetch user's address from Firestore
                 const userRef = doc(db, "users", auth.currentUser.uid);
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) {
@@ -60,6 +58,14 @@ const CartPage = () => {
                             floor: userData.address.floor || '',
                             entrance: userData.address.entrance || ''
                         });
+                    }
+                    if (userData.referredBy) {
+                        const agentRef = doc(db, "users", userData.referredBy);
+                        const agentSnap = await getDoc(agentRef);
+                        if (agentSnap.exists()) {
+                            const agentData = agentSnap.data();
+                            setCartDiscount(agentData.cartDiscount || 0);
+                        }
                     }
                 }
             } catch (error) {
@@ -78,8 +84,6 @@ const CartPage = () => {
             try {
                 const response = await fetch('/api/materialGroups');
                 const data = await response.json();
-                console.log(data);
-
                 setMaterialGroups(data);
             } catch (error) {
                 console.error('Error fetching material groups:', error);
@@ -97,26 +101,23 @@ const CartPage = () => {
             const groupTotals = {};
             let totalTransportationCosts = 0;
 
-            // Initialize totals for each material group
             materialGroups.forEach((group) => {
                 groupTotals[group.groupName] = 0;
             });
 
-            // Sum prices for products in the cart by material group
             cartItems.forEach((item) => {
                 if (groupTotals[item.materialGroup] !== undefined) {
                     groupTotals[item.materialGroup] += item.unitPrice * item.quantity;
                 }
             });
 
-            // Calculate progress for each material group
             const progress = {};
             materialGroups.forEach((group) => {
                 const totalInCart = groupTotals[group.groupName];
-                const percentage = Math.min((totalInCart / group.minPrice) * 100, 100); // Cap at 100%
+                const percentage = Math.min((totalInCart / group.minPrice) * 100, 100);
 
-                if (percentage < 100) {
-                    totalTransportationCosts += group.transportationPrice; // Add transportation price if progress is less than 100%
+                if (totalInCart > 0 && percentage < 100) {
+                    totalTransportationCosts += group.transportationPrice;
                 }
                 progress[group.groupName] = {
                     totalInCart,
@@ -131,7 +132,7 @@ const CartPage = () => {
     }, [materialGroups, cartItems]);
 
     const handleCheckout = async () => {
-        if (!isAuthenticated) return; // Prevent checkout if not authenticated
+        if (!isAuthenticated) return;
 
         const cartItemsForPurchase = cartItems.map(item => ({
             _id: item._id,
@@ -146,7 +147,9 @@ const CartPage = () => {
         const purchaseData = {
             purchaseId: `purchase_${Date.now()}`,
             cartItems: cartItemsForPurchase,
-            totalPrice: cartItemsForPurchase.reduce((acc, item) => acc + item.price * item.quantity, 0),
+            totalPrice: finalTotalPrice,
+            originalPrice: originalTotalPrice,
+            cartDiscount: cartDiscount,
             date: new Date().toISOString(),
             status: "pending",
             shippingAddress: temporaryAddress
@@ -213,11 +216,13 @@ const CartPage = () => {
         saveCartToFirestore(cartItems.filter(item => item._id !== _id));
     };
 
-    const totalPrice = cartItems.reduce((acc, item) => {
+    const originalTotalPrice = cartItems.reduce((acc, item) => {
         const itemPrice = item.unitPrice || 0;
         const itemQuantity = item.quantity || 1;
         return acc + itemPrice * itemQuantity;
-    }, 0) + transportationCosts;
+    }, 0);
+
+    const finalTotalPrice = originalTotalPrice - (originalTotalPrice * cartDiscount) / 100 + transportationCosts;
 
     return (
         <div className="cart-page">
@@ -244,7 +249,7 @@ const CartPage = () => {
                         <h2>השג 100% בכל קבוצת חומרים לקבלת הובלה חינם!</h2>
                         {materialGroups.map((group) => {
                             const progress = progressData[group.groupName] || { totalInCart: 0, percentage: 0 };
-                            const remainingAmount = Math.max(group.minPrice - progress.totalInCart, 0); // Remaining amount
+                            const remainingAmount = Math.max(group.minPrice - progress.totalInCart, 0);
                             return (
                                 <div key={group.groupName} className="progress-group">
                                     <h3>
@@ -261,11 +266,15 @@ const CartPage = () => {
                                             {Math.floor(progress.percentage)}%
                                         </span>
                                     </div>
-                                    <p className="add-more-text">
-                                        {progress.percentage < 100
-                                            ? `הוסף ${remainingAmount}₪ להובלה חינם (משלוח: ${group.transportationPrice}₪)`
-                                            : 'הובלה חינם!'}
-                                    </p>
+                                    {progress.totalInCart > 0 ? (
+                                        <p className="add-more-text">
+                                            {progress.percentage < 100
+                                                ? `הוסף ${remainingAmount}₪ להובלה חינם (משלוח: ${group.transportationPrice}₪)`
+                                                : 'הובלה חינם!'}
+                                        </p>
+                                    ) : (
+                                        <p className="add-more-text">אין מוצרים מקבוצה זו בעגלה</p>
+                                    )}
                                 </div>
                             );
                         })}
@@ -273,9 +282,14 @@ const CartPage = () => {
 
                     <div className="cart-summary">
                         <h2>סיכום הזמנה</h2>
-                        <p>סה"כ מוצרים: ₪{(totalPrice - transportationCosts).toFixed(2)}</p>
+                        <p>סה"כ מוצרים לפני הנחה: ₪{originalTotalPrice.toFixed(2)}</p>
+                        {cartDiscount > 0 && (
+                            <p>
+                                <strong>הנחת עגלה (%{cartDiscount}):</strong> ₪{(originalTotalPrice * cartDiscount / 100).toFixed(2)}
+                            </p>
+                        )}
                         <p>מחיר משלוח: ₪{transportationCosts.toFixed(2)}</p>
-                        <p>סה"כ כולל משלוח: ₪{totalPrice.toFixed(2)}</p>
+                        <p>סה"כ כולל הנחה ומשלוח: ₪{finalTotalPrice.toFixed(2)}</p>
                         <button className="checkout-button" onClick={handleCheckout}>מעבר לתשלום</button>
                     </div>
                     <div className="address-card">

@@ -20,6 +20,8 @@ import AdminPanel from "./pages/AdminPanel"; // Import AdminPanel
 import AdminRoute from "./components/AdminRoute"; // Import the AdminRoute component
 import UserManagement from "./pages/UserManagement";
 import PurchaseHistory from "./pages/PurchaseHistory";
+import AgentDashboard from "./pages/AgentDashboard.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -97,6 +99,14 @@ function App() {
             <Route
               path="/purchase-history/:userId/:userName"
               element={<PurchaseHistory />}
+            />
+            <Route
+              path="/agent-dashboard"
+              element={
+                <ProtectedRoute>
+                  <AgentDashboard />
+                </ProtectedRoute>
+              }
             />
           </Routes>
 

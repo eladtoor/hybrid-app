@@ -36,8 +36,29 @@ export const createProduct = (newProductData) => async (dispatch) => {
       // Dispatch success action if product created successfully
       dispatch({ type: "CREATE_PRODUCT_SUCCESS", payload: data });
 
-      // Optionally, refetch products after creating a new one
+      // Fetch updated products after creating a new one
       dispatch(fetchProducts());
+
+      // Fetch the updated categories
+      const categoriesResponse = await fetch(
+        "http://localhost:5000/api/categories"
+      );
+      const categoriesData = await categoriesResponse.json();
+      console.log("Updated Categories:", categoriesData);
+
+      // Create the updated category structure
+      const updatedCategories = {
+        companyName: "טמבור",
+        companyCategories: { ...categoriesData },
+      };
+
+      // Save updated categories to localStorage
+      localStorage.setItem("categories", JSON.stringify(updatedCategories));
+
+      // Dispatch the updated categories to Redux store
+      dispatch({ type: "SET_CATEGORIES", payload: updatedCategories });
+
+      console.log("Categories updated successfully in localStorage and Redux.");
     } else {
       // Handle failure in response
       dispatch({
@@ -103,8 +124,29 @@ export const updateProduct = (updatedProduct) => async (dispatch) => {
       // Dispatch success action after updating the product
       dispatch({ type: "UPDATE_PRODUCT_SUCCESS", payload: data });
 
-      // Optionally, fetch the updated list of products
+      // Fetch the updated list of products
       dispatch(fetchProducts());
+
+      // Fetch the updated categories
+      const categoriesResponse = await fetch(
+        "http://localhost:5000/api/categories"
+      );
+      const categoriesData = await categoriesResponse.json();
+      console.log("Updated Categories:", categoriesData);
+
+      // Create the updated category structure
+      const updatedCategories = {
+        companyName: "טמבור",
+        companyCategories: { ...categoriesData },
+      };
+
+      // Save updated categories to localStorage
+      localStorage.setItem("categories", JSON.stringify(updatedCategories));
+
+      // Dispatch the updated categories to Redux store
+      dispatch({ type: "SET_CATEGORIES", payload: updatedCategories });
+
+      console.log("Categories updated successfully in localStorage and Redux.");
     } else {
       dispatch({
         type: "UPDATE_PRODUCT_FAILURE",

@@ -12,10 +12,12 @@ const UserManagement = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userType, setUserType] = useState('regular');
+  const [userType, setUserType] = useState('רגיל');
   const [productDiscounts, setProductDiscounts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [referralCounts, setReferralCounts] = useState({});
+
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -30,14 +32,47 @@ const UserManagement = () => {
         const userDocs = await getDocs(usersCollection);
         const usersData = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setUsers(usersData);
+
+        // Count referrals for each agent
+        const counts = {};
+        usersData.forEach(user => {
+          if (user.referredBy) {
+            const agentId = user.referredBy.trim(); // Ensure exact match
+            counts[agentId] = (counts[agentId] || 0) + 1;
+          }
+        });
+
+        setReferralCounts(counts);
+        console.log('Referral Counts:', counts); // Debugging log
+
+        // Save referral counts to the agent documents
+        for (const agentId of Object.keys(counts)) {
+          const referralCount = counts[agentId];
+          console.log(`Updating agent ${agentId} with referral count: ${referralCount}`); // Debug log
+          try {
+            const agentRef = doc(db, 'users', agentId);
+            await updateDoc(agentRef, { referralCount });
+          } catch (error) {
+            console.error(`Error updating agent ${agentId}:`, error);
+          }
+        }
+
+        console.log('Referral counts updated successfully!');
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching users or updating referral counts:", error);
       }
     };
 
     fetchUsers();
-    dispatch(fetchProducts()); // Fetch products from Redux
+    dispatch(fetchProducts());
   }, [dispatch]);
+
+
+
+
+
+
+
 
   useEffect(() => {
     const filtered = products
@@ -49,18 +84,18 @@ const UserManagement = () => {
     setFilteredProducts(filtered);
   }, [searchQuery, products]);
 
-  const generateReferralLink = (userId) => {
-    const referralCode = `agent-${userId}-${Date.now()}`;
-    return `https://yourapp.com/register?ref=${referralCode}`;
-  };
-
   const handleEditUser = (user) => {
+    console.log(user, "הדפסה");
+
     setSelectedUser(user);
     setIsAdmin(user.isAdmin);
-    setUserType(user.userType || 'regular');
-    setProductDiscounts(user.productDiscounts || []);
+    setUserType(user.userType || 'רגיל'); // Set to the correct user type
+    setProductDiscounts(user.productDiscounts || []); // Default to an empty array if not set
     setIsEditModalOpen(true);
   };
+
+
+
 
   const handleViewPurchaseHistory = (userId, userName) => {
     navigate(`/purchase-history/${userId}/${userName}`);
@@ -76,12 +111,16 @@ const UserManagement = () => {
 
   const handleAddProductDiscount = (product) => {
     if (!productDiscounts.find(discount => discount.productId === product._id)) {
+      console.log(product, "פהפהפהה");
+
       setProductDiscounts((prevDiscounts) => [
         ...prevDiscounts,
-        { productId: product._id, productName: product['שם'], discount: 0 }
+        { productId: product._id, מזהה: product["מזהה"], productName: product['שם'], discount: 0 }
       ]);
     }
+    setSearchQuery(''); // Clear the search query to close search results
   };
+
 
   const handleRemoveProductDiscount = (index) => {
     const updatedDiscounts = [...productDiscounts];
@@ -99,22 +138,19 @@ const UserManagement = () => {
     if (selectedUser) {
       const userRef = doc(db, 'users', selectedUser.id);
       try {
+        let referralLink = selectedUser.referralLink;
+        if (userType === 'סוכן' && !referralLink) {
+          // Generate referral link if it doesn't exist
+          referralLink = `https://yourapp.com/register?ref=agent-${selectedUser.id}-${Date.now()}`;
+        }
+
         const updateData = {
           isAdmin,
-          userType,
-          cartDiscount: selectedUser.cartDiscount || 0,
+          userType: userType || 'רגיל', // Default to 'רגיל'
+          cartDiscount: userType === 'סוכן' ? (selectedUser.cartDiscount || 0) : deleteField(),
+          productDiscounts: userType === 'רגיל' ? productDiscounts : deleteField(),
+          referralLink: userType === 'סוכן' ? referralLink : deleteField(),
         };
-
-        if (userType === 'agent') {
-          updateData.productDiscounts = deleteField();
-          if (!selectedUser.referralLink) {
-            updateData.referralLink = generateReferralLink(selectedUser.id);
-          }
-        } else {
-          updateData.cartDiscount = deleteField();
-          updateData.productDiscounts = productDiscounts;
-          updateData.referralLink = deleteField();
-        }
 
         await updateDoc(userRef, updateData);
 
@@ -123,10 +159,10 @@ const UserManagement = () => {
             ? {
               ...user,
               isAdmin,
-              userType,
-              cartDiscount: userType === 'agent' ? selectedUser.cartDiscount : undefined,
-              productDiscounts: userType === 'regular' ? productDiscounts : undefined,
-              referralLink: userType === 'agent' ? updateData.referralLink || user.referralLink : undefined,
+              userType: userType || 'רגיל',
+              cartDiscount: userType === 'סוכן' ? selectedUser.cartDiscount : undefined,
+              productDiscounts: userType === 'רגיל' ? productDiscounts : undefined,
+              referralLink: userType === 'סוכן' ? referralLink : undefined,
             }
             : user
         ));
@@ -136,6 +172,8 @@ const UserManagement = () => {
       }
     }
   };
+
+
 
   return (
     <div className="user-management">
@@ -150,6 +188,7 @@ const UserManagement = () => {
             <th>סוג משתמש</th>
             <th>הנחת סוכן כללית</th>
             <th>פעולות</th>
+            <th>לקוחות דרכו</th>
           </tr>
         </thead>
         <tbody>
@@ -171,9 +210,9 @@ const UserManagement = () => {
                     .join(', ')
                   : 'לא זמין'}
               </td>
-              <td>{user.userType === 'agent' ? 'סוכן' : 'רגיל'}</td>
+              <td>{user.userType === 'סוכן' || user.userType === 'agent' ? 'סוכן' : 'רגיל'}</td>
               <td>
-                {user.userType === 'agent'
+                {user.userType === 'סוכן'
                   ? `${user.cartDiscount || 0}%`
                   : 'לא זמין'}
               </td>
@@ -183,6 +222,12 @@ const UserManagement = () => {
                   הצג היסטוריית רכישות
                 </button>
               </td>
+              <td>
+                {user.userType === 'סוכן'
+                  ? referralCounts[user.id] || 0
+                  : 'לא זמין'}
+              </td>
+
             </tr>
           ))}
         </tbody>
@@ -208,20 +253,26 @@ const UserManagement = () => {
 
             <div className="form-group">
               <p>סוג משתמש:</p>
-              <select value={userType} onChange={(e) => setUserType(e.target.value)}>
-                <option value="regular">רגיל</option>
-                <option value="agent">סוכן</option>
+              {console.log(userType)}
+
+              <select
+                value={userType === 'סוכן' || userType === 'agent' ? "סוכן" : "רגיל"} // Reflects the userType state
+                onChange={(e) => setUserType(e.target.value)} // Updates the state on change
+              >
+                <option value="רגיל">רגיל</option>
+                <option value="סוכן">סוכן</option>
               </select>
             </div>
 
-            {userType === 'agent' && (
+
+            {(userType === 'סוכן' || userType === "agent") && (
               <div className="form-group">
                 <p>הנחה כללית לעגלה (%):</p>
                 <input
                   type="number"
                   min="0"
                   max="100"
-                  value={selectedUser.cartDiscount || 0}
+                  value={selectedUser?.cartDiscount || 0}
                   onChange={(e) =>
                     setSelectedUser({ ...selectedUser, cartDiscount: parseFloat(e.target.value) || 0 })
                   }
@@ -229,7 +280,7 @@ const UserManagement = () => {
               </div>
             )}
 
-            {userType === 'regular' && (
+            {userType === 'רגיל' && (
               <>
                 <h3>הנחות למוצרים ספציפיים</h3>
                 <div className="product-discount-section">
@@ -277,6 +328,7 @@ const UserManagement = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

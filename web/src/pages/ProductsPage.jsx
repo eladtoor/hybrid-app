@@ -12,7 +12,7 @@ const ProductsPage = () => {
 
     // Safely access the companyCategories from Redux store
     const companyCategories = useSelector((state) => state.categories.categories?.companyCategories);
-    console.log(companyCategories);
+    console.log(companyCategories, "im here");
 
     // Check if companyCategories is available before proceeding
     if (!companyCategories) {

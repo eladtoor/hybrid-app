@@ -102,6 +102,9 @@ const NavBar = ({ categories }) => {
                             {userDropdownVisible && (
                                 <div className="user-dropdown-content">
                                     <button onClick={() => navigate('/profile')}>הפרופיל שלי</button>
+                                    {user?.userType === 'סוכן' && (
+                                        <button onClick={() => navigate('/agent-dashboard')}>ניהול לקוחות</button>
+                                    )}
                                     <button onClick={handleSignOut}>התנתק</button>
                                 </div>
                             )}

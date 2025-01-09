@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../redux/slices/cartSlice';
 import '../styles/ProductCard.css';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,10 @@ import { auth } from '../firebase';
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const user = useSelector((state) => state.user.user); // Get user data from Redux
+
+
+
     const [showLoginAlert, setShowLoginAlert] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -15,6 +19,23 @@ const ProductCard = ({ product }) => {
     const [selectedQuantity, setSelectedQuantity] = useState(1);
     const [updatedPrice, setUpdatedPrice] = useState(product["מחיר רגיל"] || 0);
     const [totalPrice, setTotalPrice] = useState(product["מחיר רגיל"] || 0);
+    const [originalPrice, setOriginalPrice] = useState(product["מחיר רגיל"] || 0);
+    const [hasDiscount, setHasDiscount] = useState(false); // New state to check if the product has a discount
+    const [disableAddToCart, setDisableAddToCart] = useState(product.quantities && product.quantities.length > 0);
+    const [discountPercentage, setDiscountPercentage] = useState(0);
+
+
+
+
+    const materialGroupTranslations = {
+        'Colors and Accessories': 'צבעים ומוצרים נלווים',
+        'Powders': 'אבקות (דבקים וטייח)',
+        'Gypsum and Tracks': 'גבס ומסלולים'
+    };
+
+
+
+    const productMaterialGroup = product.materialGroup ? materialGroupTranslations[product.materialGroup] || product.materialGroup : null;
 
     useEffect(() => {
         if (product && Array.isArray(product.variations) && product.variations.length > 0) {
@@ -39,8 +60,10 @@ const ProductCard = ({ product }) => {
 
             setSelectedAttributes(defaultAttributes);
             calculateTotalPrice(defaultAttributes, selectedQuantity);
+        } else {
+            calculateTotalPrice({}, 1);
         }
-    }, [product.variations]);
+    }, [product]);
 
     const toggleModal = () => {
         setShowModal(!showModal);
@@ -57,11 +80,19 @@ const ProductCard = ({ product }) => {
 
     const handleQuantityChange = (quantity) => {
         setSelectedQuantity(quantity);
+        setDisableAddToCart(false);  // Enable the "Add to Cart" button when a quantity is selected
         calculateTotalPrice(selectedAttributes, quantity);
     };
 
+
     const calculateTotalPrice = (updatedAttributes, quantity) => {
         let updatedPriceTemp = product["מחיר רגיל"] || 0;
+
+        const discountInfo = user?.productDiscounts?.find((discount) => discount.productId === product._id);
+        const discount = discountInfo ? parseFloat(discountInfo.discount) : 0;
+        setDiscountPercentage(discount);
+        setHasDiscount(discount > 0); // Check if there is a discount
+
 
         if (product.variations && product.variations.length > 0) {
             for (const variation of product.variations) {
@@ -85,8 +116,11 @@ const ProductCard = ({ product }) => {
                 }
             }
         }
-        setUpdatedPrice(updatedPriceTemp)
-        setTotalPrice(updatedPrice * quantity);
+
+        const finalPrice = updatedPriceTemp - (updatedPriceTemp * discount) / 100;
+        setOriginalPrice(updatedPriceTemp);
+        setUpdatedPrice(finalPrice);
+        setTotalPrice(finalPrice * quantity);
     };
 
     const renderVariationAttributes = () => {
@@ -130,13 +164,11 @@ const ProductCard = ({ product }) => {
     };
 
     const handleAddToCart = () => {
-        const user = auth.currentUser;
-        if (!user) {
+        if (!auth.currentUser) {
             setShowLoginAlert(true);
             setTimeout(() => setShowLoginAlert(false), 3000);
             return;
         }
-        console.log(totalPrice, "מחיר בכרטיס מוצר");
 
         dispatch(addToCart({ ...product, price: totalPrice, unitPrice: updatedPrice, quantity: selectedQuantity, packageSize: selectedQuantity }));
         setShowModal(false);
@@ -150,24 +182,67 @@ const ProductCard = ({ product }) => {
     return (
         <>
             <div className="product-card" onClick={toggleModal}>
+                {hasDiscount && (
+                    <div className="discount-badge">
+                        {`${discountPercentage}% הנחה`}
+                    </div>
+                )}
+                {productMaterialGroup && (
+                    <div className="material-group-icon">
+                        {productMaterialGroup}
+                    </div>
+                )}
                 <img src={product.תמונות} alt={product.שם} className="product-card-image" />
                 <h3 className="product-card-title">{product.שם}</h3>
                 <p className="product-card-description">
                     {product["תיאור קצר"] ? product["תיאור קצר"] : product["תיאור"]}
                 </p>
                 <div className="product-card-footer">
-                    <span className="product-card-price">{`₪${Number(product["מחיר רגיל"]).toFixed(2)}`}</span>
+                    <span className="product-card-link">הצג עוד</span>
                 </div>
             </div>
 
             {showModal && (
                 <div className="modal" onClick={(e) => e.target.className === 'modal' && toggleModal()}>
                     <div className="modal-content">
+                        {productMaterialGroup && (
+                            <div className="material-group-icon-modal">
+                                {productMaterialGroup}
+                            </div>
+                        )}
                         <span className="close" onClick={toggleModal}>&times;</span>
-                        <h2>{product.שם}</h2>
+                        <h2 className='modal-title'>{product.שם}</h2>
                         <img src={product.תמונות} alt={product.שם} className="modal-image" />
                         <p>{product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}</p>
-                        <p>{`מחיר: ₪${updatedPrice.toFixed(2) * selectedQuantity}`}</p>
+
+                        {productMaterialGroup && (
+                            <div className="material-group-badge-modal">
+                                {productMaterialGroup}
+                            </div>
+                        )}
+
+                        <div className="price-section">
+                            {hasDiscount ? (
+                                <>
+                                    <p className="original-price">
+                                        <span style={{ textDecoration: 'line-through', color: '#a0a0a0' }}>
+                                            ₪{(originalPrice * selectedQuantity).toFixed(2)}
+                                        </span>
+                                    </p>
+                                    <p className="discounted-price">
+                                        <strong style={{ fontSize: '1.5rem', color: '#ff4d4f' }}>
+                                            ₪{totalPrice.toFixed(2)}
+                                        </strong>
+                                    </p>
+                                </>
+                            ) : (
+                                <p className="discounted-price">
+                                    <strong style={{ fontSize: '1.5rem', color: '#000' }}>
+                                        ₪{totalPrice.toFixed(2)}
+                                    </strong>
+                                </p>
+                            )}
+                        </div>
 
                         {product.סוג === 'variable' && (
                             <div className="product-attributes">
@@ -187,7 +262,6 @@ const ProductCard = ({ product }) => {
                                                 value={quantity}
                                                 checked={selectedQuantity === quantity}
                                                 onChange={() => handleQuantityChange(quantity)}
-
                                             />
                                             {quantity}
                                         </label>
@@ -199,9 +273,11 @@ const ProductCard = ({ product }) => {
                         <button
                             className="product-card-button"
                             onClick={handleAddToCart}
+                            disabled={disableAddToCart} // Disable when no quantity is selected
                         >
                             הוסף לעגלה
                         </button>
+
                         {showLoginAlert && (
                             <div className="alert alert-red">
                                 אנא התחבר כדי להוסיף מוצרים לעגלה
