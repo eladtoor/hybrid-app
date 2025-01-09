@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const path = require("path"); // נדרש להגשת קבצים סטטיים
+const path = require("path"); // Required for serving frontend build files
 require("dotenv").config();
 
 const userRoutes = require("./routes/userRoutes");
@@ -40,16 +40,21 @@ app.use("/api/products", productRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/materialGroups", materialGroupRoutes);
 
-// Serve static files from the React build folder
-app.use(express.static(path.join(__dirname, "build")));
+// Serve frontend build folder in production
+if (process.env.NODE_ENV === "production") {
+  const buildPath = path.join(__dirname, "build"); // Adjust if your build folder is located elsewhere
 
-// Serve the React app for any unmatched routes
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
-});
+  // Serve static files from the React app
+  app.use(express.static(buildPath));
 
-// Basic test route
-app.get("/test", (req, res) => {
+  // Handle React routing, return index.html
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(buildPath, "index.html"));
+  });
+}
+
+// Basic test route (used only in development mode)
+app.get("/", (req, res) => {
   res.send("Server is running");
 });
 
