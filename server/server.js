@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path"); // נדרש להגשת קבצים סטטיים
 require("dotenv").config();
 
 const userRoutes = require("./routes/userRoutes");
@@ -39,8 +40,16 @@ app.use("/api/products", productRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/materialGroups", materialGroupRoutes);
 
+// Serve static files from the React build folder
+app.use(express.static(path.join(__dirname, "build")));
+
+// Serve the React app for any unmatched routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+
 // Basic test route
-app.get("/", (req, res) => {
+app.get("/test", (req, res) => {
   res.send("Server is running");
 });
 
