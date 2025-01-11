@@ -40,9 +40,9 @@ app.use("/api/products", productRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/materialGroups", materialGroupRoutes);
 
-app.use(express.static(path.join(__dirname, "build"))); // Serve frontend files
+app.use(express.static(path.join(__dirname, "../web/build")));
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "build", "index.html")); // Redirect all to React index.html
+  res.sendFile(path.join(__dirname, "../web/build", "index.html"));
 });
 
 // Basic test route (used only in development mode)

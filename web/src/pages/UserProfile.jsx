@@ -13,8 +13,13 @@ const UserProfile = () => {
     const user = useSelector((state) => state.user.user);
 
     const getBaseUrl = () => {
-        return process.env.NODE_ENV === 'production' ? 'https://your-production-domain.com' : 'http://localhost:3000';
+        return process.env.REACT_APP_BASE_URL || 'http://localhost:3000/';
     };
+
+
+    console.log(getBaseUrl());
+
+
 
     useEffect(() => {
         const fetchUserData = async () => {
