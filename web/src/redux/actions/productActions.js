@@ -1,10 +1,12 @@
 // actions/productActions.js
-
+const getBaseUrl = () => {
+  return process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+};
 // Fetch products from the server
 export const fetchProducts = () => async (dispatch) => {
   dispatch({ type: "FETCH_PRODUCTS_REQUEST" });
   try {
-    const response = await fetch("http://localhost:5000/api/products/getAll");
+    const response = await fetch(`${getBaseUrl()}/api/products/getAll`);
     const data = await response.json();
 
     // Save products to localStorage
@@ -22,7 +24,7 @@ export const createProduct = (newProductData) => async (dispatch) => {
   try {
     console.log(newProductData);
 
-    const response = await fetch("http://localhost:5000/api/products/create", {
+    const response = await fetch(`${getBaseUrl()}/api/products/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -40,9 +42,7 @@ export const createProduct = (newProductData) => async (dispatch) => {
       dispatch(fetchProducts());
 
       // Fetch the updated categories
-      const categoriesResponse = await fetch(
-        "http://localhost:5000/api/categories"
-      );
+      const categoriesResponse = await fetch(`${getBaseUrl()}/api/categories`);
       const categoriesData = await categoriesResponse.json();
       console.log("Updated Categories:", categoriesData);
 
@@ -77,7 +77,7 @@ export const deleteProduct = (productId) => async (dispatch) => {
   dispatch({ type: "DELETE_PRODUCT_REQUEST" });
   try {
     const response = await fetch(
-      `http://localhost:5000/api/products/delete/${productId}`,
+      `${getBaseUrl()}/api/products/delete/${productId}`,
       {
         method: "DELETE",
       }
@@ -108,7 +108,7 @@ export const updateProduct = (updatedProduct) => async (dispatch) => {
   dispatch({ type: "UPDATE_PRODUCT_REQUEST" });
   try {
     const response = await fetch(
-      `http://localhost:5000/api/products/update/${updatedProduct._id}`,
+      `${getBaseUrl()}/api/products/update/${updatedProduct._id}`,
       {
         method: "PUT",
         headers: {
@@ -128,9 +128,7 @@ export const updateProduct = (updatedProduct) => async (dispatch) => {
       dispatch(fetchProducts());
 
       // Fetch the updated categories
-      const categoriesResponse = await fetch(
-        "http://localhost:5000/api/categories"
-      );
+      const categoriesResponse = await fetch(`${getBaseUrl()}/api/categories`);
       const categoriesData = await categoriesResponse.json();
       console.log("Updated Categories:", categoriesData);
 
