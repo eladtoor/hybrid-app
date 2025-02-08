@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const http = require("http");
-const { WebSocketServer } = require("ws"); // WebSocket Server
+const WebSocket = require("ws"); // Import WebSocket
 require("dotenv").config();
 
 const userRoutes = require("./routes/userRoutes");
@@ -12,16 +12,15 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const materialGroupRoutes = require("./routes/materialGroupRoutes");
 
 const app = express();
-const server = http.createServer(app); // Create HTTP server for WebSocket
-const wss = new WebSocketServer({ server }); // Initialize WebSocket Server
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-// Validate environment variables
 if (!process.env.MONGO_URI) {
   console.error("❌ MONGO_URI is not defined in environment variables.");
   process.exit(1);
 }
 
-// Connect to MongoDB with error handling
+// Connect to MongoDB with retry mechanism
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -30,16 +29,15 @@ const connectDB = async () => {
     });
     console.log("✅ MongoDB connected");
 
-    setupChangeStream(); // Start watching products after successful connection
+    setupChangeStream(); // Start Change Stream
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
-    setTimeout(connectDB, 5000); // Retry connection after 5 seconds
+    setTimeout(connectDB, 5000); // Retry connection in 5 seconds
   }
 };
 
-connectDB(); // Initial connection attempt
+connectDB(); // Initial connection
 
-// CORS setup (for development, allowing all origins)
 const corsOptions = { origin: "*" };
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -50,13 +48,11 @@ app.use("/api/products", productRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/materialGroups", materialGroupRoutes);
 
-// Serve frontend build files
 app.use(express.static(path.join(__dirname, "../web/build")));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../web/build", "index.html"));
 });
 
-// Basic test route
 app.get("/", (req, res) => {
   res.send("🟢 Server is running");
 });
@@ -65,7 +61,7 @@ app.get("/", (req, res) => {
  *  🔹 WEBSOCKET LOGIC BELOW
  *  ========================== */
 
-// Function to broadcast product updates to all clients
+// Broadcast product updates to all clients
 const broadcastProductsUpdate = async () => {
   try {
     const updatedProducts = await mongoose.connection
@@ -74,18 +70,21 @@ const broadcastProductsUpdate = async () => {
       .toArray();
 
     wss.clients.forEach((client) => {
-      if (client.readyState === 1) {
+      if (client.readyState === WebSocket.OPEN) {
+        // Ensure connection is open
         client.send(
           JSON.stringify({ type: "PRODUCTS_UPDATED", payload: updatedProducts })
         );
       }
     });
+
+    console.log("📡 Broadcasted product update to all clients.");
   } catch (error) {
     console.error("❌ Error broadcasting product updates:", error);
   }
 };
 
-// Set up MongoDB Change Stream to detect product updates
+// Setup MongoDB Change Stream
 const setupChangeStream = () => {
   try {
     const productCollection = mongoose.connection.collection("products");
@@ -96,13 +95,19 @@ const setupChangeStream = () => {
       broadcastProductsUpdate();
     });
 
+    changeStream.on("error", (error) => {
+      console.error("❌ Change Stream error:", error);
+      console.log("🟡 Restarting Change Stream in 5 seconds...");
+      setTimeout(setupChangeStream, 5000);
+    });
+
     console.log("🟢 Change Stream initialized.");
   } catch (error) {
     console.error("❌ Error setting up Change Stream:", error);
   }
 };
 
-// WebSocket Connection Handling
+// WebSocket Handling
 wss.on("connection", (ws) => {
   console.log("🟢 New WebSocket client connected");
 

@@ -63,40 +63,31 @@ const AdminPanel = () => {
     useEffect(() => {
         dispatch(fetchProducts()); // Initial Fetch
 
-        if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-            socketRef.current = new WebSocket(
-                process.env.REACT_APP_BASE_URL || "http://localhost:5000"
-            ) // Adjust URL if needed
+        const socket = new WebSocket("ws://localhost:5000"); // Adjust WebSocket URL if needed
 
-            socketRef.current.onopen = () => {
-                console.log("🟢 Connected to WebSocket");
-            };
+        socket.onopen = () => {
+            console.log("🟢 Connected to WebSocket");
+        };
 
-            socketRef.current.onmessage = (event) => {
-                try {
-                    const message = JSON.parse(event.data);
-                    if (message.type === "PRODUCTS_UPDATED") {
-                        console.log("🔄 Received Products Update:", message.payload);
-                        dispatch(updateProductsList(message.payload)); // Update Redux store
-                    }
-                } catch (error) {
-                    console.error("❌ Error parsing WebSocket message:", error);
+        socket.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                if (message.type === "PRODUCTS_UPDATED") {
+                    console.log("🔄 Received Products Update:", message.payload);
+                    dispatch({ type: "UPDATE_PRODUCTS_LIST", payload: message.payload }); // Update Redux store
+                    localStorage.setItem("products", JSON.stringify(message.payload)); // Update localStorage
                 }
-            };
+            } catch (error) {
+                console.error("❌ Error parsing WebSocket message:", error);
+            }
+        };
 
-            socketRef.current.onclose = () => {
-                console.log("🔴 WebSocket Disconnected. Attempting Reconnect...");
-                setTimeout(() => {
-                    socketRef.current = null; // Reset WebSocket ref
-                    dispatch(fetchProducts()); // Ensure data stays updated
-                }, 3000); // Reconnect after 3 seconds
-            };
-        }
+        socket.onclose = () => {
+            console.log("🔴 WebSocket Disconnected");
+        };
 
         return () => {
-            if (socketRef.current) {
-                socketRef.current.close();
-            }
+            socket.close();
         };
     }, [dispatch]);
 
