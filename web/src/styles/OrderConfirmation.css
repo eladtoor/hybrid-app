@@ -1,0 +1,39 @@
+.order-confirmation-container {
+  max-width: 600px;
+  margin: 0 auto;
+  margin-top: 130px;
+  margin-bottom: 50px;
+  padding: 50px;
+  text-align: center;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+h1 {
+  color: #4caf50;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  padding: 8px 0;
+  font-size: 18px;
+}
+
+.orderConfirm-button {
+  background: #4caf50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+.orderConfirm-button:hover {
+  background: #45a049;
+}

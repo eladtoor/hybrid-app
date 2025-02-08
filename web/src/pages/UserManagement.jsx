@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { deleteField } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../redux/actions/productActions';
+import { getWhatsAppDetails, saveWhatsAppDetails } from '../utils/WhatsappService';
 import '../styles/UserManagement.css';
 
 const UserManagement = () => {
@@ -17,7 +18,9 @@ const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [referralCounts, setReferralCounts] = useState({});
-
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [whatsappMessage, setWhatsappMessage] = useState('');
+  const [isCreditLine, setIsCreditLine] = useState(false); // הוסף ל-state
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -31,6 +34,12 @@ const UserManagement = () => {
         const usersCollection = collection(db, 'users');
         const userDocs = await getDocs(usersCollection);
         const usersData = userDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        usersData.forEach(async (user) => {
+          if (user.isCreditLine === undefined) {
+            const userRef = doc(db, 'users', user.id);
+            await updateDoc(userRef, { isCreditLine: false }); // ברירת מחדל: false
+          }
+        });
         setUsers(usersData);
 
         // Count referrals for each agent
@@ -63,11 +72,35 @@ const UserManagement = () => {
       }
     };
 
+
     fetchUsers();
+
+    const fetchWhatsAppDetails = async () => {
+      try {
+        const data = await getWhatsAppDetails('whatsapp-settings'); // מפתח לדוגמה
+        if (data) {
+          setWhatsappNumber(data.whatsappNumber || '');
+          setWhatsappMessage(data.whatsappMessage || '');
+        }
+      } catch (error) {
+        console.error('Error fetching WhatsApp details:', error);
+      }
+    };
+
+    fetchWhatsAppDetails();
+
+
     dispatch(fetchProducts());
   }, [dispatch]);
 
-
+  const handleSaveWhatsAppDetails = async () => {
+    try {
+      await saveWhatsAppDetails('whatsapp-settings', whatsappNumber, whatsappMessage); // מפתח לדוגמה
+      alert('פרטי וואטסאפ נשמרו בהצלחה!');
+    } catch (error) {
+      console.error('Error saving WhatsApp details:', error);
+    }
+  };
 
 
 
@@ -91,6 +124,7 @@ const UserManagement = () => {
     setIsAdmin(user.isAdmin);
     setUserType(user.userType || 'רגיל'); // Set to the correct user type
     setProductDiscounts(user.productDiscounts || []); // Default to an empty array if not set
+    setIsCreditLine(user.isCreditLine || false); // הגדרת isCreditLine כברירת מחדל
     setIsEditModalOpen(true);
   };
 
@@ -150,6 +184,7 @@ const UserManagement = () => {
           cartDiscount: userType === 'סוכן' ? (selectedUser.cartDiscount || 0) : deleteField(),
           productDiscounts: userType === 'רגיל' ? productDiscounts : deleteField(),
           referralLink: userType === 'סוכן' ? referralLink : deleteField(),
+          isCreditLine
         };
 
         await updateDoc(userRef, updateData);
@@ -160,6 +195,7 @@ const UserManagement = () => {
               ...user,
               isAdmin,
               userType: userType || 'רגיל',
+              isCreditLine,
               cartDiscount: userType === 'סוכן' ? selectedUser.cartDiscount : undefined,
               productDiscounts: userType === 'רגיל' ? productDiscounts : undefined,
               referralLink: userType === 'סוכן' ? referralLink : undefined,
@@ -186,6 +222,8 @@ const UserManagement = () => {
             <th>טלפון</th>
             <th>כתובת</th>
             <th>סוג משתמש</th>
+            <th>קו אשראי</th>
+
             <th>הנחת סוכן כללית</th>
             <th>פעולות</th>
             <th>לקוחות דרכו</th>
@@ -211,6 +249,7 @@ const UserManagement = () => {
                   : 'לא זמין'}
               </td>
               <td>{user.userType === 'סוכן' || user.userType === 'agent' ? 'סוכן' : 'רגיל'}</td>
+              <td>{user.isCreditLine ? 'כן' : 'לא'}</td> {/* הצגת קו אשראי */}
               <td>
                 {user.userType === 'סוכן'
                   ? `${user.cartDiscount || 0}%`
@@ -232,6 +271,26 @@ const UserManagement = () => {
           ))}
         </tbody>
       </table>
+
+      <div className="whatsapp-settings">
+        <h2>עריכת פרטי וואטסאפ</h2>
+        <div className="form-group">
+          <label>מספר וואטסאפ:</label>
+          <input
+            type="text"
+            value={whatsappNumber}
+            onChange={(e) => setWhatsappNumber(e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label>הודעת וואטסאפ:</label>
+          <textarea
+            value={whatsappMessage}
+            onChange={(e) => setWhatsappMessage(e.target.value)}
+          />
+        </div>
+        <button onClick={handleSaveWhatsAppDetails}>שמור</button>
+      </div>
 
       {isEditModalOpen && (
         <div className="modal">
@@ -282,6 +341,18 @@ const UserManagement = () => {
 
             {userType === 'רגיל' && (
               <>
+                <div className="form-group">
+                  <p>האם המשתמש הוא "קו אשראי"?</p>
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={isCreditLine}
+                      onChange={() => setIsCreditLine(!isCreditLine)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+
                 <h3>הנחות למוצרים ספציפיים</h3>
                 <div className="product-discount-section">
                   <input

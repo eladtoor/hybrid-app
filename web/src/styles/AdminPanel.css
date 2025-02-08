@@ -209,6 +209,34 @@ button[type="button"]:hover {
   font-weight: bold;
 }
 
+.quantity-check {
+  margin-top: 1.5rem;
+}
+.attribute-buttons {
+  display: flex;
+  justify-content: flex-start; /* Align buttons to the start (right in Hebrew layout) */
+  gap: 10px; /* Add spacing between buttons */
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.attribute-buttons button {
+  flex: none; /* Prevent buttons from stretching */
+  white-space: nowrap; /* Ensure the text stays in one line */
+}
+.attribute-values {
+  display: flex;
+  gap: 15px; /* Space between fields */
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Ensure labels don't stack vertically */
+.attribute-values label {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
 /* Responsive styling */
 @media screen and (max-width: 768px) {
   .admin-panel {

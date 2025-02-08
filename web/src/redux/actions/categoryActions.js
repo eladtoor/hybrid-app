@@ -2,7 +2,7 @@ export const fetchCategories = () => async (dispatch) => {
   dispatch({ type: "FETCH_CATEGORIES_REQUEST" });
   try {
     const getBaseUrl = () => {
-      return process.env.REACT_APP_BASE_URL || "http://localhost:5000/";
+      return process.env.REACT_APP_BASE_URL || "http://localhost:3000/";
     };
     const response = await fetch(`${getBaseUrl()}/api/categories`);
     const data = await response.json();

@@ -12,6 +12,7 @@ const productSchema = new mongoose.Schema({
   קטגוריות: { type: String }, // Categories as a string
   תמונות: { type: String }, // Image URL
   quantities: { type: [Number], default: [] }, // Quantities as an array of numbers
+  allowComments: Boolean,
 
   // New field for material groups
   materialGroup: {

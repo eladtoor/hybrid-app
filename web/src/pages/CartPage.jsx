@@ -8,6 +8,7 @@ import { increaseQuantity, decreaseQuantity, removeFromCart, setCartItems } from
 import { loadCartFromFirestore, saveCartToFirestore } from '../utils/cartUtils';
 import { auth, db } from '../firebase';
 import { collection, addDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const CartPage = () => {
     const cartItems = useSelector((state) => state.cart.cartItems);
@@ -17,7 +18,10 @@ const CartPage = () => {
     const [transportationCosts, setTransportationCosts] = useState(0);
     const [progressData, setProgressData] = useState({});
     const [cartDiscount, setCartDiscount] = useState(0);
-    const [discountedTotal, setDiscountedTotal] = useState(0);
+    const [errorMessage, setErrorMessage] = useState(""); // New state for errors
+
+    const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
+
     const [temporaryAddress, setTemporaryAddress] = useState({
         city: '',
         street: '',
@@ -29,17 +33,30 @@ const CartPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 setIsAuthenticated(true);
+
+                // Reset the cart when user logs in
+                dispatch(setCartItems([]));
+
+                // Load new user's cart
+                const cartFromFirestore = await loadCartFromFirestore();
+                dispatch(setCartItems(cartFromFirestore));
             } else {
                 setIsAuthenticated(false);
                 navigate('/login');
+
+                // Clear the cart on logout
+                dispatch(setCartItems([]));
             }
         });
+
         return () => unsubscribe();
-    }, [navigate]);
+    }, [navigate, dispatch]);
+
 
     useEffect(() => {
         if (!isAuthenticated) return;
@@ -75,6 +92,7 @@ const CartPage = () => {
 
         const fetchCart = async () => {
             const cartFromFirestore = await loadCartFromFirestore();
+
             if (cartFromFirestore.length > 0) {
                 dispatch(setCartItems(cartFromFirestore));
             }
@@ -134,35 +152,73 @@ const CartPage = () => {
     const handleCheckout = async () => {
         if (!isAuthenticated) return;
 
-        const cartItemsForPurchase = cartItems.map(item => ({
-            _id: item._id,
-            name: item.שם,
-            price: item.unitPrice || 0,
-            quantity: item.quantity,
-            imageUrl: item.תמונות,
-            sku: item['מק"ט'],
-            category: item.קטגוריות || "לא מוגדר",
-        }));
 
         const purchaseData = {
-            purchaseId: `purchase_${Date.now()}`,
-            cartItems: cartItemsForPurchase,
+            purchaseId: `${Date.now()}`, // מספר הזמנה ייחודי
+            cartItems: cartItems.map(item => ({
+                _id: item._id,
+                sku: item['מק"ט'],
+                name: item.שם,
+                quantity: item.quantity,
+                price: item.unitPrice,
+                comment: item.comment,
+
+
+
+            })), // נתוני עגלה מתומצתים
             totalPrice: finalTotalPrice,
-            originalPrice: originalTotalPrice,
-            cartDiscount: cartDiscount,
+
+
             date: new Date().toISOString(),
             status: "pending",
-            shippingAddress: temporaryAddress
+            shippingAddress: temporaryAddress,
         };
 
         try {
+            // שמירה בקולקשן `purchases`
             const purchasesRef = collection(db, "users", auth.currentUser.uid, "purchases");
             await addDoc(purchasesRef, purchaseData);
-            dispatch(setCartItems([]));
-            saveCartToFirestore([]);
+
+            // הצגת הודעה למשתמש עם מספר ההזמנה
+            // Navigate to order confirmation page
+            navigate("/order-confirmation", { state: { orderData: purchaseData } });
+
+            // ניקוי העגלה
+            dispatch(setCartItems([])); // ריקון העגלה ב-Redux
+            saveCartToFirestore([]); // שמירת עגלה ריקה ב-Firestore
+
+            // התנהגות לפי סוג המשתמש
+            if (!user?.isCreditLine) {
+                // במידה והמשתמש אינו "קו אשראי", מעבר לעמוד התשלום הרגיל
+                navigate('/checkout');
+            }
         } catch (error) {
-            console.error("Error saving purchase:", error);
+            console.error("Error completing purchase:", error);
         }
+    };
+
+    const handleCheckoutClick = () => {
+        if (cartItems.length === 0) {
+            setErrorMessage("❌ שים לב העגלה ריקה!");
+
+            // Clear error message after 5 seconds
+            setTimeout(() => setErrorMessage(""), 5000);
+            return;
+        }
+        if (user?.isCreditLine) {
+            setIsModalOpen(true); // Open confirmation modal for CreditLine users
+        } else {
+            handleCheckout(); // Proceed directly for regular users
+        }
+    };
+
+    const handleConfirmOrder = () => {
+        setIsModalOpen(false);
+        handleCheckout(); // Complete order if user confirms
+    };
+
+    const handleCancelOrder = () => {
+        setIsModalOpen(false); // Close modal
     };
 
     const handleEditAddressToggle = () => {
@@ -194,26 +250,32 @@ const CartPage = () => {
         }
     };
 
-    const handleIncrease = (_id, quantity) => {
-        dispatch(increaseQuantity({ _id, quantity }));
-        saveCartToFirestore(cartItems.map(item =>
-            item._id === _id ? { ...item, quantity: item.quantity + quantity } : item
-        ));
+    const handleIncrease = (cartItemId) => {
+        dispatch(increaseQuantity({ cartItemId }));
+        saveCartToFirestore(
+            cartItems.map((item) =>
+                item.cartItemId === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
+            )
+        );
     };
 
-    const handleDecrease = (_id, quantity) => {
-        const item = cartItems.find((item) => item._id === _id);
-        if (item && item.quantity > quantity) {
-            dispatch(decreaseQuantity({ _id, quantity }));
-            saveCartToFirestore(cartItems.map(item =>
-                item._id === _id ? { ...item, quantity: item.quantity - quantity } : item
-            ));
+    const handleDecrease = (cartItemId) => {
+        const item = cartItems.find((item) => item.cartItemId === cartItemId);
+        if (item && item.quantity > 1) {
+            dispatch(decreaseQuantity({ cartItemId }));
+            saveCartToFirestore(
+                cartItems.map((item) =>
+                    item.cartItemId === cartItemId ? { ...item, quantity: item.quantity - 1 } : item
+                )
+            );
+        } else {
+            handleRemove(cartItemId);
         }
     };
 
-    const handleRemove = (_id) => {
-        dispatch(removeFromCart({ _id }));
-        saveCartToFirestore(cartItems.filter(item => item._id !== _id));
+    const handleRemove = (cartItemId) => {
+        dispatch(removeFromCart({ cartItemId }));
+        saveCartToFirestore(cartItems.filter((item) => item.cartItemId !== cartItemId));
     };
 
     const originalTotalPrice = cartItems.reduce((acc, item) => {
@@ -221,8 +283,14 @@ const CartPage = () => {
         const itemQuantity = item.quantity || 1;
         return acc + itemPrice * itemQuantity;
     }, 0);
+    const craneUnloadFee = cartItems.some(item =>
+        item.materialGroup === "Gypsum and Tracks" && item.craneUnload === "כן"
+    ) ? 250 : 0;
 
-    const finalTotalPrice = originalTotalPrice - (originalTotalPrice * cartDiscount) / 100 + transportationCosts;
+    console.log(craneUnloadFee, 'כאן');
+
+    const finalTotalPrice = originalTotalPrice - (originalTotalPrice * cartDiscount) / 100 + transportationCosts + craneUnloadFee;
+    console.log(cartItems);
 
     return (
         <div className="cart-page">
@@ -236,11 +304,11 @@ const CartPage = () => {
                                 item={item}
                                 onIncrease={handleIncrease}
                                 onDecrease={handleDecrease}
-                                onRemove={() => handleRemove(item._id)}
+                                onRemove={() => handleRemove(item.cartItemId)}
                             />
                         ))
                     ) : (
-                        <p>העגלה ריקה</p>
+                        <h2>העגלה ריקה</h2>
                     )}
                 </div>
                 <div className="vertical-divider"></div>
@@ -289,9 +357,24 @@ const CartPage = () => {
                             </p>
                         )}
                         <p>מחיר משלוח: ₪{transportationCosts.toFixed(2)}</p>
+
+                        {craneUnloadFee > 0 && (
+                            <p style={{ color: "red", fontWeight: "bold" }}>תוספת פריקת מנוף: ₪250</p>
+                        )}
                         <p>סה"כ כולל הנחה ומשלוח: ₪{finalTotalPrice.toFixed(2)}</p>
-                        <button className="checkout-button" onClick={handleCheckout}>מעבר לתשלום</button>
+                        {/* MODAL FOR CREDIT USERS */}
+                        {isModalOpen && (
+                            <ConfirmationModal
+                                cartItems={cartItems}
+                                finalTotalPrice={finalTotalPrice}
+                                onConfirm={handleConfirmOrder}
+                                onCancel={handleCancelOrder}
+                            />
+                        )}
+                        <button className="checkout-button" onClick={handleCheckoutClick}>{user?.isCreditLine ? 'סיום הזמנה' : 'מעבר לתשלום'}</button>
                     </div>
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
+
                     <div className="address-card">
                         <h3>כתובת למשלוח</h3>
                         {isEditingAddress ? (

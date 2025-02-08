@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { db } from '../firebase';
-import { collection, getDocs } from 'firebase/firestore';
-import { useParams } from 'react-router-dom';
-import '../styles/PurchaseHistory.css';
+import React, { useEffect, useState } from "react";
+import { db } from "../firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { useParams } from "react-router-dom";
+import "../styles/PurchaseHistory.css";
 
 const PurchaseHistory = () => {
     const { userId, userName } = useParams();
@@ -15,7 +15,7 @@ const PurchaseHistory = () => {
             try {
                 const purchasesCollection = collection(db, `users/${userId}/purchases`);
                 const purchaseDocs = await getDocs(purchasesCollection);
-                const purchasesData = purchaseDocs.docs.map(doc => ({
+                const purchasesData = purchaseDocs.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                 }));
@@ -40,7 +40,7 @@ const PurchaseHistory = () => {
 
     return (
         <div className="purchase-history">
-            <h1 className='historyPurchase-title'>היסטוריית רכישות של {userName}</h1>
+            <h1 className="historyPurchase-title">היסטוריית רכישות של {userName}</h1>
             <table className="purchase-table">
                 <thead>
                     <tr>
@@ -52,53 +52,75 @@ const PurchaseHistory = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {purchases.map(purchase => (
-                        <tr key={purchase.id}>
-                            <td>{purchase.id}</td>
-                            <td>{purchase.date}</td>
-                            <td>{purchase.status}</td>
-                            <td>₪{purchase.totalPrice}</td>
-                            <td>
-                                <button className='detail-button' onClick={() => handleViewDetails(purchase.cartItems)}>
-                                    פירוט
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                    {purchases
+                        .slice()
+                        .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by date descending
+                        .map((purchase) => (
+                            <tr key={purchase.id}>
+                                <td>{purchase.purchaseId}</td>
+                                <td>
+                                    {new Date(purchase.date).toLocaleString("he-IL", {
+                                        day: "2-digit",
+                                        month: "2-digit",
+                                        year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: false,
+                                    })}
+                                </td>
+                                <td>{purchase.status}</td>
+                                <td>₪{purchase.totalPrice}</td>
+                                <td>
+                                    <button
+                                        className="detail-button"
+                                        onClick={() => handleViewDetails(purchase.cartItems)}
+                                    >
+                                        פירוט
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                 </tbody>
             </table>
 
             {isDetailModalOpen && (
                 <div className="modal">
-                    <div className="modal-content">
-                        <span className="close" onClick={closeModal}>&times;</span>
+
+                    <div className="modal-content-purchase">
+                        <span className="close" onClick={closeModal}>
+                            &times;
+                        </span>
                         <h2>פרטי המוצרים ברכישה</h2>
-                        <table className="item-table">
-                            <thead>
-                                <tr>
-                                    <th>מקט</th>
-                                    <th>שם</th>
-                                    <th>קטגוריה</th>
-                                    <th>מחיר</th>
-                                    <th>כמות</th>
-                                    <th>תמונה</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {selectedPurchaseItems.map(item => (
-                                    <tr key={item._id}>
-                                        <td>{item.sku}</td>
-                                        <td>{item.name}</td>
-                                        <td>{item.category}</td>
-                                        <td>₪{item.price}</td>
-                                        <td>{item.quantity}</td>
-                                        <td>
-                                            <img src={item.imageUrl} alt={item.name} className="item-image" />
-                                        </td>
+
+                        {/* Ensure table expands fully inside modal */}
+                        <div className="table-container">
+
+                            <table className="item-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>מזהה מוצר</th>
+                                        <th>מקט</th>
+                                        <th>שם</th>
+                                        <th>הערות</th>
+                                        <th>מחיר</th>
+                                        <th>כמות</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {selectedPurchaseItems.map((item) => (
+                                        <tr key={item._id}>
+                                            <td>{item._id}</td>
+                                            <td>{item.sku}</td>
+                                            <td>{item.name}</td>
+                                            <td>{item.comment}</td>
+                                            <td>₪{item.price}</td>
+                                            <td>{item.quantity}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}

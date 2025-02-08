@@ -23,6 +23,10 @@ const ProductCard = ({ product }) => {
     const [hasDiscount, setHasDiscount] = useState(false); // New state to check if the product has a discount
     const [disableAddToCart, setDisableAddToCart] = useState(product.quantities && product.quantities.length > 0);
     const [discountPercentage, setDiscountPercentage] = useState(0);
+    const [craneUnload, setCraneUnload] = useState(null);
+    const [comment, setComment] = useState("");
+
+
 
 
 
@@ -170,7 +174,28 @@ const ProductCard = ({ product }) => {
             return;
         }
 
-        dispatch(addToCart({ ...product, price: totalPrice, unitPrice: updatedPrice, quantity: selectedQuantity, packageSize: selectedQuantity }));
+        // Prepare cart item with crane unloading selection
+        const hasComment = product.allowComments && comment.trim() !== "";
+
+        // ✅ Generate a unique ID ONLY if there is a comment
+        const uniqueId = hasComment ? `${product._id}-${Date.now()}` : product._id;
+
+        const cartItem = {
+            ...product,
+            cartItemId: uniqueId, // ✅ Unique ID if comment exists, otherwise normal ID
+            price: totalPrice,
+            unitPrice: updatedPrice,
+            quantity: selectedQuantity,
+            packageSize: selectedQuantity,
+            craneUnload: product.materialGroup === "Gypsum and Tracks" ? craneUnload : null,
+            comment: hasComment ? comment : "", // ✅ Keep user comment if exists
+        };
+
+        console.log("Adding to cart:", cartItem); // 👈 Debugging
+
+        dispatch(addToCart(cartItem));
+
+        setComment("");
         setShowModal(false);
         setShowSuccessMessage(true);
 
@@ -178,6 +203,15 @@ const ProductCard = ({ product }) => {
             setShowSuccessMessage(false);
         }, 3000);
     };
+
+
+
+    const handleCraneUnloadChange = (value) => {
+        console.log(value);
+
+        setCraneUnload(value);
+    };
+
 
     return (
         <>
@@ -269,14 +303,58 @@ const ProductCard = ({ product }) => {
                                 </div>
                             </div>
                         )}
+                        {product.materialGroup === "Gypsum and Tracks" && (
+                            <div className="crane-unload-section">
+                                <strong>האם נדרשת פריקת מנוף?</strong>
+                                <div className="crane-options">
+                                    <label className={craneUnload === "כן" ? "selected" : ""}>
+                                        <input
+                                            type="radio"
+                                            name="craneUnload"
+                                            value="כן"
+                                            checked={craneUnload === "כן"}
+                                            onChange={() => handleCraneUnloadChange("כן")}
+                                        />
+                                        כן
+                                    </label>
+                                    <label className={craneUnload === "לא" ? "selected" : ""}>
+                                        <input
+                                            type="radio"
+                                            name="craneUnload"
+                                            value="לא"
+                                            checked={craneUnload === "לא"}
+                                            onChange={() => handleCraneUnloadChange("לא")}
+                                        />
+                                        לא
+                                    </label>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Show comment input only if allowComments is true */}
+                        {product.allowComments && (
+                            <div className="comment-section">
+                                <label>הערות:</label>
+                                <input
+                                    type="text"
+                                    placeholder="הזן הערה למוצר זה..."
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    className="comment-input"
+                                />
+                            </div>
+                        )}
+
+
 
                         <button
                             className="product-card-button"
                             onClick={handleAddToCart}
-                            disabled={disableAddToCart} // Disable when no quantity is selected
+                            disabled={disableAddToCart || (product.materialGroup === "Gypsum and Tracks" && craneUnload === null)}
                         >
                             הוסף לעגלה
                         </button>
+
 
                         {showLoginAlert && (
                             <div className="alert alert-red">

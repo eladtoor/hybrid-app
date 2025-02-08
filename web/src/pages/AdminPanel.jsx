@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+
 import '../styles/AdminPanel.css';
 import { createProduct, deleteProduct, fetchProducts, updateProduct } from '../redux/actions/productActions';
 import {
@@ -31,7 +31,8 @@ const initialProductState = {
     materialGroup: '',
     variations: [],
     attributes: [{ name: '', values: [{ value: '', price: '' }] }],
-    quantities: []
+    quantities: [],
+    allowComments: false,
 };
 
 const AdminPanel = () => {
@@ -182,7 +183,7 @@ const AdminPanel = () => {
             subCategories: selectedSubCategories[mainCategoryName] || []
         }));
 
-        let updatedProduct = { ...newProduct, קטגוריות: selectedCategories, quantities: [...newProduct.quantities].sort((a, b) => a - b) };
+        let updatedProduct = { ...newProduct, קטגוריות: selectedCategories, allowComments: newProduct.allowComments, quantities: [...newProduct.quantities].sort((a, b) => a - b) };
         const categoriesString = updatedProduct.קטגוריות.map(category => {
             const mainCategory = category.mainCategory;
             const subCategories = category.subCategories;
@@ -437,7 +438,7 @@ const AdminPanel = () => {
                                 <>
                                     <h3>מאפיינים</h3>
                                     {newProduct.attributes.map((attribute, index) => (
-                                        <div key={index}>
+                                        <div key={index} className="attribute-container">
                                             <label>
                                                 שם מאפיין:
                                                 <input
@@ -448,7 +449,7 @@ const AdminPanel = () => {
                                                 />
                                             </label>
                                             {attribute.values.map((valueObj, valueIndex) => (
-                                                <div key={valueIndex}>
+                                                <div key={valueIndex} className="attribute-values">
                                                     <label>
                                                         ערך מאפיין:
                                                         <input
@@ -469,20 +470,43 @@ const AdminPanel = () => {
                                                     </label>
                                                 </div>
                                             ))}
-                                            <button type="button" onClick={() => handleAddAttributeValue(index, newProduct, setNewProduct)}>+ הוסף ערך מאפיין</button>
+                                            <div className="attribute-buttons">
+                                                <button type="button" onClick={() => handleAddAttribute(newProduct, setNewProduct)}>
+                                                    הוסף שם מאפיין
+                                                </button>
+                                                <button type="button" onClick={() => handleAddAttributeValue(index, newProduct, setNewProduct)}>
+                                                    הוסף ערך מאפיין
+                                                </button>
+
+                                            </div>
                                         </div>
                                     ))}
-                                    <button type="button" onClick={() => handleAddAttribute(newProduct, setNewProduct)}>+ הוסף שם מאפיין</button>
+
                                 </>
                             )}
 
-                            <label>
+                            <label className='quantity-check'>
+                                אופציה לכמות
+
                                 <input
                                     type="checkbox"
                                     checked={quantityEnabled}
                                     onChange={() => setQuantityEnabled(!quantityEnabled)}
                                 />
-                                אופציה לכמות
+                            </label>
+
+                            <label className='comment-field-checkbox'>
+                                פתח שדה הערות
+                                <input
+                                    type="checkbox"
+                                    checked={newProduct.allowComments}
+                                    onChange={() =>
+                                        setNewProduct((prev) => ({
+                                            ...prev,
+                                            allowComments: !prev.allowComments, // ✅ Toggle allowComments state
+                                        }))
+                                    }
+                                />
                             </label>
 
                             {quantityEnabled && (

@@ -258,3 +258,42 @@
 .product-discount button:hover {
   background-color: #c9302c;
 }
+
+.whatsapp-settings {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.whatsapp-settings .form-group {
+  margin-bottom: 15px;
+}
+
+.whatsapp-settings label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.whatsapp-settings input,
+.whatsapp-settings textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.whatsapp-settings button {
+  background-color: #25d366;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.whatsapp-settings button:hover {
+  background-color: #1da851;
+}

@@ -141,3 +141,13 @@
   color: #555;
   margin-top: 5px;
 }
+*:hover {
+  transform: none !important;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}

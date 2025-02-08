@@ -22,6 +22,8 @@ import UserManagement from "./pages/UserManagement";
 import PurchaseHistory from "./pages/PurchaseHistory";
 import AgentDashboard from "./pages/AgentDashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import FloatingWhatsAppButton from "./components/FloatingWhatsAppButton";
+import OrderConfirmation from "./pages/OrderConfirmation"; // Import
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -73,6 +75,7 @@ function App() {
               element={<HomePage categories={categories} products={products} />}
             />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/user-info" element={<UserInfoForm />} />
             <Route path="/:title/:subcategoryName" element={<Subcategory />} />
@@ -111,6 +114,7 @@ function App() {
           </Routes>
 
           <Footer />
+          <FloatingWhatsAppButton />
         </Router>
       </PersistGate>
     </Provider>

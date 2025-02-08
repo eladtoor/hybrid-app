@@ -8,20 +8,27 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
 
     // פונקציות להוספת או הפחתת הכמות לפי גודל החבילה
     const handleIncreaseByPackage = (packageSize) => {
-        onIncrease(item._id, packageSize);
+        onIncrease(item.cartItemId, packageSize);
     };
 
     const handleDecreaseByPackage = (packageSize) => {
-        onDecrease(item._id, packageSize);
+        onDecrease(item.cartItemId, packageSize);
     };
 
     return (
         <div className="cart-item">
-            <button className="remove-item" onClick={onRemove}>×</button> {/* כפתור מחיקה */}
+            <button className="remove-item" onClick={() => onRemove(item.cartItemId)}>×</button> {/* כפתור מחיקה */}
             <img src={item.תמונות} alt={item.שם} className="cart-item-image" /> {/* תמונה */}
             <div className="cart-item-details">
                 <h4>{item.שם}</h4> {/* שם המוצר */}
                 <p>{item['מק"ט']}</p> {/* SKU */}
+
+                {/* ✅ Show comment if exists */}
+                {item.comment && (
+                    <p className="cart-item-comment">
+                        <strong>הערה:</strong> {item.comment}
+                    </p>
+                )}
 
                 {/* הצגת המחיר ליחידה */}
                 <p>מחיר ליחידה: ₪{unitPrice.toFixed(2)}</p>
