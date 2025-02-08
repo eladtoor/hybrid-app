@@ -1,3 +1,23 @@
+// WebSocket connection
+const socket = new WebSocket(
+  process.env.REACT_APP_BASE_URL || "http://localhost:5000"
+);
+
+// Listen for WebSocket messages and dispatch updates to Redux
+export const listenForProductUpdates = () => (dispatch) => {
+  socket.onmessage = (event) => {
+    try {
+      const message = JSON.parse(event.data);
+      if (message.type === "PRODUCTS_UPDATED") {
+        console.log("🔄 Received WebSocket Update:", message.payload);
+        dispatch(updateProductsList(message.payload)); // Update Redux store
+      }
+    } catch (error) {
+      console.error("❌ Error parsing WebSocket message:", error);
+    }
+  };
+};
+
 // actions/productActions.js
 const getBaseUrl = () => {
   return process.env.REACT_APP_BASE_URL || "http://localhost:5000";
@@ -39,7 +59,7 @@ export const createProduct = (newProductData) => async (dispatch) => {
       dispatch({ type: "CREATE_PRODUCT_SUCCESS", payload: data });
 
       // Fetch updated products after creating a new one
-      dispatch(fetchProducts());
+      socket.send(JSON.stringify({ type: "REQUEST_PRODUCTS_UPDATE" }));
 
       // Fetch the updated categories
       const categoriesResponse = await fetch(`${getBaseUrl()}/api/categories`);
@@ -88,7 +108,7 @@ export const deleteProduct = (productId) => async (dispatch) => {
       dispatch({ type: "DELETE_PRODUCT_SUCCESS", payload: productId });
 
       // Optionally, refetch products after deletion
-      dispatch(fetchProducts());
+      socket.send(JSON.stringify({ type: "REQUEST_PRODUCTS_UPDATE" }));
     } else {
       const data = await response.json();
       dispatch({
@@ -125,7 +145,7 @@ export const updateProduct = (updatedProduct) => async (dispatch) => {
       dispatch({ type: "UPDATE_PRODUCT_SUCCESS", payload: data });
 
       // Fetch the updated list of products
-      dispatch(fetchProducts());
+      socket.send(JSON.stringify({ type: "REQUEST_PRODUCTS_UPDATE" }));
 
       // Fetch the updated categories
       const categoriesResponse = await fetch(`${getBaseUrl()}/api/categories`);
@@ -155,3 +175,8 @@ export const updateProduct = (updatedProduct) => async (dispatch) => {
     dispatch({ type: "UPDATE_PRODUCT_FAILURE", payload: error.message });
   }
 };
+
+export const updateProductsList = (updatedProducts) => ({
+  type: "UPDATE_PRODUCTS_LIST",
+  payload: updatedProducts,
+});

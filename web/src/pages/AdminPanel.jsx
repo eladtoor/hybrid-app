@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import '../styles/AdminPanel.css';
-import { createProduct, deleteProduct, fetchProducts, updateProduct } from '../redux/actions/productActions';
+import { createProduct, deleteProduct, fetchProducts, updateProduct, updateProductsList } from '../redux/actions/productActions';
 import {
     generateCombinations,
     fetchCategories,
@@ -57,12 +57,47 @@ const AdminPanel = () => {
 
     const [editedTransportPrices, setEditedTransportPrices] = useState({});
     const [loading, setLoading] = useState(false);
+    const socketRef = useRef(null);
 
 
     useEffect(() => {
+        dispatch(fetchProducts()); // Initial Fetch
 
+        if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
+            socketRef.current = new WebSocket(
+                process.env.REACT_APP_BASE_URL || "http://localhost:5000"
+            ) // Adjust URL if needed
 
-        dispatch(fetchProducts());
+            socketRef.current.onopen = () => {
+                console.log("🟢 Connected to WebSocket");
+            };
+
+            socketRef.current.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    if (message.type === "PRODUCTS_UPDATED") {
+                        console.log("🔄 Received Products Update:", message.payload);
+                        dispatch(updateProductsList(message.payload)); // Update Redux store
+                    }
+                } catch (error) {
+                    console.error("❌ Error parsing WebSocket message:", error);
+                }
+            };
+
+            socketRef.current.onclose = () => {
+                console.log("🔴 WebSocket Disconnected. Attempting Reconnect...");
+                setTimeout(() => {
+                    socketRef.current = null; // Reset WebSocket ref
+                    dispatch(fetchProducts()); // Ensure data stays updated
+                }, 3000); // Reconnect after 3 seconds
+            };
+        }
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.close();
+            }
+        };
     }, [dispatch]);
 
     useEffect(() => {

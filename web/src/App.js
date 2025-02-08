@@ -24,6 +24,7 @@ import AgentDashboard from "./pages/AgentDashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import FloatingWhatsAppButton from "./components/FloatingWhatsAppButton";
 import OrderConfirmation from "./pages/OrderConfirmation"; // Import
+import ScrollToTop from "./components/ScrollToTop"; // Import the new component
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -67,8 +68,8 @@ function App() {
     <Provider store={store}>
       <PersistGate loading={<p>Loading...</p>} persistor={persistor}>
         <Router>
+          <ScrollToTop /> {/* Ensures every route starts from top */}
           <NavBar categories={categories} />
-
           <Routes>
             <Route
               path="/"
@@ -112,7 +113,6 @@ function App() {
               }
             />
           </Routes>
-
           <Footer />
           <FloatingWhatsAppButton />
         </Router>
