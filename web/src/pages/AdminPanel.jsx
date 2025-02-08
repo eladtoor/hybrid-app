@@ -63,11 +63,12 @@ const AdminPanel = () => {
     useEffect(() => {
         dispatch(fetchProducts()); // Initial Fetch
 
-        const socket = new WebSocket(
+    const socket = new WebSocket(
     process.env.NODE_ENV === "production"
-        ? "wss://https://hybrid-app-1-2haj.onrender.com"  // Replace with your actual backend URL
+        ? "wss://hybrid-app-1-2haj.onrender.com"  // Remove extra "https//"
         : "ws://localhost:5000"
 );
+
 
         socket.onopen = () => {
             console.log("🟢 Connected to WebSocket");
