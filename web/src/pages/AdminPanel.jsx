@@ -65,7 +65,7 @@ const AdminPanel = () => {
 
         const socket = new WebSocket(
     process.env.NODE_ENV === "production"
-        ? "wss://your-backend-service.onrender.com"  // Replace with your actual backend URL
+        ? "wss://https://hybrid-app-1-2haj.onrender.com"  // Replace with your actual backend URL
         : "ws://localhost:5000"
 );
 
