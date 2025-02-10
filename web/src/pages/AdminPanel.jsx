@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import '../styles/AdminPanel.css';
-import { createProduct, deleteProduct, fetchProducts, updateProduct, updateProductsList } from '../redux/actions/productActions';
+import { createProduct, deleteProduct, fetchProducts, updateProduct, updateProductsList, listenForProductUpdates } from '../redux/actions/productActions';
 import {
     generateCombinations,
     fetchCategories,
@@ -61,34 +61,8 @@ const AdminPanel = () => {
 
 
     useEffect(() => {
-        dispatch(fetchProducts()); // Initial Fetch
-
-        const socket = new WebSocket("ws://localhost:5000"); // Adjust WebSocket URL if needed
-
-        socket.onopen = () => {
-            console.log("🟢 Connected to WebSocket");
-        };
-
-        socket.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                if (message.type === "PRODUCTS_UPDATED") {
-                    console.log("🔄 Received Products Update:", message.payload);
-                    dispatch({ type: "UPDATE_PRODUCTS_LIST", payload: message.payload }); // Update Redux store
-                    localStorage.setItem("products", JSON.stringify(message.payload)); // Update localStorage
-                }
-            } catch (error) {
-                console.error("❌ Error parsing WebSocket message:", error);
-            }
-        };
-
-        socket.onclose = () => {
-            console.log("🔴 WebSocket Disconnected");
-        };
-
-        return () => {
-            socket.close();
-        };
+        dispatch(fetchProducts()); // ✅ Fetch products on mount
+        dispatch(listenForProductUpdates()); // ✅ Start listening for WebSocket updates
     }, [dispatch]);
 
     useEffect(() => {
