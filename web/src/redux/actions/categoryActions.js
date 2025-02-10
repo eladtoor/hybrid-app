@@ -6,8 +6,17 @@ export const fetchCategories = () => async (dispatch) => {
       return process.env.REACT_APP_BASE_URL || "http://localhost:5000";
     };
 
-    const response = await fetch(`${getBaseUrl()}/api/category`);
-    const data = await response.json();
+    const response = await fetch(`${getBaseUrl()}/api/categories`); // ✅ Use correct API path
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      console.error(
+        "❌ Server returned non-JSON response",
+        await response.text()
+      );
+      return;
+    }
 
     if (!data || Object.keys(data).length === 0) {
       console.warn("⚠️ Empty categories received, ignoring update.");
