@@ -136,7 +136,23 @@ wss.on("connection", (ws) => {
   console.log("🟢 New WebSocket client connected");
 
   ws.on("message", (message) => {
-    console.log("📩 Received Message:", message);
+    try {
+      const parsedMessage = JSON.parse(message.toString()); // Convert Buffer to String & Parse JSON
+
+      console.log("📩 Parsed WebSocket Message:", parsedMessage);
+
+      if (parsedMessage.type === "REQUEST_PRODUCTS_UPDATE") {
+        console.log("🔄 WebSocket: Sending Updated Products...");
+        broadcastProductsUpdate(); // ✅ Ensure this function is broadcasting correctly
+      }
+
+      if (parsedMessage.type === "REQUEST_CATEGORIES_UPDATE") {
+        console.log("🔄 WebSocket: Sending Updated Categories...");
+        broadcastCategoriesUpdate();
+      }
+    } catch (error) {
+      console.error("❌ Error parsing WebSocket message:", error);
+    }
   });
 
   ws.on("close", () => {
