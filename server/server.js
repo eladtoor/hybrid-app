@@ -84,15 +84,39 @@ const broadcastProductsUpdate = async () => {
   }
 };
 
+const broadcastCategoriesUpdate = async () => {
+  try {
+    const updatedCategories = await mongoose.connection
+      .collection("categories") // Ensure the correct collection name
+      .find()
+      .toArray();
+
+    wss.clients.forEach((client) => {
+      if (client.readyState === 1) {
+        client.send(
+          JSON.stringify({
+            type: "CATEGORIES_UPDATED",
+            payload: updatedCategories,
+          })
+        );
+      }
+    });
+  } catch (error) {
+    console.error("❌ Error broadcasting category updates:", error);
+  }
+};
+
 // Setup MongoDB Change Stream
 const setupChangeStream = () => {
   try {
     const productCollection = mongoose.connection.collection("products");
     const changeStream = productCollection.watch();
 
-    changeStream.on("change", (change) => {
+    changeStream.on("change", async (change) => {
       console.log("🔄 Product Change Detected:", change);
-      broadcastProductsUpdate();
+
+      broadcastProductsUpdate(); // Broadcast updated product list
+      broadcastCategoriesUpdate(); // ✅ Now also update categories list
     });
 
     changeStream.on("error", (error) => {
