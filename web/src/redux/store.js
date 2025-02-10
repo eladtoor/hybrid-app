@@ -19,7 +19,7 @@ if (!window.socket) {
     console.log("🟢 WebSocket Connected (Global)");
   };
 
-  socket.onmessage = (event) => {
+  window.socket.onmessage = (event) => {
     try {
       const message = JSON.parse(event.data);
 
