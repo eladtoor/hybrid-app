@@ -19,20 +19,39 @@ if (!window.socket) {
     console.log("🟢 WebSocket Connected (Global)");
   };
 
-  window.socket.onmessage = (event) => {
+  socket.onmessage = (event) => {
     try {
       const message = JSON.parse(event.data);
+
       if (message.type === "PRODUCTS_UPDATED") {
         console.log("🔄 Received WebSocket Update:", message.payload);
-        store.dispatch({
-          type: "UPDATE_PRODUCTS_LIST",
-          payload: message.payload,
-        });
-        localStorage.setItem("products", JSON.stringify(message.payload));
-      } else if (message.type === "CATEGORIES_UPDATED") {
+
+        if (message.payload.length) {
+          // ✅ Ensure products list isn't empty
+          store.dispatch({
+            type: "UPDATE_PRODUCTS_LIST",
+            payload: message.payload,
+          });
+          localStorage.setItem("products", JSON.stringify(message.payload));
+        } else {
+          console.warn(
+            "⚠️ WebSocket: Received empty products list, ignoring update."
+          );
+        }
+      }
+
+      if (message.type === "CATEGORIES_UPDATED") {
         console.log("🔄 Received Categories Update:", message.payload);
-        store.dispatch({ type: "SET_CATEGORIES", payload: message.payload });
-        localStorage.setItem("categories", JSON.stringify(message.payload));
+
+        if (message.payload && Object.keys(message.payload).length) {
+          // ✅ Ensure categories are not empty
+          store.dispatch({ type: "SET_CATEGORIES", payload: message.payload });
+          localStorage.setItem("categories", JSON.stringify(message.payload));
+        } else {
+          console.warn(
+            "⚠️ WebSocket: Received empty categories, ignoring update."
+          );
+        }
       }
     } catch (error) {
       console.error("❌ WebSocket Message Error:", error);

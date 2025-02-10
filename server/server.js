@@ -87,20 +87,32 @@ const broadcastProductsUpdate = async () => {
 const broadcastCategoriesUpdate = async () => {
   try {
     const updatedCategories = await mongoose.connection
-      .collection("categories") // Ensure the correct collection name
+      .collection("categories")
       .find()
       .toArray();
 
+    if (!updatedCategories.length) {
+      console.warn("⚠️ No categories found, skipping broadcast.");
+      return;
+    }
+
+    const formattedCategories = {
+      companyName: "טמבור",
+      companyCategories: updatedCategories,
+    };
+
     wss.clients.forEach((client) => {
-      if (client.readyState === 1) {
+      if (client.readyState === WebSocket.OPEN) {
         client.send(
           JSON.stringify({
             type: "CATEGORIES_UPDATED",
-            payload: updatedCategories,
+            payload: formattedCategories, // ✅ Send formatted categories
           })
         );
       }
     });
+
+    console.log("📡 Broadcasted updated categories:", formattedCategories);
   } catch (error) {
     console.error("❌ Error broadcasting category updates:", error);
   }

@@ -3,17 +3,21 @@ export const fetchCategories = () => async (dispatch) => {
 
   try {
     const getBaseUrl = () => {
-      return process.env.REACT_APP_BASE_URL || "http://localhost:5000"; // ✅ Correct Port
+      return process.env.REACT_APP_BASE_URL || "http://localhost:5000";
     };
 
-    const response = await fetch(`${getBaseUrl()}/api/category`); // ✅ Ensure correct API path
+    const response = await fetch(`${getBaseUrl()}/api/category`);
     const data = await response.json();
+
+    if (!data || Object.keys(data).length === 0) {
+      console.warn("⚠️ Empty categories received, ignoring update.");
+      return;
+    }
 
     console.log("📦 Received Categories:", data);
 
     const newData = { companyName: "טמבור", companyCategories: { ...data } };
 
-    // ✅ Save categories to localStorage
     localStorage.setItem("categories", JSON.stringify(newData));
 
     dispatch({ type: "FETCH_CATEGORIES_SUCCESS", payload: newData });
