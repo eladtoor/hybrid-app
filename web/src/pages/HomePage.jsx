@@ -5,9 +5,11 @@ import Carousel from '../components/Carousel';
 import Category from '../components/Category';
 import { useNavigate } from 'react-router-dom';
 
-const HomePage = ({ categories, products }) => {
+const HomePage = ({ products }) => {
     const loadingCategories = useSelector((state) => state.categories.loading);
     const loadingProducts = useSelector((state) => state.products.loading);
+    const categories = useSelector((state) => state.categories.categories);
+
     const navigate = useNavigate();
     const user = useSelector((state) => state.user?.user);
 

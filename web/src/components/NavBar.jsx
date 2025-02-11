@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+
+
 import { useDispatch, useSelector } from 'react-redux';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -7,7 +9,9 @@ import { logoutUser } from '../redux/reducers/userReducer';
 import '../styles/NavBar.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-const NavBar = ({ categories }) => {
+const NavBar = () => {
+    const categories = useSelector((state) => state.categories.categories);
+
     const [searchQuery, setSearchQuery] = useState('');
     const [searchVisible, setSearchVisible] = useState(false);
     const [userDropdownVisible, setUserDropdownVisible] = useState(false);
@@ -17,7 +21,9 @@ const NavBar = ({ categories }) => {
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
+    useEffect(() => {
+        console.log("🛠 Component received categories update:", categories);
+    }, [categories]); // ✅ Log updates
     useEffect(() => {
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
