@@ -32,9 +32,17 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const storedCategories = localStorage.getItem("categories");
     const storedProducts = localStorage.getItem("products");
 
-    dispatch(fetchCategories()); // ✅ Always fetch fresh categories
+    if (storedCategories) {
+      dispatch({
+        type: "SET_CATEGORIES_FROM_STORAGE",
+        payload: JSON.parse(storedCategories),
+      });
+    } else {
+      dispatch(fetchCategories()); // ✅ Fetch only if not in localStorage
+    }
 
     if (storedProducts) {
       dispatch({
@@ -44,17 +52,22 @@ function App() {
     } else {
       dispatch(fetchProducts());
     }
+
+    // ✅ Listen for WebSocket updates (ensures live updates)
+    window.socket?.addEventListener("message", (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === "CATEGORIES_UPDATED") {
+        console.log(
+          "🔄 WebSocket: Received Updated Categories",
+          message.payload
+        );
+
+        // ✅ Update Redux state and localStorage
+        dispatch({ type: "SET_CATEGORIES", payload: message.payload });
+        localStorage.setItem("categories", JSON.stringify(message.payload));
+      }
+    });
   }, [dispatch]);
-
-  useEffect(() => {
-    if (categories.length) {
-      localStorage.setItem("categories", JSON.stringify(categories));
-    }
-
-    if (products.length) {
-      localStorage.setItem("products", JSON.stringify(products));
-    }
-  }, [categories, products]);
 
   return (
     <Provider store={store}>
