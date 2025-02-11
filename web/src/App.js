@@ -32,17 +32,9 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const storedCategories = localStorage.getItem("categories");
     const storedProducts = localStorage.getItem("products");
 
-    if (storedCategories) {
-      dispatch({
-        type: "SET_CATEGORIES_FROM_STORAGE",
-        payload: JSON.parse(storedCategories),
-      });
-    } else {
-      dispatch(fetchCategories());
-    }
+    dispatch(fetchCategories()); // ✅ Always fetch fresh categories
 
     if (storedProducts) {
       dispatch({
