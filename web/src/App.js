@@ -54,6 +54,7 @@ function App() {
     }
 
     // ✅ Listen for WebSocket updates (ensures live updates)
+    // ✅ Listen for WebSocket updates (ensures live updates)
     window.socket?.addEventListener("message", (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "CATEGORIES_UPDATED") {
@@ -62,9 +63,15 @@ function App() {
           message.payload
         );
 
+        // ✅ Ensure correct format
+        const formattedCategories = {
+          companyName: "טמבור",
+          companyCategories: message.payload, // Wrap categories inside the correct structure
+        };
+
         // ✅ Update Redux state and localStorage
-        dispatch({ type: "SET_CATEGORIES", payload: message.payload });
-        localStorage.setItem("categories", JSON.stringify(message.payload));
+        dispatch({ type: "SET_CATEGORIES", payload: formattedCategories });
+        localStorage.setItem("categories", JSON.stringify(formattedCategories));
       }
     });
   }, [dispatch]);
