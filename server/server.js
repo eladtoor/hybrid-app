@@ -5,6 +5,7 @@ const path = require("path");
 const http = require("http");
 const WebSocket = require("ws"); // Import WebSocket
 require("dotenv").config();
+const { buildCategoryStructure } = require("./controllers/categoryController");
 
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -84,35 +85,38 @@ const broadcastProductsUpdate = async () => {
   }
 };
 
-const broadcastCategoriesUpdate = async () => {
+cconst broadcastCategoriesUpdate = async () => {
   try {
-    const updatedCategories = await mongoose.connection
-      .collection("categories")
-      .find()
-      .toArray();
+    // Simulate a request and response object for buildCategoryStructure
+    const req = {}; // Empty request
+    const res = {
+      status: (statusCode) => ({
+        json: (data) => {
+          if (statusCode !== 200) {
+            console.warn("⚠️ Failed to build category structure:", data);
+            return;
+          }
 
-    if (!updatedCategories.length) {
-      console.warn("⚠️ No categories found, skipping broadcast.");
-      return;
-    }
+          const formattedCategories = data;
+          if (!formattedCategories.length) {
+            console.warn("⚠️ No categories generated from products, skipping broadcast.");
+            return;
+          }
 
-    const formattedCategories = {
-      companyName: "טמבור",
-      companyCategories: updatedCategories,
+          wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(
+                JSON.stringify({ type: "CATEGORIES_UPDATED", payload: formattedCategories })
+              );
+            }
+          });
+
+          console.log("📡 Broadcasted updated categories:", formattedCategories);
+        },
+      }),
     };
 
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(
-          JSON.stringify({
-            type: "CATEGORIES_UPDATED",
-            payload: formattedCategories, // ✅ Send formatted categories
-          })
-        );
-      }
-    });
-
-    console.log("📡 Broadcasted updated categories:", formattedCategories);
+    await buildCategoryStructure(req, res); // Call the function directly
   } catch (error) {
     console.error("❌ Error broadcasting category updates:", error);
   }
