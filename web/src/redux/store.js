@@ -41,17 +41,19 @@ if (!window.socket) {
       }
 
       if (message.type === "CATEGORIES_UPDATED") {
-        console.log("🔄 Received Categories Update:", message.payload);
+        console.log("🔄 Received WebSocket Category Update:", message.payload);
 
-        if (message.payload && Object.keys(message.payload).length) {
-          // ✅ Ensure categories are not empty
-          store.dispatch({ type: "SET_CATEGORIES", payload: message.payload });
-          localStorage.setItem("categories", JSON.stringify(message.payload));
-        } else {
-          console.warn(
-            "⚠️ WebSocket: Received empty categories, ignoring update."
-          );
-        }
+        // ✅ Ensure the correct structure before dispatching
+        const formattedCategories = {
+          companyName: "טמבור",
+          companyCategories: message.payload, // Wrap in the correct structure
+        };
+
+        store.dispatch({
+          type: "SET_CATEGORIES",
+          payload: formattedCategories,
+        });
+        localStorage.setItem("categories", JSON.stringify(formattedCategories));
       }
     } catch (error) {
       console.error("❌ WebSocket Message Error:", error);
