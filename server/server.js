@@ -85,7 +85,7 @@ const broadcastProductsUpdate = async () => {
   }
 };
 
-cconst broadcastCategoriesUpdate = async () => {
+const broadcastCategoriesUpdate = async () => {
   try {
     // Simulate a request and response object for buildCategoryStructure
     const req = {}; // Empty request
@@ -99,19 +99,27 @@ cconst broadcastCategoriesUpdate = async () => {
 
           const formattedCategories = data;
           if (!formattedCategories.length) {
-            console.warn("⚠️ No categories generated from products, skipping broadcast.");
+            console.warn(
+              "⚠️ No categories generated from products, skipping broadcast."
+            );
             return;
           }
 
           wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
               client.send(
-                JSON.stringify({ type: "CATEGORIES_UPDATED", payload: formattedCategories })
+                JSON.stringify({
+                  type: "CATEGORIES_UPDATED",
+                  payload: formattedCategories,
+                })
               );
             }
           });
 
-          console.log("📡 Broadcasted updated categories:", formattedCategories);
+          console.log(
+            "📡 Broadcasted updated categories:",
+            formattedCategories
+          );
         },
       }),
     };
