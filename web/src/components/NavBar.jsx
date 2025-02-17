@@ -11,16 +11,33 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const NavBar = () => {
     const categories = useSelector((state) => state.categories.categories);
-
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchVisible, setSearchVisible] = useState(false);
     const [userDropdownVisible, setUserDropdownVisible] = useState(false);
     const [adminDropdownVisible, setAdminDropdownVisible] = useState(false);
     const user = useSelector(state => state?.user?.user);
     const location = useLocation();
+    const [searchError, setSearchError] = useState('');
+    const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
+
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsDesktop(window.innerWidth > 768);
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+
     useEffect(() => {
         console.log("🛠 Component received categories update:", categories);
     }, [categories]); // ✅ Log updates
@@ -31,25 +48,37 @@ const NavBar = () => {
     }, [user]);
 
     useEffect(() => {
-        if (location.pathname === '/search') {
+        if (location.pathname !== '/search') {
             setSearchVisible(false);
         }
     }, [location.pathname]);
 
+
     const toggleSearch = () => {
         setSearchVisible(!searchVisible);
+        setSearchError(''); // מנקה הודעות שגיאה כשהחיפוש נפתח מחדש
     };
 
-    const handleSearch = () => {
-        if (searchQuery.trim()) {
-            navigate(`/search?query=${searchQuery.trim()}`);
-            setSearchVisible(false);
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (!searchQuery.trim()) {
+            setSearchError("נא להזין מוצר");
+            return;
+        }
+        setSearchError('');
+        navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
+        setSearchQuery(''); // ✅ מאפס את שדה החיפוש אחרי הניווט
+
+        if (isDesktop) {
+            setSearchVisible(false); // ✅ סוגר את שורת החיפוש רק בדסקטופ
         }
     };
 
+
+
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
-            handleSearch();
+            handleSearch(e);
         }
     };
 
@@ -69,9 +98,11 @@ const NavBar = () => {
         navigate('/cart');
     };
 
+
+
     return (
         <header className="navbar-container">
-            <div className="navbar">
+            <div className="navbar-grid">
                 <Link to="/" className="navbar-logo">
                     <img src="/logo.png" alt="לוגו לבן גרופ" />
                 </Link>
@@ -90,10 +121,30 @@ const NavBar = () => {
                         </li>
                     )}
                 </ul>
+                <button className="hamburger-menu" onClick={toggleMenu}>
+                    ☰
+                </button>
+                <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
+                    <span className="close-menu" onClick={toggleMenu}>✖</span>
+                    <Link to="/" onClick={toggleMenu}>ראשי</Link>
+                    <Link to="/search" onClick={toggleMenu}>חיפוש</Link>
+                    <Link to="/profile" onClick={toggleMenu}>הפרופיל שלי</Link>
+                    <Link to="/cart" onClick={toggleMenu}>העגלה שלי</Link>
+
+                    {/* כפתור התנתקות */}
+                    <Link to="/" onClick={async (e) => {
+                        e.preventDefault(); // מניעת ניווט מיידי
+                        await handleSignOut(); // ביצוע התנתקות
+                        setIsMenuOpen(false); // סגירת התפריט
+                    }}>
+                        התנתק
+                    </Link>
+                </div>
+
 
                 <div className="navbar-icons">
                     <a href="#" onClick={toggleSearch}>
-                        <i className="fa fa-search"></i>
+                        <i className="fa fa-search icon-style"></i>
                     </a>
 
                     {(user || JSON.parse(localStorage.getItem('user'))) ? (
@@ -103,7 +154,7 @@ const NavBar = () => {
                             onMouseLeave={() => setUserDropdownVisible(false)}
                         >
                             <a href="#">
-                                <i className="fa fa-user"></i>
+                                <i className="fa fa-user icon-style"></i>
                             </a>
                             {userDropdownVisible && (
                                 <div className="user-dropdown-content">
@@ -128,7 +179,7 @@ const NavBar = () => {
                             onMouseLeave={() => setAdminDropdownVisible(false)}
                         >
                             <a href="#">
-                                <i className="fa fa-cogs"></i>
+                                <i className="fa fa-cogs icon-style"></i>
                             </a>
                             {adminDropdownVisible && (
                                 <div className="user-dropdown-content">
@@ -138,13 +189,13 @@ const NavBar = () => {
                             )}
                         </div>
                     )}
-
                     <a href="/cart" onClick={handleCartClick}>
-                        <i className="fa fa-shopping-cart"></i>
+                        <i className="fa fa-shopping-cart icon-style"></i>
                     </a>
                 </div>
             </div>
 
+            {/* ✅ הצגת שורת החיפוש */}
             {searchVisible && (
                 <div className="navbar-search">
                     <input
@@ -155,9 +206,11 @@ const NavBar = () => {
                         onKeyDown={handleKeyPress}
                     />
                     <button onClick={handleSearch}>
-                        <i className="fa fa-search"></i>
+                        <i className="fa fa-search  "></i>
                     </button>
+                    {searchError && <p className="search-error ">{searchError}</p>}
                 </div>
+
             )}
         </header>
     );

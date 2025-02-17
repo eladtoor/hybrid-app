@@ -21,7 +21,6 @@ const Footer = () => {
                         <li><a href="/">דף הבית</a></li>
                         <li><a href="/cart">העגלה שלי</a></li>
                         <li><a href="/profile">הפרופיל שלי</a></li>
-                        <li><a href="/contact">צור קשר</a></li>
                     </ul>
                 </div>
 

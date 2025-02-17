@@ -1,39 +1,121 @@
-/* Container for search results */
+/* עיצוב רגיל לדסקטופ */
 .search-results-page {
-    padding: 100px 20px 20px; /* מרווח עליון כדי למנוע חפיפה עם ה-NavBar */
-    text-align: center; /* יישור המרכז */
+  padding: 100px 20px 20px;
+  text-align: center;
+}
+
+.search-results-page h2 {
+  font-size: 2.5em;
+  margin-bottom: 40px;
+  font-weight: bold;
+  color: #333;
+  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 10px;
+}
+
+/* עיצוב תוצאות החיפוש */
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  justify-items: center;
+  margin-bottom: 50px;
+}
+
+/* 🔹 עיצוב מיוחד למובייל */
+@media (max-width: 768px) {
+
+  .mobile-view {
+    text-align: center;
+    padding: 10px;
   }
-  
-  /* Header styling */
+
+  .mobile-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .mobile-layout .product-card {
+    width: 90%;
+    /* 📏 מוצר אחד בשורה */
+    max-width: 400px;
+  }
+
+  /* 🔹 עיצוב חיפוש במובייל */
+  .search-box-mobile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* ✅ הורדת החיפוש עוד יותר */
+    margin-bottom: 20px;
+    padding: 10px;
+  }
+
+  .search-box-mobile input {
+    width: 70%;
+    padding: 12px 15px;
+    border: 2px solid #ccc;
+    border-radius: 25px;
+    font-size: 16px;
+  }
+
+  .search-box-mobile button {
+    background-color: var(--hover-color);
+    /* ✅ צבע כמו ההובר בגרסה הרגילה */
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-size: 22px;
+    width: 48px;
+    /* ✅ התאמת הגודל */
+    height: 48px;
+    /* ✅ התאמת הגודל */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    /* ✅ הפיכת הכפתור לעגול */
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    margin-top: -8px;
+    margin-right: 8px;
+    /* ✅ הוספת רווח קטן בין האינפוט לכפתור */
+    background-color: var(--background-hover-color);
+    border-color: var(--hover-color);
+  }
+
+  /* 🔹 אייקון בתוך הכפתור */
+  .search-box-mobile button i {
+    color: white;
+    /* ✅ הצבע של האייקון */
+    font-size: 20px;
+    transition: color 0.3s ease;
+  }
+
+  .search-results-page {
+    padding: 150px 15px 20px;
+    /* ⬇️ הורדת הדף טיפה למטה */
+  }
+
   .search-results-page h2 {
-    font-size: 2.5em; /* גודל פונט גדול יותר */
-    margin-bottom: 40px; /* מרווח תחתון כדי להפריד בין הכותרת למוצרים */
-    font-weight: bold; /* הדגשה */
-    color: #333; /* צבע כהה */
-    text-align: center; /* יישור למרכז */
-    border-bottom: 2px solid #eaeaea; /* קו תחתון לכותרת */
-    padding-bottom: 10px; /* מרווח פנימי תחתון */
+    font-size: 1.5em;
+    /* 📏 כותרת קטנה יותר במובייל */
+    margin-bottom: 25px;
+    padding-bottom: 8px;
   }
-  
-  /* Grid for product listing */
+
+  /* 📌 התאמת פריסת תוצאות החיפוש */
   .product-list {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 מוצרים בשורה */
-    gap: 15px; /* רווח בין הכרטיסים */
-    justify-items: center; /* ממרכז את המוצרים */
-    margin-bottom: 50px; /* מרווח תחתון אחרי המוצרים */
+    display: flex;
+    flex-direction: column;
+    /* 🔄 הצגת מוצרים בטור */
+    align-items: center;
+    gap: 1px;
   }
-  
-  /* Mobile responsive design */
-  @media (max-width: 768px) {
-    .product-list {
-      grid-template-columns: repeat(2, 1fr); /* 2 מוצרים בשורה במסכים קטנים יותר */
-    }
+
+  .product-list .product-card {
+    width: 70%;
+    /* 📏 מוצר אחד בשורה */
+    max-width: 400px;
   }
-  
-  @media (max-width: 480px) {
-    .product-list {
-      grid-template-columns: 1fr; /* מוצר אחד בשורה במסכים קטנים מאוד */
-    }
-  }
-  
+}

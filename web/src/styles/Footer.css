@@ -3,6 +3,8 @@
   color: #fff;
   padding: 10px 0;
   text-align: center;
+  width: 100%;
+  position: relative;
 }
 
 .footer-container {
@@ -17,6 +19,9 @@
   flex: 1;
   min-width: 250px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .footer-section h3 {
@@ -70,4 +75,69 @@
   font-size: 12px;
   border-top: 1px solid #444;
   padding-top: 10px;
+}
+
+/* 📌 התאמה למובייל – תצוגה אופקית עם רווחים טיפה גדולים יותר */
+@media (max-width: 768px) {
+  .footer {
+    padding: 3px 0;
+  }
+
+  .footer-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+  }
+
+  .footer-section {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    /* 🔼 הגדלת המרווח קצת */
+    padding: 0;
+    margin-top: 10px;
+  }
+
+  .footer-section h3 {
+    display: none;
+  }
+
+  .footer-section ul {
+    flex-direction: row;
+    display: flex;
+    gap: 12px;
+    /* 🔼 טיפה יותר רווח */
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer-section ul li {
+    margin: 2px 0;
+    padding: 0;
+  }
+
+  .footer-section p,
+  .footer-section a {
+    font-size: 16px;
+    /* 🔼 טיפה יותר גדול */
+    margin: 0;
+    padding: 4px;
+  }
+
+  .social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    /* 🔼 הגדלת רווחים מעט */
+    padding: 3px;
+  }
+
+  .social-icons a {
+    font-size: 19px;
+    /* 🔼 טיפה יותר גדול */
+    margin: 0 6px;
+    /* 🔼 קצת יותר רווח */
+  }
 }

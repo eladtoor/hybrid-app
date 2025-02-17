@@ -16,6 +16,16 @@
   height: 60px;
 }
 
+
+.navbar-grid {
+  display: grid;
+  grid-template-columns: 0.5fr 4fr 0.1fr;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  height: 100px;
+}
+
 .navbar-logo {
   display: flex;
   justify-content: flex-start;
@@ -41,8 +51,9 @@
 
 .navbar-icons {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+  gap: 20px;
+  /* מרווח שווה בין האייקונים */
 }
 
 .navbar-icons a {
@@ -52,50 +63,99 @@
   font-size: 18px;
 }
 
+.icon-style {
+  font-size: 20px;
+  /* שנה את הגודל בהתאם לצורך */
+  padding: 1rem;
+  /* ריווח בין האייקונים */
+  transition: transform 0.3s ease;
+  width: 18px;
+  /* רוחב אחיד */
+  height: 15px;
+  border: 2px solid transparent;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  border-radius: 50%;
+
+  /* שמירה על גודל קבוע */
+
+
+}
+
+.icon-style:hover {
+  background-color: var(--background-hover-color);
+  /* רקע אפור */
+  border-color: var(--hover-color);
+  /* מסגרת שחורה */
+  border-radius: 50%;
+  color: var(--hover-color);
+
+}
+
 /* דרופדאון של הקטגוריות */
 .category-dropdown {
   position: relative;
 }
 
 .category-dropdown-button {
-  font-size: 30px; /* גודל טקסט מוגדל */
-  font-weight: bold; /* הדגשת הטקסט */
-  color: #333; /* צבע טקסט כהה */
+  font-size: 42px;
+  font-weight: bold;
+  color: var(--background-hover-color);
   cursor: pointer;
-  padding: 25px 40px; /* רווח פנימי */
-  background-color: transparent; /* הסרת רקע */
-  border: none; /* הסרת גבול */
+  background-color: transparent;
+  border: 2px solid #ffffff;
+  transition: all 0.2s ease-in-out;
 }
 
 .category-dropdown-button:hover {
-  background-color: #333; /* שינוי צבע הרקע ב-hover */
-  color: white; /* שינוי צבע הטקסט ב-hover */
+  background-color: var(--background-hover-color);
+  color: var(--hover-color);
+  border-radius: 30px;
+  padding: 0 1.5rem 0 1.5rem;
+  border-color: var(--hover-color);
+
+
 }
 
 /* דרופדאון רחב ויציב */
 .category-dropdown-content {
   display: none;
   position: fixed;
-  top: 80px; /* יישר את הדרופדאון מתחת ל-navbar */
+  top: 95px;
+  /* יישר את הדרופדאון מתחת ל-navbar */
   right: 8px;
-  width: 100%; /* פרוס את הדרופדאון לכל רוחב המסך */
+  width: 100%;
+  /* פרוס את הדרופדאון לכל רוחב המסך */
   background-color: white;
-  z-index: 999; /* וודא שהדרופדאון מופיע מעל כל האלמנטים */
-  padding-top: 10px; /* מוסיף מרווח */
-  transition: opacity 0.3s ease, visibility 0.3s ease; /* הוספת אפקט של דילאיי */
-  opacity: 0; /* התחל בהסתרה */
-  visibility: hidden; /* התחל במצב מוסתר */
-  font-size: 25px; /* גודל טקסט מוגדל */
+  z-index: 999;
+  /* וודא שהדרופדאון מופיע מעל כל האלמנטים */
+  padding-top: 10px;
+  /* מוסיף מרווח */
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  /* הוספת אפקט של דילאיי */
+  opacity: 0;
+  /* התחל בהסתרה */
+  visibility: hidden;
+  /* התחל במצב מוסתר */
+  font-size: 25px;
+  /* גודל טקסט מוגדל */
   padding-bottom: 10px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
 }
 
 /* בעת hover על הכפתור או הדרופדאון */
 .category-dropdown:hover .category-dropdown-content,
 .category-dropdown-content:hover {
   display: flex;
-  justify-content: space-evenly; /* יישור התוכן בצורה שווה */
-  opacity: 1; /* הצגת הדרופדאון */
-  visibility: visible; /* הופך את הדרופדאון לנראה */
+  justify-content: space-evenly;
+  /* יישור התוכן בצורה שווה */
+  opacity: 1;
+  /* הצגת הדרופדאון */
+  visibility: visible;
+  /* הופך את הדרופדאון לנראה */
+
 }
 
 /* סגנון הקישורים בתוך הדרופדאון */
@@ -106,37 +166,86 @@
   text-decoration: none;
   text-align: center;
   width: auto;
+
 }
 
 .category-dropdown-content a:hover {
-  background-color: #ddd;
+  background-color: var(--secondary-background-hover-color);
+  ;
 }
 
 /* סגנון חיפוש */
 .navbar-search {
   display: flex;
+  align-items: center;
+  /* מוודא שהאייקון והשדה מיושרים */
   justify-content: center;
-  padding: 30px 20px;
+  gap: 8px;
+  /* קובע רווח קבוע בין השדה לכפתור */
+  padding: 25px 20px;
   background-color: #f8f8f8;
   border-top: 1px solid #eaeaea;
 }
 
 .navbar-search input {
-  width: 400px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-right: 10px;
+  width: 20rem;
+  padding-right: 1.5rem;
+  border-radius: 25px;
+  border: 2px solid #ccc;
+  transition: box-shadow 0.5s ease-in-out;
+  font-size: 1.2rem;
+
 }
 
 .navbar-search button {
-  padding: 8px 15px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  background-color: #333 !important;
+  /* צבע רקע קבוע כהה */
+  border: 2px solid transparent;
+  /* מסגרת שקופה */
   cursor: pointer;
+  font-size: 22px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: border-color 0.3s ease, color 0.3s ease;
+  margin-top: -8px;
+  margin-left: -8px;
 }
+
+.navbar-search button i {
+  color: white;
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+/* ✅ תיקון סופי - אין שינוי ברקע בהובר, רק שינוי באייקון */
+.navbar-search button:hover {
+  background-color: #333 !important;
+  /* נשאר זהה */
+  border-color: var(--hover-color);
+  /* שינוי מסגרת בלבד */
+}
+
+.navbar-search button:hover i {
+  color: var(--hover-color);
+  /* שינוי צבע האייקון בלבד */
+}
+
+
+.search-error {
+  color: red;
+  font-size: 16px;
+  position: absolute;
+  bottom: -5px;
+  /* ✅ שם את ההודעה מתחת לשדה */
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
 
 /* CSS לדרופדאון של המשתמש */
 .user-dropdown {
@@ -148,29 +257,24 @@
 .user-dropdown a {
   color: black;
   text-decoration: none;
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
-  padding: 20px;
   transition: color 0.3s ease;
-}
-
-.user-dropdown a:hover {
-  color: #007bff; /* שינוי צבע בזמן מעבר hover */
 }
 
 /* הדרופדאון עצמו */
 .user-dropdown-content {
   display: none;
   position: absolute;
-  left: 1rem;
-
-  top: 100%; /* דרופדאון יופיע מתחת לאייקון */
+  left: 0;
+  top: 100%;
+  /* הצגת הדרופדאון ישירות מתחת לאייקון */
   background-color: white;
   min-width: 160px;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  border-radius: 15px;
+  box-shadow: 0 10px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
   padding: 1rem;
 }
 
@@ -181,14 +285,15 @@
   border: none;
   background-color: white;
   text-align: right;
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 /* אפקט בעת מעבר עם העכבר */
 .user-dropdown-content button:hover {
-  background-color: #f1f1f1;
+  background-color: var(--secondary-background-hover-color);
+
 }
 
 /* הצגת הדרופדאון בעת ה-hover */
@@ -196,18 +301,157 @@
   display: block;
 }
 
-/* התאמה לרזולוציות נמוכות יותר */
+/* התאמה לעברית - כפתור המבורגר בצד ימין */
+.hamburger-menu {
+  display: none;
+  /* מוסתר בדסקטופ */
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: var(--text-color);
+  position: absolute;
+  right: 20px;
+  /* בצד ימין */
+}
+
+/* תפריט צד (פתוח או סגור) */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  /* מוסתר בהתחלה - ייפתח מימין */
+  width: 250px;
+  height: 100vh;
+  background-color: var(--background-hover-color);
+  color: var(--hover-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 60px;
+  transition: right 0.3s ease-in-out;
+  box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* תפריט פתוח */
+.mobile-menu.open {
+  right: 0;
+}
+
+/* כפתור סגירה */
+.close-menu {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  /* בצד שמאל כי התפריט נפתח מימין */
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--hover-color);
+}
+
+/* כפתורים בתוך התפריט */
+.mobile-menu a {
+  color: var(--hover-color);
+  text-decoration: none;
+  font-size: 20px;
+  margin: 15px 0;
+}
+
+.mobile-menu a:hover {
+  color: var(--primary-color);
+}
+
+
+/* התאמה למובייל */
 @media (max-width: 768px) {
-  .user-dropdown-content {
-    min-width: 120px;
+  .navbar-grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* יוודא שהלוגו תמיד במרכז */
+    position: relative;
+    width: 100%;
   }
 
-  .user-dropdown a {
-    font-size: 18px;
+  .navbar-logo {
+    position: relative;
+    left: unset;
+    /* ביטול `left: 50%` */
+    transform: none;
+    /* ביטול `translateX(-50%)` */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: max-content;
+    /* כדי שהגודל יישאר אחיד */
+    margin: 0 auto;
   }
 
-  .user-dropdown-content button {
-    font-size: 14px;
-    padding: 10px;
+  .hamburger-menu {
+    display: block;
+    position: absolute;
+    right: 20px;
+    /* הבטחת המיקום בצד ימין */
+  }
+
+  .navbar-icons {
+    display: none;
+  }
+
+  .navbar-categories {
+    display: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  .navbar-grid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .navbar-logo {
+    position: relative;
+    left: -20px;
+    /* הזזת הלוגו שמאלה */
+  }
+}
+
+/* מסכים בינוניים (טאבלטים) - הלוגו באמצע */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .navbar-grid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* שומר על מרחק מהאייקונים */
+    /* מרווח נוסף מימין ושמאל */
+  }
+
+  .navbar-logo {
+    position: relative;
+    left: unset;
+    transform: none;
+    margin: 0 auto;
+    width: max-content;
+  }
+}
+
+/* מסכים קטנים יותר (בין בינוני למובייל) - מניעת התנגשות עם האייקונים */
+@media (min-width: 601px) and (max-width: 768px) {
+  .navbar-grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    padding: 0 60px;
+    /* שומר על רווח מהאייקונים */
+  }
+
+  .navbar-logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
   }
 }
