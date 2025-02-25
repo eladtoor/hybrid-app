@@ -18,29 +18,41 @@ const SearchResults = ({ products }) => {
         }
     }, [query]);
 
-
     useEffect(() => {
         if (query && products.length > 0) {
             const lowerQuery = query.toLowerCase();
             const regex = new RegExp(lowerQuery.split('').join('.*'), 'i');
-            const queryAsNumber = Number(query);
+            const queryAsNumber = Number(query); // הפיכת השאילתה למספר
+
+            console.log("🔍 חיפוש לפי:", query, "(מספר:", queryAsNumber, ")");
 
             const exactNameMatches = products.filter(product =>
                 product['שם'].toLowerCase() === lowerQuery
             );
 
-            const partialMatches = products.filter(product =>
-                regex.test(product['שם']) ||
-                regex.test(product['מק"ט']) ||
-                product['מזהה'] === query ||
-                product['מזהה'] === queryAsNumber
-            );
+            const partialMatches = products.filter(product => {
+                const productIdString = String(product['מזהה']).trim();
+                const productIdNumber = Number(product['מזהה']);
+
+                console.log("📌 בדיקה עבור מוצר:", product);
+                console.log("🔹 מזהה כמחרוזת:", productIdString, "🔹 מזהה כמספר:", productIdNumber);
+
+                const isExactIdMatch = productIdString === query.trim() || productIdNumber === queryAsNumber;
+                const isNameMatch = regex.test(product['שם']);
+                const isSkuMatch = regex.test(product['מק"ט']);
+
+                if (isExactIdMatch) console.log("🎯 נמצא מזהה מתאים:", product['מזהה']);
+
+                return isExactIdMatch || isNameMatch || isSkuMatch;
+            });
 
             const filteredPartialMatches = partialMatches.filter(product =>
                 !exactNameMatches.includes(product)
             );
 
             const results = [...exactNameMatches, ...filteredPartialMatches].slice(0, 9);
+
+            console.log("📌 תוצאות חיפוש סופיות:", results);
             setFilteredProducts(results);
         }
     }, [query, products]);
