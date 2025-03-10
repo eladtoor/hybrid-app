@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import "../styles/Category.css";
 import ProductCard from '../components/ProductCard'; // ייבוא הכרטיס של המוצרים
 
 export const Subcategory = () => {
@@ -36,58 +35,41 @@ export const Subcategory = () => {
     }
 
     return (
-        <div className="category-section">
-            <div className="sub-category">
-                <hr className='hr'></hr>
-                <h2 className="category-title">{subcategoryName}</h2>
+        <div className="max-w-6xl mx-auto mt-24 p-6">
+            <div className="bg-white shadow-md rounded-lg p-6 text-center">
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">{subcategoryName}</h2>
 
-                {/* Display subcategories if they exist */}
                 {subCategories.length > 0 && (
-                    <div className="subcategory-container">
-                        <div className="subcategory-list">
-                            {subCategories.map((subcategory, index) => (
-                                <button
-                                    key={index}
-                                    className="subcategory-card"
-                                    onClick={() => moveToSubcategory(subcategory.subCategoryName)}
-                                >
-                                    {/* Display subcategory image */}
-                                    <img
-                                        src={subcategory.products?.[0]?.תמונות || '/default-image.png'}
-                                        alt={subcategory.subCategoryName}
-                                        className="subcategory-image"
-                                    />
-                                    <hr className='hr-card'></hr>
-                                    {/* Display subcategory name */}
-                                    <p className="subcategory-name">{subcategory.subCategoryName}</p>
-
-                                </button>
-                            ))}
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        {subCategories.map((subcategory, index) => (
+                            <button
+                                key={index}
+                                className="bg-gray-100 p-4 rounded-lg shadow hover:shadow-lg transition"
+                                onClick={() => moveToSubcategory(subcategory.subCategoryName)}
+                            >
+                                <img
+                                    src={subcategory.products?.[0]?.תמונות || '/default-image.png'}
+                                    alt={subcategory.subCategoryName}
+                                    className="w-full h-40 object-cover rounded-md"
+                                />
+                                <p className="mt-2 text-lg font-semibold text-gray-700">{subcategory.subCategoryName}</p>
+                            </button>
+                        ))}
                     </div>
                 )}
-            </div>
 
-            {/* Add the horizontal separator */}
-            <hr className='hr'></hr> {/* This separates categories from products */}
+                <hr className="my-8 border-gray-300" />
 
-            {/* Display products directly in the category */}
-            {products.length > 0 && (
-                <div className="sub-category">
-                    <div className="product-container">
-                        <div className="product-list">
-                            {products.map((product) => (
-                                <ProductCard key={product.productId} product={product} />
-                            ))}
-                        </div>
+                {products.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        {products.map((product) => (
+                            <ProductCard key={product.productId} product={product} />
+                        ))}
                     </div>
-                </div>
-            )}
-
-            {/* Message if no products or subcategories are found */}
-            {subCategories.length === 0 && products.length === 0 && (
-                <p>לא נמצאו מוצרים או תתי קטגוריות בקטגוריה.</p>
-            )}
+                ) : (
+                    <p className="text-lg text-gray-600">לא נמצאו מוצרים או תתי קטגוריות בקטגוריה.</p>
+                )}
+            </div>
         </div>
     );
 };

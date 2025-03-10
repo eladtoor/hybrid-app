@@ -25,6 +25,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import FloatingWhatsAppButton from "./components/FloatingWhatsAppButton";
 import OrderConfirmation from "./pages/OrderConfirmation"; // Import
 import ScrollToTop from "./components/ScrollToTop"; // Import the new component
+import './App.css'; // חיבור Tailwind
+
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);

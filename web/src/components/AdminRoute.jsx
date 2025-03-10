@@ -4,20 +4,22 @@ import { Navigate } from 'react-router-dom';
 
 const AdminRoute = ({ children }) => {
     const userInfo = useSelector((state) => state.user?.user);
-    const userFromStorage = JSON.parse(localStorage.getItem('user')); // Fallback to local storage
 
-    // Check if user is logged in
-    if (!userInfo && !userFromStorage) {
-        return <Navigate to="/login" />;
+    // בדיקה אם המשתמש נטען מהרדוסר
+    if (!userInfo) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+            </div>
+        );
     }
 
-    // Check if user is an admin
-    const isAdmin = userInfo?.isAdmin || userFromStorage?.isAdmin;
-    if (!isAdmin) {
+    // בדיקה האם המשתמש הוא אדמין
+    if (!userInfo?.isAdmin) {
         return <Navigate to="/" />;
     }
 
-    return children; // Render the protected component
+    return children; // הצגת התוכן המוגן
 };
 
 export default AdminRoute;

@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/Carousel.css'; // Ensure this path is correct
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // ייבוא אייקוני חצים
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+
+const images = [
+    '/constructor1.jpg',
+    '/constructor2.jpg',
+    '/constructor3.jpg'
+];
 
 const Carousel = () => {
-    const images = [
-        '/constructor1.jpg',
-        '/constructor2.jpg',
-        '/constructor3.jpg'
-    ];
-
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-        }, 3000);
-
+        }, 4000);
         return () => clearInterval(interval);
-    }, [images.length]);
+    }, []);
 
     const handlePrev = () => {
         setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
@@ -28,25 +26,40 @@ const Carousel = () => {
     };
 
     return (
-        <div className="carousel">
-            <div className="carousel-images" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
+        <div className=" relative w-full h-[400px] overflow-hidden">
+            {/* קונטיינר עם תמונות מסודרות ימינה */}
+            <div
+                className="flex transition-transform duration-700 ease-in-out"
+                style={{ transform: `translateX(${currentIndex * 100}%)`, direction: 'rtl' }}
+            >
                 {images.map((src, index) => (
-                    <div className="carousel-image" key={index}>
-                        <img src={src} alt={`Slide ${index}`} />
+                    <div key={index} className=" w-full flex-shrink-0 h-[400px]">
+                        <img src={src} alt={`Slide ${index}`} className="w-full h-full object-cover" />
                     </div>
                 ))}
             </div>
-            <button className="carousel-button prev" onClick={handlePrev}>
-                <FaChevronLeft /> {/* חץ שמאלה */}
+
+            {/* חצים לנווט */}
+            <button
+                className="absolute top-1/2 right-4  bg-black/70 text-white p-3 rounded-full hover:bg-black/90 transition"
+                onClick={handlePrev}
+            >
+                <FaChevronRight size={28} /> {/* חץ ימינה בגלל RTL */}
             </button>
-            <button className="carousel-button next" onClick={handleNext}>
-                <FaChevronRight /> {/* חץ ימינה */}
+
+            <button
+                className="absolute top-1/2 left-4  bg-black/70 text-white p-3 rounded-full hover:bg-black/90 transition"
+                onClick={handleNext}
+            >
+                <FaChevronLeft size={28} /> {/* חץ שמאלה בגלל RTL */}
             </button>
-            <div className="carousel-indicators">
+
+            {/* נקודות ניווט */}
+            <div className="absolute bottom-4 left-1/2  flex gap-3">
                 {images.map((_, index) => (
                     <span
                         key={index}
-                        className={`indicator ${currentIndex === index ? 'active' : ''}`}
+                        className={`w-3 h-3 rounded-full transition ${currentIndex === index ? 'bg-white' : 'bg-gray-500'}`}
                         onClick={() => setCurrentIndex(index)}
                     ></span>
                 ))}

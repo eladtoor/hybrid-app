@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../redux/reducers/userReducer';
 import { fetchUserDataFromFirestore, updateUserDataInFirestore } from '../utils/userUtils';
-import '../styles/UserProfile.css';
 
 const UserProfile = () => {
     const [loading, setLoading] = useState(true);
@@ -102,41 +101,41 @@ const UserProfile = () => {
 
     if (loading) return <p>טוען נתונים...</p>;
     if (!formData) return <p>אין נתונים להציג. אנא התחבר.</p>;
-
     return (
-        <div className="user-profile-container">
-            <h2>הפרופיל שלי</h2>
-            <div className="user-info">
-                <p><strong>שם:</strong> {isEditing ? <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} /> : formData.name}</p>
+        <div className="max-w-lg mx-auto mt-28 p-6 bg-white shadow-md rounded-lg text-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">הפרופיל שלי</h2>
+            <div className="bg-gray-100 p-6 rounded-md">
+                <p><strong>שם:</strong> {isEditing ? <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} className="border p-2 rounded-md w-full" /> : formData.name}</p>
                 <p><strong>מייל:</strong> {formData.email}</p>
-                <p><strong>פלאפון:</strong> {isEditing ? <input type="tel" name="phone" value={formData.phone || ''} onChange={handleInputChange} /> : formData.phone}</p>
+                <p><strong>פלאפון:</strong> {isEditing ? <input type="tel" name="phone" value={formData.phone || ''} onChange={handleInputChange} className="border p-2 rounded-md w-full" /> : formData.phone}</p>
 
-                <div>
+                <div className="mt-4">
                     <p><strong>כתובת:</strong></p>
-                    <p><strong>עיר:</strong> {isEditing ? <input type="text" name="city" value={formData.address?.city || ''} onChange={handleAddressChange} /> : formData.address?.city}</p>
-                    <p><strong>רחוב:</strong> {isEditing ? <input type="text" name="street" value={formData.address?.street || ''} onChange={handleAddressChange} /> : formData.address?.street}</p>
-                    <p><strong>דירה:</strong> {isEditing ? <input type="text" name="apartment" value={formData.address?.apartment || ''} onChange={handleAddressChange} /> : formData.address?.apartment}</p>
-                    <p><strong>קומה:</strong> {isEditing ? <input type="text" name="floor" value={formData.address?.floor || ''} onChange={handleAddressChange} /> : formData.address?.floor}</p>
-                    <p><strong>כניסה:</strong> {isEditing ? <input type="text" name="entrance" value={formData.address?.entrance || ''} onChange={handleAddressChange} /> : formData.address?.entrance}</p>
+                    <p><strong>עיר:</strong> {isEditing ? <input type="text" name="city" value={formData.address?.city || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.city}</p>
+                    <p><strong>רחוב:</strong> {isEditing ? <input type="text" name="street" value={formData.address?.street || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.street}</p>
+                    <p><strong>דירה:</strong> {isEditing ? <input type="text" name="apartment" value={formData.address?.apartment || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.apartment}</p>
+                    <p><strong>קומה:</strong> {isEditing ? <input type="text" name="floor" value={formData.address?.floor || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.floor}</p>
+                    <p><strong>כניסה:</strong> {isEditing ? <input type="text" name="entrance" value={formData.address?.entrance || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.entrance}</p>
                 </div>
 
                 {formData.userType === 'סוכן' && formData.referralLink && (
-                    <div className="agent-invite">
-                        <h3>קישור הזמנה שלך</h3>
-                        <p>שתף קישור זה כדי להזמין משתמשים:</p>
-                        <div className="referral-link-container">
-                            <a href={`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`} target="_blank" rel="noopener noreferrer">
+                    <div className="mt-4 p-4 bg-gray-200 rounded-md">
+                        <h3 className="text-lg font-semibold">קישור הזמנה שלך</h3>
+                        <p className="text-gray-700">שתף קישור זה כדי להזמין משתמשים:</p>
+                        <div className="flex items-center justify-center gap-2 mt-2">
+                            <a href={`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
                                 {`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`}
                             </a>
-                            <button onClick={() => handleCopyToClipboard(`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`)}>העתק קישור</button>
-
+                            <button onClick={() => handleCopyToClipboard(`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`)} className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
+                                העתק קישור
+                            </button>
                         </div>
                     </div>
                 )}
             </div>
 
-            <button onClick={handleEditToggle}>{isEditing ? "ביטול" : "ערוך"}</button>
-            {isEditing && <button onClick={handleSave}>שמור</button>}
+            <button onClick={handleEditToggle} className="mt-6 bg-yellow-500 text-white px-6 py-2 rounded-md hover:bg-yellow-600 transition">{isEditing ? "ביטול" : "ערוך"}</button>
+            {isEditing && <button onClick={handleSave} className="ml-4 bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition">שמור</button>}
         </div>
     );
 };

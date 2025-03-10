@@ -6,7 +6,6 @@ import { deleteField } from 'firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../redux/actions/productActions';
 import { getWhatsAppDetails, saveWhatsAppDetails } from '../utils/WhatsappService';
-import '../styles/UserManagement.css';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);

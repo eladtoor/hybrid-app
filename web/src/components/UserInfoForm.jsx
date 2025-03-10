@@ -4,7 +4,6 @@ import { setUser } from '../redux/reducers/userReducer';
 import { doc, setDoc } from "firebase/firestore";
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import '../styles/UserInfoForm.css';
 
 const UserInfoForm = () => {
     const [name, setName] = useState('');
@@ -57,77 +56,46 @@ const UserInfoForm = () => {
     };
 
     return (
-        <div className="user-info-form">
-            <div className="form-container">
-                <h2>אנא הזן את פרטיך</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>שם:</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                        />
+        <div className="flex flex-col justify-center items-center h-screen bg-gray-100 text-center mt-20">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">אנא הזן את פרטיך</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="flex flex-col">
+                        <label className="text-gray-700">שם:</label>
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="border p-2 rounded-md" />
                     </div>
-                    <div className="form-group">
-                        <label>מספר פלאפון:</label>
-                        <input
-                            type="tel"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            required
-                        />
+                    <div className="flex flex-col">
+                        <label className="text-gray-700">מספר פלאפון:</label>
+                        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required className="border p-2 rounded-md" />
                     </div>
-                    <div className="form-group">
-                        <label>עיר:</label>
-                        <input
-                            type="text"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            required
-                        />
+                    <div className="flex flex-col">
+                        <label className="text-gray-700">עיר:</label>
+                        <input type="text" value={city} onChange={(e) => setCity(e.target.value)} required className="border p-2 rounded-md" />
                     </div>
-                    <div className="form-group">
-                        <label>רחוב:</label>
-                        <input
-                            type="text"
-                            value={street}
-                            onChange={(e) => setStreet(e.target.value)}
-                            required
-                        />
+                    <div className="flex flex-col">
+                        <label className="text-gray-700">רחוב:</label>
+                        <input type="text" value={street} onChange={(e) => setStreet(e.target.value)} required className="border p-2 rounded-md" />
                     </div>
-                    <div className='address-row'>
-                        <div className="form-group">
-                            <label>דירה:</label>
-                            <input
-                                type="text"
-                                value={apartment}
-                                onChange={(e) => setApartment(e.target.value)}
-                            />
+                    <div className="flex space-x-2">
+                        <div className="flex-1">
+                            <label className="text-gray-700">דירה:</label>
+                            <input type="text" value={apartment} onChange={(e) => setApartment(e.target.value)} className="border p-2 rounded-md w-full" />
                         </div>
-                        <div className="form-group">
-                            <label>קומה:</label>
-                            <input
-                                type="text"
-                                value={floor}
-                                onChange={(e) => setFloor(e.target.value)}
-                            />
+                        <div className="flex-1">
+                            <label className="text-gray-700">קומה:</label>
+                            <input type="text" value={floor} onChange={(e) => setFloor(e.target.value)} className="border p-2 rounded-md w-full" />
                         </div>
-                        <div className="form-group">
-                            <label>כניסה:</label>
-                            <input
-                                type="text"
-                                value={entrance}
-                                onChange={(e) => setEntrance(e.target.value)}
-                            />
+                        <div className="flex-1">
+                            <label className="text-gray-700">כניסה:</label>
+                            <input type="text" value={entrance} onChange={(e) => setEntrance(e.target.value)} className="border p-2 rounded-md w-full" />
                         </div>
                     </div>
-                    <button type="submit" className="submit-btn">המשך</button>
+                    <button type="submit" className="bg-blue-600 text-white py-2 rounded-md w-full hover:bg-blue-700 transition">המשך</button>
                 </form>
             </div>
         </div>
     );
+
 };
 
 export default UserInfoForm;

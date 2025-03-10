@@ -1,9 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import '../styles/ProductsPage.css'; // Import the CSS file
 import { useSelector } from 'react-redux';
 import ProductCard from '../components/ProductCard';
-import "../styles/Category.css"
 
 
 const ProductsPage = () => {
@@ -41,23 +39,16 @@ const ProductsPage = () => {
 
 
     return (
-        <div className="category-section">
-
-            <div className="sub-category">
-                <hr className='hr'></hr>
-
-                <div className="product-page-container">
-                    <h2 className="category-title">{`${categoryname}: ${subcategoryname}`}</h2>
-                    <div className="product-list">
-                        {currentSubCategory.products.map((product) => (
-                            <ProductCard key={product.productId} product={product} />
-                        ))}
-                    </div>
+        <div className="max-w-6xl mx-auto mt-24 p-6">
+            <div className="bg-white shadow-md rounded-lg p-6 text-center">
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">{`${categoryname}: ${subcategoryname}`}</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {currentSubCategory.products.map((product) => (
+                        <ProductCard key={product.productId} product={product} />
+                    ))}
                 </div>
             </div>
-
         </div>
-
     );
 };
 

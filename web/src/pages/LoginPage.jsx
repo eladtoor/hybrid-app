@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { doc, getDoc, collection, query, where, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import '../styles/LoginPage.css';
 
 const LoginPage = () => {
     const dispatch = useDispatch();
@@ -78,10 +77,10 @@ const LoginPage = () => {
 
 
     return (
-        <div className="login-page">
-            <h2>המשך באמצעות</h2>
-            <button onClick={handleGoogleSignIn} className="google-signin-btn">
-                <FontAwesomeIcon icon={faGoogle} className="google-icon" />
+        <div className="flex flex-col justify-center items-center h-screen text-center bg-gray-100">
+            <h2 className="mb-6 text-2xl font-bold">המשך באמצעות</h2>
+            <button onClick={handleGoogleSignIn} className="flex items-center justify-center bg-blue-600 text-white p-4 text-2xl rounded-full cursor-pointer transition hover:bg-blue-700">
+                <FontAwesomeIcon icon={faGoogle} className="text-4xl" />
             </button>
         </div>
     );
