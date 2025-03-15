@@ -23,6 +23,7 @@ const Footer = () => {
                         <li><a href="/" className="text-lg hover:text-yellow-400 transition">דף הבית</a></li>
                         <li><a href="/cart" className="text-lg hover:text-yellow-400 transition">העגלה שלי</a></li>
                         <li><a href="/profile" className="text-lg hover:text-yellow-400 transition">הפרופיל שלי</a></li>
+                        <li><a href="/terms-privacy" className="text-lg flex items-center gap-2 hover:text-primary transition">תנאי שימוש ומדיניות פרטיות</a></li>
                     </ul>
                 </div>
 

@@ -1,12 +1,17 @@
-import React, { useEffect } from 'react';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../redux/reducers/userReducer';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { doc, getDoc, collection, query, where, getDocs, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import React, { useState } from "react";
+import {
+    getAuth,
+    signInWithPopup,
+    GoogleAuthProvider,
+    signInWithEmailAndPassword
+} from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { setUser } from "../redux/reducers/userReducer";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 const LoginPage = () => {
     const dispatch = useDispatch();
@@ -14,74 +19,119 @@ const LoginPage = () => {
     const auth = getAuth();
     const [searchParams] = useSearchParams();
 
-    const handleGoogleSignIn = () => {
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider)
-            .then(async (result) => {
-                const user = result.user;
+    // State לניהול טופס התחברות
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-                // Extract referral code and remove "agent-" and timestamp
-                const referralCode = searchParams.get('ref')?.replace(/^agent-/, '').split('-')[0];
+    // 🔹 התחברות עם Google
+    const handleGoogleSignIn = async () => {
+        try {
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
 
-                let fullUser = {
-                    uid: user.uid,
-                    displayName: user.displayName,
-                    email: user.email,
-                    name: "",
-                    phone: "",
-                    isAdmin: false,
-                    referredBy: referralCode || null, // Save only the ID without timestamp
-                };
+            // בדיקה אם המשתמש קיים ב-Firestore
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
 
-                // Check if the user is an admin
-                const adminQuery = query(collection(db, "admins"), where("email", "==", user.email));
-                const adminSnapshot = await getDocs(adminQuery);
-                if (!adminSnapshot.empty) {
-                    fullUser.isAdmin = true;
-                }
-
-                // Fetch additional details from Firestore if they exist
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-
-                if (userSnap.exists()) {
-                    const firestoreData = userSnap.data();
-                    fullUser = {
-                        ...fullUser,
-                        ...firestoreData, // Merge existing Firestore data into fullUser
-                    };
-                } else {
-                    // Save the new user to Firestore
-                    await setDoc(userRef, fullUser);
-                }
-
-                // Save full user data in Redux
+            if (userSnap.exists()) {
+                const fullUser = userSnap.data();
                 dispatch(setUser(fullUser));
-
-                // Save full user data in localStorage
-                localStorage.setItem('user', JSON.stringify(fullUser));
-
-                // Navigate to the appropriate page
-                if (fullUser.name && fullUser.phone) {
-                    navigate('/');
-                } else {
-                    navigate('/user-info');
-                }
-            })
-            .catch((error) => {
-                console.error('Error signing in with Google:', error.message);
-            });
+                localStorage.setItem("user", JSON.stringify(fullUser));
+                navigate("/");
+            } else {
+                navigate("/user-info");
+            }
+        } catch (error) {
+            console.error("שגיאה בהתחברות עם Google:", error.message);
+            setError("אירעה שגיאה בהתחברות עם Google.");
+        }
     };
 
+    // 🔹 התחברות עם אימייל וסיסמה
+    const handleLogin = async () => {
+        if (!email || !password) {
+            setError("נא להזין אימייל וסיסמה");
+            return;
+        }
+        setLoading(true);
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
+            const userRef = doc(db, "users", user.uid);
+            const userSnap = await getDoc(userRef);
 
+            if (userSnap.exists()) {
+                const loggedInUser = userSnap.data();
+                dispatch(setUser(loggedInUser));
+                localStorage.setItem("user", JSON.stringify(loggedInUser));
+                navigate("/");
+            } else {
+                setError("חשבון לא נמצא, נסה להירשם.");
+            }
+        } catch (error) {
+            console.error("שגיאה בהתחברות:", error.message);
+            setError("אימייל או סיסמה לא תקינים.");
+        }
+        setLoading(false);
+    };
 
     return (
-        <div className="flex flex-col justify-center items-center h-screen text-center bg-gray-100">
-            <h2 className="mb-6 text-2xl font-bold">המשך באמצעות</h2>
-            <button onClick={handleGoogleSignIn} className="flex items-center justify-center bg-blue-600 text-white p-4 text-2xl rounded-full cursor-pointer transition hover:bg-blue-700">
-                <FontAwesomeIcon icon={faGoogle} className="text-4xl" />
-            </button>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+            <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
+                <h2 className="text-2xl font-bold text-gray-800 text-center mb-4">התחברות</h2>
+
+                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+                {/* 🔹 טופס התחברות */}
+                <div className="space-y-4">
+                    <input
+                        type="email"
+                        placeholder="אימייל"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-400"
+                    />
+                    <input
+                        type="password"
+                        placeholder="סיסמה"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-400"
+                    />
+
+                    <button
+                        onClick={handleLogin}
+                        disabled={loading}
+                        className="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition"
+                    >
+                        התחברות
+                    </button>
+
+                    <p className="text-center text-gray-600">אין לך חשבון?</p>
+
+                    <button
+                        onClick={() => navigate("/register")}
+                        className="w-full bg-green-600 text-white py-2 rounded-md font-semibold hover:bg-green-700 transition"
+                    >
+                        הרשמה
+                    </button>
+                </div>
+
+                <hr className="my-6 border-gray-300" />
+
+                {/* 🔹 Google Login */}
+                <button
+                    onClick={handleGoogleSignIn}
+                    className="w-full flex items-center justify-center bg-red-500 text-white py-2 rounded-md font-semibold hover:bg-red-600 transition"
+                >
+                    <FontAwesomeIcon icon={faGoogle} className="text-lg mr-2" />
+                    התחבר עם Google
+                </button>
+            </div>
         </div>
     );
 };

@@ -118,20 +118,33 @@ const UserProfile = () => {
                     <p><strong>כניסה:</strong> {isEditing ? <input type="text" name="entrance" value={formData.address?.entrance || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.entrance}</p>
                 </div>
 
+                {/* Referral Link for Agents */}
                 {formData.userType === 'סוכן' && formData.referralLink && (
-                    <div className="mt-4 p-4 bg-gray-200 rounded-md">
+                    <div className="mt-6 p-4 bg-gray-200 rounded-md">
                         <h3 className="text-lg font-semibold">קישור הזמנה שלך</h3>
                         <p className="text-gray-700">שתף קישור זה כדי להזמין משתמשים:</p>
-                        <div className="flex items-center justify-center gap-2 mt-2">
-                            <a href={`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                                {`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`}
+                        <div className="flex items-center justify-between mt-3">
+
+                            {/* ✅ Correctly formatted login referral link */}
+                            <a
+                                href={`${getBaseUrl()}login?ref=${encodeURIComponent(formData.referralLink)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline truncate"
+                            >
+                                {`${getBaseUrl()}login?ref=${encodeURIComponent(formData.referralLink)}`}
                             </a>
-                            <button onClick={() => handleCopyToClipboard(`${getBaseUrl()}/login?ref=${formData.referralLink.replace(/.*ref=/, '')}`)} className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition">
+
+                            <button
+                                onClick={() => handleCopyToClipboard(`${getBaseUrl()}login?ref=${encodeURIComponent(formData.referralLink)}`)}
+                                className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition"
+                            >
                                 העתק קישור
                             </button>
                         </div>
                     </div>
                 )}
+
             </div>
 
             <button onClick={handleEditToggle} className="mt-6 bg-yellow-500 text-white px-6 py-2 rounded-md hover:bg-yellow-600 transition">{isEditing ? "ביטול" : "ערוך"}</button>

@@ -16,17 +16,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "./redux/actions/categoryActions";
 import { fetchProducts } from "./redux/actions/productActions";
 import SearchResults from "./pages/SearchResults";
-import AdminPanel from "./pages/AdminPanel"; // Import AdminPanel
-import AdminRoute from "./components/AdminRoute"; // Import the AdminRoute component
+import AdminPanel from "./pages/AdminPanel";
+import AdminRoute from "./components/AdminRoute";
 import UserManagement from "./pages/UserManagement";
 import PurchaseHistory from "./pages/PurchaseHistory";
 import AgentDashboard from "./pages/AgentDashboard.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import FloatingWhatsAppButton from "./components/FloatingWhatsAppButton";
-import OrderConfirmation from "./pages/OrderConfirmation"; // Import
-import ScrollToTop from "./components/ScrollToTop"; // Import the new component
-import './App.css'; // חיבור Tailwind
-
+import OrderConfirmation from "./pages/OrderConfirmation";
+import ScrollToTop from "./components/ScrollToTop";
+import TermsPrivacy from "./pages/Terms.jsx";
+import "./App.css";
+import RegisterPage from "./pages/RegisterPage.jsx";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -43,7 +44,7 @@ function App() {
         payload: JSON.parse(storedCategories),
       });
     } else {
-      dispatch(fetchCategories()); // ✅ Fetch only if not in localStorage
+      dispatch(fetchCategories());
     }
 
     if (storedProducts) {
@@ -55,80 +56,97 @@ function App() {
       dispatch(fetchProducts());
     }
 
-    // ✅ Listen for WebSocket updates (ensures live updates)
-    // ✅ Listen for WebSocket updates (ensures live updates)
-    window.socket?.addEventListener("message", (event) => {
+    // ✅ WebSocket for real-time updates (with cleanup)
+    const handleWebSocketMessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "CATEGORIES_UPDATED") {
         console.log(
           "🔄 WebSocket: Received Updated Categories",
           message.payload
         );
-
-        // ✅ Ensure correct format
         const formattedCategories = {
           companyName: "טמבור",
-          companyCategories: message.payload, // Wrap categories inside the correct structure
+          companyCategories: message.payload,
         };
-
-        // ✅ Update Redux state and localStorage
         dispatch({ type: "SET_CATEGORIES", payload: formattedCategories });
         localStorage.setItem("categories", JSON.stringify(formattedCategories));
       }
-    });
+    };
+
+    window.socket?.addEventListener("message", handleWebSocketMessage);
+
+    return () => {
+      window.socket?.removeEventListener("message", handleWebSocketMessage);
+    };
   }, [dispatch]);
 
   return (
     <Provider store={store}>
       <PersistGate loading={<p>Loading...</p>} persistor={persistor}>
         <Router>
-          <ScrollToTop /> {/* Ensures every route starts from top */}
-          <NavBar categories={categories} />
-          <Routes>
-            <Route
-              path="/"
-              element={<HomePage categories={categories} products={products} />}
-            />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/order-confirmation" element={<OrderConfirmation />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/user-info" element={<UserInfoForm />} />
-            <Route path="/:title/:subcategoryName" element={<Subcategory />} />
-            <Route
-              path="/:companyName/:categoryname/:subcategoryname/products"
-              element={<ProductsPage />}
-            />
-            <Route
-              path="/search"
-              element={<SearchResults products={products} />}
-            />
-            <Route path="/profile" element={<UserProfile />} />
+          <div className="flex flex-col min-h-screen">
+            <ScrollToTop />
+            <NavBar categories={categories} />
 
-            {/* Admin Panel Route - Protected */}
-            <Route
-              path="/admin-panel"
-              element={
-                <AdminRoute>
-                  <AdminPanel />
-                </AdminRoute>
-              }
-            />
-            <Route path="/user-management" element={<UserManagement />} />
-            <Route
-              path="/purchase-history/:userId/:userName"
-              element={<PurchaseHistory />}
-            />
-            <Route
-              path="/agent-dashboard"
-              element={
-                <ProtectedRoute>
-                  <AgentDashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-          <Footer />
-          <FloatingWhatsAppButton />
+            <main className="flex-grow">
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <HomePage categories={categories} products={products} />
+                  }
+                />
+                <Route path="/cart" element={<CartPage />} />
+                <Route
+                  path="/order-confirmation"
+                  element={<OrderConfirmation />}
+                />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/user-info" element={<UserInfoForm />} />
+                <Route path="/register" element={<RegisterPage />} />
+
+                <Route
+                  path="/:title/:subcategoryName"
+                  element={<Subcategory />}
+                />
+                <Route
+                  path="/:companyName/:categoryname/:subcategoryname/products"
+                  element={<ProductsPage />}
+                />
+                <Route
+                  path="/search"
+                  element={<SearchResults products={products} />}
+                />
+                <Route path="/profile" element={<UserProfile />} />
+                <Route path="/terms-privacy" element={<TermsPrivacy />} />
+                {/* Admin & Protected Routes */}
+                <Route
+                  path="/admin-panel"
+                  element={
+                    <AdminRoute>
+                      <AdminPanel />
+                    </AdminRoute>
+                  }
+                />
+                <Route path="/user-management" element={<UserManagement />} />
+                <Route
+                  path="/purchase-history/:userId/:userName"
+                  element={<PurchaseHistory />}
+                />
+                <Route
+                  path="/agent-dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <AgentDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </main>
+
+            <Footer />
+            <FloatingWhatsAppButton />
+          </div>
         </Router>
       </PersistGate>
     </Provider>

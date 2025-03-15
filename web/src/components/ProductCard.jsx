@@ -143,28 +143,35 @@ const ProductCard = ({ product }) => {
             });
 
             return Object.entries(attributeOptions).map(([attributeName, values], index) => (
-                <div key={index} className="attribute">
-                    <strong>{attributeName}:</strong>
-                    {[...values].map((value) => (
-                        <label
-                            key={value}
-                            className={selectedAttributes[attributeName] === value ? 'selected' : ''}
-                        >
-                            <input
-                                type="radio"
-                                name={attributeName}
-                                value={value}
-                                checked={selectedAttributes[attributeName] === value}
-                                onChange={() => handleAttributeChange(attributeName, value)}
-                            />
-                            {value}
-                        </label>
-                    ))}
+                <div key={index} className="mt-4">
+                    <h3 className="font-semibold text-gray-800">{attributeName}:</h3>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                        {[...values].map((value) => (
+                            <label
+                                key={value}
+                                className={`px-4 py-2 border rounded-md cursor-pointer transition-all duration-300
+                                    ${selectedAttributes[attributeName] === value
+                                        ? 'bg-blue-600 text-white shadow-md'
+                                        : 'bg-gray-100 hover:bg-gray-200'}`}
+                            >
+                                <input
+                                    type="radio"
+                                    name={attributeName}
+                                    value={value}
+                                    checked={selectedAttributes[attributeName] === value}
+                                    onChange={() => handleAttributeChange(attributeName, value)}
+                                    className="hidden"
+                                />
+                                {value}
+                            </label>
+                        ))}
+                    </div>
                 </div>
             ));
         }
         return null;
     };
+
 
     const handleAddToCart = () => {
         if (!auth.currentUser) {
@@ -214,32 +221,76 @@ const ProductCard = ({ product }) => {
 
     return (
         <>
-            <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105 cursor-pointer p-4" onClick={toggleModal}>
+            <div
+                className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer p-3 flex flex-col w-60"
+                onClick={toggleModal}
+            >
+                {/* הנחה */}
                 {hasDiscount && (
-                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
                         {`${discountPercentage}% הנחה`}
                     </div>
                 )}
+
+                {/* קבוצת חומר */}
                 {productMaterialGroup && (
-                    <div className="absolute top-2 left-2 bg-gray-800 text-white text-xs px-2 py-1 rounded-full">
+                    <div className="absolute top-2 left-2 bg-gray-800 text-white text-xs px-2 py-1 rounded-full shadow-md">
                         {productMaterialGroup}
                     </div>
                 )}
-                <img src={product.תמונות} alt={product.שם} className="w-full h-48 object-cover rounded-lg" />
-                <h3 className="text-lg font-semibold text-gray-800 text-center mt-2">{product.שם}</h3>
-                <p className="text-sm text-gray-600 text-center">{product["תיאור קצר"] ? product["תיאור קצר"] : product["תיאור"]}</p>
+
+                {/* תמונה */}
+                <div className="w-full h-40 bg-gray-100 flex justify-center items-center rounded-md overflow-hidden">
+                    <img
+                        src={product.תמונות}
+                        alt={product.שם}
+                        className="w-full h-full object-cover transition-all duration-300 hover:scale-105"
+                    />
+                </div>
+
+                {/* שם מוצר */}
+                <h3 className="text-md font-medium text-gray-900 text-center mt-2 truncate">
+                    {product.שם}
+                </h3>
+
+                {/* תיאור מוצר */}
+                <p className="text-sm text-gray-500 text-center line-clamp-2 mt-1">
+                    {product["תיאור קצר"] ? product["תיאור קצר"] : product["תיאור"]}
+                </p>
+
+                {/* קישור לפרטים נוספים */}
                 <div className="text-center mt-2">
-                    <span className="text-blue-600 font-semibold cursor-pointer">הצג עוד</span>
+                    <span className="text-blue-600 font-medium cursor-pointer hover:underline">
+                        הצג עוד
+                    </span>
                 </div>
             </div>
 
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={(e) => e.target.className.includes('bg-black') && toggleModal()}>
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 pt-20"
+                    onClick={(e) =>
+                        e.target.className.includes('bg-black') && toggleModal()
+                    }
+                >
                     <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative">
-                        <button className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl" onClick={toggleModal}>&times;</button>
-                        <h2 className="text-2xl font-bold text-gray-800 text-center">{product.שם}</h2>
-                        <img src={product.תמונות} alt={product.שם} className="w-32 h-32 object-cover rounded-full mx-auto mt-4" />
-                        <p className="text-center text-gray-600 mt-2">{product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}</p>
+                        <button
+                            className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl"
+                            onClick={toggleModal}
+                        >
+                            &times;
+                        </button>
+                        <h2 className="text-2xl font-bold text-gray-800 text-center">
+                            {product.שם}
+                        </h2>
+                        <img
+                            src={product.תמונות}
+                            alt={product.שם}
+                            className="w-32 h-32 object-cover rounded-full mx-auto mt-4"
+                        />
+                        <p className="text-center text-gray-600 mt-2">
+                            {product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}
+                        </p>
 
                         <div className="mt-4 text-center">
                             {hasDiscount ? (
@@ -254,10 +305,13 @@ const ProductCard = ({ product }) => {
 
                         {product.סוג === 'variable' && (
                             <div className="mt-4">
-                                <h3 className="font-semibold text-gray-800">בחר מאפיין:</h3>
-                                {renderVariationAttributes()}
+                                <h3 className="font-semibold text-gray-800 text-center mb-2">בחר מאפיין:</h3>
+                                <div className="flex flex-wrap justify-center gap-3">
+                                    {renderVariationAttributes()}
+                                </div>
                             </div>
                         )}
+
 
                         {product.quantities && product.quantities.length > 0 && (
                             <div className="mt-4">

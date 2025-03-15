@@ -26,14 +26,14 @@ const Carousel = () => {
     };
 
     return (
-        <div className=" relative w-full h-[400px] overflow-hidden">
+        <div className="relative w-full h-[400px] overflow-hidden">
             {/* קונטיינר עם תמונות מסודרות ימינה */}
             <div
                 className="flex transition-transform duration-700 ease-in-out"
                 style={{ transform: `translateX(${currentIndex * 100}%)`, direction: 'rtl' }}
             >
                 {images.map((src, index) => (
-                    <div key={index} className=" w-full flex-shrink-0 h-[400px]">
+                    <div key={index} className="w-full flex-shrink-0 h-[400px]">
                         <img src={src} alt={`Slide ${index}`} className="w-full h-full object-cover" />
                     </div>
                 ))}
@@ -41,25 +41,26 @@ const Carousel = () => {
 
             {/* חצים לנווט */}
             <button
-                className="absolute top-1/2 right-4  bg-black/70 text-white p-3 rounded-full hover:bg-black/90 transition"
+                className="absolute top-1/2 right-4 bg-transparent text-white p-3 rounded-full hover:bg-black/30 transition"
                 onClick={handlePrev}
             >
-                <FaChevronRight size={28} /> {/* חץ ימינה בגלל RTL */}
+                <FaChevronRight size={28} />
             </button>
 
             <button
-                className="absolute top-1/2 left-4  bg-black/70 text-white p-3 rounded-full hover:bg-black/90 transition"
+                className="absolute top-1/2 left-4 bg-transparent text-white p-3 rounded-full hover:bg-black/30 transition"
                 onClick={handleNext}
             >
-                <FaChevronLeft size={28} /> {/* חץ שמאלה בגלל RTL */}
+                <FaChevronLeft size={28} />
             </button>
 
-            {/* נקודות ניווט */}
-            <div className="absolute bottom-4 left-1/2  flex gap-3">
+            {/* נקודות ניווט - מלבנים דקים */}
+            <div className="absolute bottom-4 left-1/2 flex gap-3">
                 {images.map((_, index) => (
                     <span
                         key={index}
-                        className={`w-3 h-3 rounded-full transition ${currentIndex === index ? 'bg-white' : 'bg-gray-500'}`}
+                        className={`w-6 h-1 transition cursor-pointer ${currentIndex === index ? 'bg-white' : 'bg-gray-500'
+                            }`}
                         onClick={() => setCurrentIndex(index)}
                     ></span>
                 ))}

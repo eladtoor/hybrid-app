@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Carousel from '../components/Carousel';
 import Category from '../components/Category';
 import RecommendedProducts from '../components/RecommendedProducts';
+import AboutUs from '../components/AboutUs';
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -30,7 +31,7 @@ const HomePage = () => {
                     </h2>
                 ) : (
                     <button
-                        className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300"
+                        className="bg-primary hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300"
                         onClick={handleLoginClick}
                     >
                         התחבר עכשיו
@@ -47,6 +48,11 @@ const HomePage = () => {
                 ) : (
                     <p className="text-center text-gray-700">אין קטגוריות זמינות.</p>
                 )}
+            </div>
+            <div className="container mx-auto px-4 py-6">
+                {/* סקשן אודותינו */}
+                <AboutUs />
+
             </div>
 
             {/* מוצרים מומלצים */}
