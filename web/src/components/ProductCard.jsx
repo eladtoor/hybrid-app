@@ -15,7 +15,9 @@ const ProductCard = ({ product }) => {
     const [showModal, setShowModal] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [selectedAttributes, setSelectedAttributes] = useState({});
-    const [selectedQuantity, setSelectedQuantity] = useState(1);
+    const [selectedQuantity, setSelectedQuantity] = useState(
+        product.quantities && product.quantities.length > 0 ? null : 1
+    );
     const [updatedPrice, setUpdatedPrice] = useState(product["מחיר רגיל"] || 0);
     const [totalPrice, setTotalPrice] = useState(product["מחיר רגיל"] || 0);
     const [originalPrice, setOriginalPrice] = useState(product["מחיר רגיל"] || 0);
@@ -143,9 +145,12 @@ const ProductCard = ({ product }) => {
             });
 
             return Object.entries(attributeOptions).map(([attributeName, values], index) => (
-                <div key={index} className="mt-4">
-                    <h3 className="font-semibold text-gray-800">{attributeName}:</h3>
-                    <div className="flex flex-wrap gap-3 mt-2">
+                <div key={index} className="mt-4 w-full">
+                    {/* שים את הכותרת לבד בשורה */}
+                    <h3 className="font-semibold text-gray-800 mb-2 w-full">{attributeName}:</h3>
+
+                    {/* ערכים של המאפיין בשורה נפרדת */}
+                    <div className="flex gap-3 flex-wrap w-full">
                         {[...values].map((value) => (
                             <label
                                 key={value}
@@ -173,6 +178,9 @@ const ProductCard = ({ product }) => {
     };
 
 
+
+
+
     const handleAddToCart = () => {
         if (!auth.currentUser) {
             setShowLoginAlert(true);
@@ -180,22 +188,49 @@ const ProductCard = ({ product }) => {
             return;
         }
 
+        // ✅ בדיקה אם למוצר יש כמויות מוגדרות והמשתמש לא בחר כמות
+        if (product.quantities && product.quantities.length > 0 && !selectedQuantity) {
+            alert("אנא בחר כמות לפני הוספה לעגלה.");
+            return;
+        }
+        // ✅ בדיקה האם התנאי מופעל
+        if (product.materialGroup === "Gypsum and Tracks" && craneUnload === null) {
+            alert("אנא בחר האם דרושה פריקת מנוף.");
+
+            return;
+        }
         // Prepare cart item with crane unloading selection
         const hasComment = product.allowComments && comment.trim() !== "";
 
         // ✅ Generate a unique ID ONLY if there is a comment
-        const uniqueId = hasComment ? `${product._id}-${Date.now()}` : product._id;
+        // בסיס המזהה: מזהה מוצר
+        let uniqueId = product._id;
+
+        // הוספת מאפיינים ייחודיים אם קיימים
+        if (product.variations && Object.keys(selectedAttributes).length > 0) {
+            const attributesString = Object.entries(selectedAttributes)
+                .map(([key, value]) => `${key}:${value}`)
+                .join("|");
+            uniqueId += `|${attributesString}`;
+        }
+
+        // הוספת הערה אם יש
+        if (hasComment) {
+            uniqueId += `|comment:${comment}`;
+        }
 
         const cartItem = {
             ...product,
-            cartItemId: uniqueId, // ✅ Unique ID if comment exists, otherwise normal ID
+            cartItemId: uniqueId,
             price: totalPrice,
             unitPrice: updatedPrice,
             quantity: selectedQuantity,
             packageSize: selectedQuantity,
             craneUnload: product.materialGroup === "Gypsum and Tracks" ? craneUnload : null,
-            comment: hasComment ? comment : "", // ✅ Keep user comment if exists
+            comment: hasComment ? comment : "",
+            selectedAttributes, // ✅ הוספה חשובה!
         };
+
 
         console.log("Adding to cart:", cartItem); // 👈 Debugging
 
@@ -268,18 +303,21 @@ const ProductCard = ({ product }) => {
 
             {showModal && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 pt-20"
+                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] p-4"
                     onClick={(e) =>
                         e.target.className.includes('bg-black') && toggleModal()
                     }
                 >
-                    <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative">
+                    <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative max-h-[90vh] overflow-y-auto z-[1100]">
+                        {/* כפתור סגירה */}
                         <button
                             className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl"
                             onClick={toggleModal}
                         >
                             &times;
                         </button>
+
+                        {/* תוכן המודל */}
                         <h2 className="text-2xl font-bold text-gray-800 text-center">
                             {product.שם}
                         </h2>
@@ -292,6 +330,7 @@ const ProductCard = ({ product }) => {
                             {product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}
                         </p>
 
+                        {/* מחיר */}
                         <div className="mt-4 text-center">
                             {hasDiscount ? (
                                 <>
@@ -303,6 +342,7 @@ const ProductCard = ({ product }) => {
                             )}
                         </div>
 
+                        {/* מאפיינים */}
                         {product.סוג === 'variable' && (
                             <div className="mt-4">
                                 <h3 className="font-semibold text-gray-800 text-center mb-2">בחר מאפיין:</h3>
@@ -312,7 +352,7 @@ const ProductCard = ({ product }) => {
                             </div>
                         )}
 
-
+                        {/* כמות */}
                         {product.quantities && product.quantities.length > 0 && (
                             <div className="mt-4">
                                 <h3 className="font-semibold text-gray-800">בחר כמות:</h3>
@@ -327,22 +367,24 @@ const ProductCard = ({ product }) => {
                             </div>
                         )}
 
+                        {/* ✅ הצגת אפשרות פריקת מנוף אם המוצר מקטגוריית "גבס ומסלולים" */}
                         {product.materialGroup === "Gypsum and Tracks" && (
                             <div className="mt-4">
-                                <h3 className="font-semibold text-gray-800">האם נדרשת פריקת מנוף?</h3>
-                                <div className="flex gap-4 mt-2">
-                                    <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === "כן" ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
-                                        <input type="radio" name="craneUnload" value="כן" checked={craneUnload === "כן"} onChange={() => setCraneUnload("כן")} className="hidden" />
+                                <h3 className="font-semibold text-gray-800">פריקת מנוף:</h3>
+                                <div className="flex gap-2 mt-2">
+                                    <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === true ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                                        <input type="radio" name="craneUnload" value="true" checked={craneUnload === true} onChange={() => handleCraneUnloadChange(true)} className="hidden" />
                                         כן
                                     </label>
-                                    <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === "לא" ? 'bg-red-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
-                                        <input type="radio" name="craneUnload" value="לא" checked={craneUnload === "לא"} onChange={() => setCraneUnload("לא")} className="hidden" />
+                                    <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === false ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                                        <input type="radio" name="craneUnload" value="false" checked={craneUnload === false} onChange={() => handleCraneUnloadChange(false)} className="hidden" />
                                         לא
                                     </label>
                                 </div>
                             </div>
                         )}
 
+                        {/* הערות */}
                         {product.allowComments && (
                             <div className="mt-4">
                                 <label className="font-semibold text-gray-800">הערות:</label>
@@ -350,23 +392,16 @@ const ProductCard = ({ product }) => {
                             </div>
                         )}
 
-                        <button className="mt-6 w-full bg-green-600 text-white py-2 rounded-md font-semibold hover:bg-green-700 transition" onClick={handleAddToCart} disabled={disableAddToCart || (product.materialGroup === "Gypsum and Tracks" && craneUnload === null)}>הוסף לעגלה</button>
-
-                        {showLoginAlert && (
-                            <div className="mt-4 text-center text-red-500 font-semibold">
-                                אנא התחבר כדי להוסיף מוצרים לעגלה.
-                            </div>
-                        )}
-
-                        {showSuccessMessage && (
-                            <div className="success-message">
-                                <span>✔ המוצר התווסף בהצלחה לעגלה!</span>
-                                <button onClick={() => setShowSuccessMessage(false)} className="close-button">×</button>
-                            </div>
-                        )}
+                        {/* כפתור הוספה לעגלה */}
+                        <button className="mt-6 w-full bg-green-600 text-white py-2 rounded-md font-semibold hover:bg-green-700 transition" onClick={handleAddToCart} >
+                            הוסף לעגלה
+                        </button>
                     </div>
-                </div>
+                </div >
             )}
+
+
+
         </>
     );
 

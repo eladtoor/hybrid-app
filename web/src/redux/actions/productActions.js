@@ -22,8 +22,13 @@ export const listenForProductUpdates = () => (dispatch) => {
   window.socket.onmessage = (event) => {
     try {
       const message = JSON.parse(event.data);
+      console.log("🔄 WebSocket - Raw message from server:", message);
+
       if (message.type === "PRODUCTS_UPDATED") {
-        console.log("🔄 Received WebSocket Update:", message.payload);
+        console.log(
+          "🔄 WebSocket - Received updated products:",
+          message.payload
+        );
         dispatch(updateProductsList(message.payload));
       } else if (message.type === "CATEGORIES_UPDATED") {
         console.log("🔄 Received Categories Update:", message.payload);
@@ -49,13 +54,11 @@ export const fetchProducts = () => async (dispatch) => {
 
   try {
     const response = await fetch(`${getBaseUrl()}/api/products/getAll`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
     const data = await response.json();
+
     dispatch({ type: "FETCH_PRODUCTS_SUCCESS", payload: data });
-    localStorage.setItem("products", JSON.stringify(data)); // ✅ Sync Local Storage
+
+    localStorage.setItem("products", JSON.stringify(data)); // שמירה ל-localStorage
   } catch (error) {
     console.error("❌ FetchProducts Failed:", error);
     dispatch({ type: "FETCH_PRODUCTS_FAILURE", payload: error.message });
@@ -151,6 +154,11 @@ export const updateProduct = (updatedProduct) => async (dispatch) => {
 
     if (response.ok) {
       dispatch({ type: "UPDATE_PRODUCT_SUCCESS", payload: data });
+
+      console.log("⏳ Fetching fresh products from server after update...");
+      setTimeout(() => {
+        dispatch(fetchProducts());
+      }, 500);
 
       // ✅ Notify WebSocket to update all users
       if (window.socket && window.socket.readyState === WebSocket.OPEN) {

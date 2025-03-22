@@ -178,12 +178,12 @@ const UserManagement = () => {
         }
 
         const updateData = {
-          isAdmin,
-          userType: userType || 'רגיל', // Default to 'רגיל'
+          isAdmin: isAdmin ?? false, // לוודא שהוא לא undefined
+          userType: userType || 'רגיל', // לוודא שהוא לא undefined
+          isCreditLine: isCreditLine ?? false, // לוודא שהוא לא undefined
           cartDiscount: userType === 'סוכן' ? (selectedUser.cartDiscount || 0) : deleteField(),
           productDiscounts: userType === 'רגיל' ? productDiscounts : deleteField(),
           referralLink: userType === 'סוכן' ? referralLink : deleteField(),
-          isCreditLine
         };
 
         await updateDoc(userRef, updateData);

@@ -34,6 +34,25 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
                 <h4 className="text-lg font-bold text-gray-800">{item.שם}</h4>
                 <p className="text-gray-600 text-sm">מק"ט: {item['מק"ט']}</p>
 
+                {/* ✅ הצגת מאפיינים נבחרים */}
+                {item.selectedAttributes && Object.keys(item.selectedAttributes).length > 0 && (
+                    <div className="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">
+                        {Object.entries(item.selectedAttributes).map(([key, value]) => (
+                            <p key={key}>
+                                <strong>{key}:</strong> {value}
+                            </p>
+                        ))}
+                    </div>
+                )}
+
+                {/* ✅ הצגת פריקת מנוף אם קיים */}
+                {item.craneUnload !== null && item.craneUnload !== undefined && (
+                    <p className="text-sm text-gray-700 mt-2">
+                        <strong>פריקת מנוף:</strong> {item.craneUnload ? "כן" : "לא"}
+                    </p>
+                )}
+
+                {/* הערות */}
                 {item.comment && (
                     <p className="text-sm text-gray-700 bg-gray-100 p-2 rounded-md mt-2">
                         <strong>הערה:</strong> {item.comment}
@@ -95,7 +114,9 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
             </div>
 
             {/* מחיר כולל */}
-            <p className="text-lg font-semibold text-gray-900 mt-2 md:mt-0">סה"כ מחיר: ₪{(unitPrice * totalQuantity).toFixed(2)}</p>
+            <p className="text-lg font-semibold text-gray-900 mt-2 md:mt-0">
+                סה"כ מחיר: ₪{(unitPrice * totalQuantity).toFixed(2)}
+            </p>
         </div>
     );
 };

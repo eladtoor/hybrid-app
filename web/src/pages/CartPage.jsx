@@ -152,50 +152,115 @@ const CartPage = () => {
     const handleCheckout = async () => {
         if (!isAuthenticated) return;
 
-
+        // יצירת פרטי הזמנה – אבל לא נשמור אותם עדיין
         const purchaseData = {
             purchaseId: `${Date.now()}`, // מספר הזמנה ייחודי
             cartItems: cartItems.map(item => ({
                 _id: item._id,
-                sku: item['מק"ט'],
-                name: item.שם,
-                quantity: item.quantity,
-                price: item.unitPrice,
-                comment: item.comment,
-
-
-
-            })), // נתוני עגלה מתומצתים
+                sku: item['מק"ט'] || "לא זמין", // מוודאים שאין undefined
+                name: item.שם || "לא זמין",
+                quantity: item.quantity || 1,
+                price: item.unitPrice || 0,
+                comment: item.comment || "",
+            })),
             totalPrice: finalTotalPrice,
-
-
             date: new Date().toISOString(),
             status: "pending",
             shippingAddress: temporaryAddress,
         };
 
         try {
-            // שמירה בקולקשן `purchases`
-            const purchasesRef = collection(db, "users", auth.currentUser.uid, "purchases");
-            await addDoc(purchasesRef, purchaseData);
-
-            // הצגת הודעה למשתמש עם מספר ההזמנה
-            // Navigate to order confirmation page
-            navigate("/order-confirmation", { state: { orderData: purchaseData } });
-
-            // ניקוי העגלה
-            dispatch(setCartItems([])); // ריקון העגלה ב-Redux
-            saveCartToFirestore([]); // שמירת עגלה ריקה ב-Firestore
-
-            // התנהגות לפי סוג המשתמש
-            if (!user?.isCreditLine) {
-                // במידה והמשתמש אינו "קו אשראי", מעבר לעמוד התשלום הרגיל
-                navigate('/checkout');
+            if (user?.isCreditLine) {
+                // ✅ משתמש קו אשראי → דלג על התשלום והעבר ישירות לאישור
+                navigate("/order-confirmation", { state: { orderData: purchaseData } });
+            } else {
+                // ✅ משתמש רגיל → שלח לתשלום ב-iCredit
+                await handlePayment(purchaseData);
             }
         } catch (error) {
-            console.error("Error completing purchase:", error);
+            console.error("Error initiating checkout:", error);
         }
     };
+
+
+
+    const handlePayment = async (purchaseData) => {
+        const isTestEnv = window.location.origin.includes("localhost") || window.location.href.includes("testicredit");
+
+        const groupPrivateToken = isTestEnv
+            ? "80d75f51-1ca1-41a8-a698-8183d68499c6" // ✅ טוקן של TEST
+            : "YOUR_PROD_GROUP_TOKEN"; // ✅ טוקן של Production (עדכן בהתאם)
+
+        // ✅ יצירת רשימת פריטים להזמנה
+        let items = purchaseData.cartItems.map(item => ({
+            CatalogNumber: item.sku,
+            Quantity: item.quantity,
+            UnitPrice: item.price,
+            Description: item.name
+        }));
+
+        // ✅ הוספת מחיר משלוח אם קיים
+        if (purchaseData.shippingCost && purchaseData.shippingCost > 0) {
+            items.push({
+                CatalogNumber: "SHIPPING",
+                Quantity: 1,
+                UnitPrice: purchaseData.shippingCost,
+                Description: "משלוח"
+            });
+        }
+
+        // ✅ הוספת עלות פריקת מנוף אם קיימת
+        if (purchaseData.craneUnloadCost && purchaseData.craneUnloadCost > 0) {
+            items.push({
+                CatalogNumber: "CRANE_UNLOAD",
+                Quantity: 1,
+                UnitPrice: purchaseData.craneUnloadCost,
+                Description: "פריקת מנוף"
+            });
+        }
+
+        const requestData = {
+            GroupPrivateToken: groupPrivateToken,
+            Items: items,
+            Currency: 1, // 1 = ש"ח
+            SaleType: 1, // עסקה מיידית
+            RedirectURL: `${window.location.origin}/order-success`,
+            FailRedirectURL: `${window.location.origin}/cart`,
+            IPNURL: `${window.location.origin}/api/payment-ipn`,
+            CustomerFirstName: user?.firstName || "אורח",
+            CustomerLastName: user?.lastName || "משתמש",
+            EmailAddress: user?.email || "guest@example.com"
+        };
+
+        console.log("📤 Sending payment request:", requestData);
+
+        try {
+            const response = await fetch("http://localhost:5000/api/payment/create-payment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const data = await response.json();
+            console.log("🔍 iCredit Response on Create Payment:", data);
+
+            if (data.success && data.paymentUrl) {
+                window.location.href = data.paymentUrl; // ✅ הפנייה לדף התשלום של iCredit
+            } else {
+                console.error("❌ שגיאה בקבלת URL לתשלום:", data);
+                setErrorMessage("❌ שגיאה בהפנייתך לתשלום. נסה שוב.");
+            }
+        } catch (error) {
+            console.error("❌ שגיאה בהתחברות לשרת:", error);
+            setErrorMessage("❌ שגיאה בלתי צפויה. נסה שוב מאוחר יותר.");
+        }
+    };
+
+
+
+
 
     const handleCheckoutClick = () => {
         if (cartItems.length === 0) {
@@ -243,29 +308,32 @@ const CartPage = () => {
                 cartAddress: temporaryAddress
             }, { merge: true });
 
-            console.log("Temporary address saved to Firestore under carts.");
             setIsEditingAddress(false);
         } catch (error) {
             console.error("Error saving temporary address to Firestore:", error);
         }
     };
 
-    const handleIncrease = (cartItemId) => {
-        dispatch(increaseQuantity({ cartItemId }));
+    const handleIncrease = (cartItemId, amount = 1) => {
+        dispatch(increaseQuantity({ cartItemId, amount }));
         saveCartToFirestore(
             cartItems.map((item) =>
-                item.cartItemId === cartItemId ? { ...item, quantity: item.quantity + 1 } : item
+                item.cartItemId === cartItemId
+                    ? { ...item, quantity: item.quantity + amount }
+                    : item
             )
         );
     };
 
-    const handleDecrease = (cartItemId) => {
+    const handleDecrease = (cartItemId, amount = 1) => {
         const item = cartItems.find((item) => item.cartItemId === cartItemId);
-        if (item && item.quantity > 1) {
-            dispatch(decreaseQuantity({ cartItemId }));
+        if (item && item.quantity > amount) {
+            dispatch(decreaseQuantity({ cartItemId, amount }));
             saveCartToFirestore(
                 cartItems.map((item) =>
-                    item.cartItemId === cartItemId ? { ...item, quantity: item.quantity - 1 } : item
+                    item.cartItemId === cartItemId
+                        ? { ...item, quantity: item.quantity - amount }
+                        : item
                 )
             );
         } else {
@@ -284,13 +352,11 @@ const CartPage = () => {
         return acc + itemPrice * itemQuantity;
     }, 0);
     const craneUnloadFee = cartItems.some(item =>
-        item.materialGroup === "Gypsum and Tracks" && item.craneUnload === "כן"
+        item.materialGroup === "Gypsum and Tracks" && item.craneUnload
     ) ? 250 : 0;
 
-    console.log(craneUnloadFee, 'כאן');
 
     const finalTotalPrice = originalTotalPrice - (originalTotalPrice * cartDiscount) / 100 + transportationCosts + craneUnloadFee;
-    console.log(cartItems);
 
     return (
         <div className="cart-page">
@@ -300,7 +366,8 @@ const CartPage = () => {
                     {cartItems.length > 0 ? (
                         cartItems.map(item => (
                             <CartItem
-                                key={item._id}
+                                key={item.cartItemId}
+
                                 item={item}
                                 onIncrease={handleIncrease}
                                 onDecrease={handleDecrease}

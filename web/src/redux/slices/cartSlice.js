@@ -12,57 +12,50 @@ const cartSlice = createSlice({
     addToCart: (state, action) => {
       const newItem = action.payload;
 
-      // ✅ Find an existing item with the same _id AND same comment
       const existingItem = state.cartItems.find(
-        (item) => item._id === newItem._id && item.comment === newItem.comment
+        (item) => item.cartItemId === newItem.cartItemId
       );
 
       if (existingItem) {
-        // ✅ Merge quantity if it's the same product & same comment
         existingItem.quantity += newItem.quantity;
       } else {
-        // ✅ Create a new cart item if comment is different or new item
         state.cartItems.push({
           ...newItem,
-          cartItemId: newItem.comment
-            ? `${newItem._id}-${Date.now()}`
-            : newItem._id, // Unique ID for different comments
           price: newItem.price,
           unitPrice: newItem.unitPrice,
           quantity: newItem.quantity,
         });
       }
 
-      saveCartToFirestore([...state.cartItems]); // ✅ Update Firestore after change
+      console.log("🛒 updated cart:", state.cartItems);
+      saveCartToFirestore([...state.cartItems]);
     },
 
     increaseQuantity: (state, action) => {
-      const { cartItemId } = action.payload;
+      const { cartItemId, amount = 1 } = action.payload;
 
-      // ✅ Find the exact cart item using cartItemId
       const item = state.cartItems.find(
         (item) => item.cartItemId === cartItemId
       );
 
       if (item) {
-        item.quantity += 1; // ✅ Increase quantity
+        item.quantity += amount; // ✅ העלאה לפי הכמות שנשלחה
         saveCartToFirestore([...state.cartItems]);
       }
     },
 
     decreaseQuantity: (state, action) => {
-      const { cartItemId } = action.payload;
+      const { cartItemId, amount = 1 } = action.payload;
 
-      // ✅ Find the exact cart item using cartItemId
       const item = state.cartItems.find(
         (item) => item.cartItemId === cartItemId
       );
 
       if (item) {
-        if (item.quantity > 1) {
-          item.quantity -= 1; // ✅ Decrease quantity
+        if (item.quantity > amount) {
+          item.quantity -= amount; // ✅ הפחתה לפי הכמות שנשלחה
         } else {
-          // ✅ Remove item if quantity reaches zero
+          // ✅ הסרה אם הכמות שווה או קטנה ממה שמנסים להוריד
           state.cartItems = state.cartItems.filter(
             (item) => item.cartItemId !== cartItemId
           );

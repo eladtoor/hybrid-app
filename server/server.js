@@ -11,6 +11,7 @@ const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const materialGroupRoutes = require("./routes/materialGroupRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +50,8 @@ app.use("/api/products", productRoutes);
 app.use("/api", categoryRoutes);
 app.use("/api/materialGroups", materialGroupRoutes);
 
+app.use("/api/payment", paymentRoutes);
+
 app.use(express.static(path.join(__dirname, "../web/build")));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../web/build", "index.html"));
@@ -65,21 +68,27 @@ app.get("/", (req, res) => {
 // Broadcast product updates to all clients
 const broadcastProductsUpdate = async () => {
   try {
-    const updatedProducts = await mongoose.connection
-      .collection("products")
-      .find()
-      .toArray();
+    // ✅ שליפה ישירה עם המודל כדי לוודא שאנחנו מקבלים נתונים מעודכנים באמת
+    const updatedProducts = await mongoose.model("Product").find({}).lean();
 
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        // Ensure connection is open
+        // 🔍 בדיקה אם יש מוצרים לא תקינים
+
+        const specificProducts = updatedProducts.filter((p) =>
+          ["5352", "1234"].includes(p.מזהה.toString())
+        );
+
+        console.log(
+          "🔄 WebSocket - Server sending specific products:",
+          specificProducts
+        );
+
         client.send(
           JSON.stringify({ type: "PRODUCTS_UPDATED", payload: updatedProducts })
         );
       }
     });
-
-    console.log("📡 Broadcasted product update to all clients.");
   } catch (error) {
     console.error("❌ Error broadcasting product updates:", error);
   }
@@ -115,11 +124,6 @@ const broadcastCategoriesUpdate = async () => {
               );
             }
           });
-
-          console.log(
-            "📡 Broadcasted updated categories:",
-            formattedCategories
-          );
         },
       }),
     };
@@ -137,15 +141,12 @@ const setupChangeStream = () => {
     const changeStream = productCollection.watch();
 
     changeStream.on("change", async (change) => {
-      console.log("🔄 Product Change Detected:", change);
-
       broadcastProductsUpdate(); // Broadcast updated product list
       broadcastCategoriesUpdate(); // ✅ Now also update categories list
     });
 
     changeStream.on("error", (error) => {
       console.error("❌ Change Stream error:", error);
-      console.log("🟡 Restarting Change Stream in 5 seconds...");
       setTimeout(setupChangeStream, 5000);
     });
 
@@ -163,7 +164,7 @@ wss.on("connection", (ws) => {
     try {
       const parsedMessage = JSON.parse(message.toString()); // Convert Buffer to String & Parse JSON
 
-      console.log("📩 Parsed WebSocket Message:", parsedMessage);
+      // console.log("📩 Parsed WebSocket Message:", parsedMessage);
 
       if (parsedMessage.type === "REQUEST_PRODUCTS_UPDATE") {
         console.log("🔄 WebSocket: Sending Updated Products...");

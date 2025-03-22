@@ -84,7 +84,6 @@ const AdminPanel = () => {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log('Material Groups:', data);
 
                 // Set the fetched material groups to state
                 setMaterialGroups(data);
@@ -382,7 +381,6 @@ const AdminPanel = () => {
                 <div className="modal">
                     <div className="modal-content">
                         <span className="close" onClick={() => setShowForm(false)}>&times;</span>
-                        {console.log("got to adminpan")}
                         <h2>{isEditing ? "ערוך מוצר" : "הוסף מוצר חדש"}</h2>
                         <form onSubmit={handleSubmit}>
                             <label>

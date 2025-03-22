@@ -28,6 +28,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import TermsPrivacy from "./pages/Terms.jsx";
 import "./App.css";
 import RegisterPage from "./pages/RegisterPage.jsx";
+import OrderSuccess from "./pages/OrderSuccess.jsx";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -113,10 +114,9 @@ function App() {
                   path="/:companyName/:categoryname/:subcategoryname/products"
                   element={<ProductsPage />}
                 />
-                <Route
-                  path="/search"
-                  element={<SearchResults products={products} />}
-                />
+                <Route path="/order-success" element={<OrderSuccess />} />
+
+                <Route path="/search" element={<SearchResults />} />
                 <Route path="/profile" element={<UserProfile />} />
                 <Route path="/terms-privacy" element={<TermsPrivacy />} />
                 {/* Admin & Protected Routes */}
