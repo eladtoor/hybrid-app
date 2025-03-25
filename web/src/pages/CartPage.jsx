@@ -19,7 +19,9 @@ const CartPage = () => {
     const [progressData, setProgressData] = useState({});
     const [cartDiscount, setCartDiscount] = useState(0);
     const [errorMessage, setErrorMessage] = useState(""); // New state for errors
-
+    const fullName = user?.name || "לקוח אנונימי";
+    const [firstName, ...rest] = fullName.trim().split(" ");
+    const lastName = rest.length > 0 ? rest.join(" ") : "ללא";
     const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
 
     const [temporaryAddress, setTemporaryAddress] = useState({
@@ -154,20 +156,23 @@ const CartPage = () => {
 
         // יצירת פרטי הזמנה – אבל לא נשמור אותם עדיין
         const purchaseData = {
-            purchaseId: `${Date.now()}`, // מספר הזמנה ייחודי
+            purchaseId: `${Date.now()}`,
             cartItems: cartItems.map(item => ({
                 _id: item._id,
-                sku: item['מק"ט'] || "לא זמין", // מוודאים שאין undefined
+                sku: item['מק"ט'] || "לא זמין",
                 name: item.שם || "לא זמין",
                 quantity: item.quantity || 1,
                 price: item.unitPrice || 0,
                 comment: item.comment || "",
             })),
             totalPrice: finalTotalPrice,
+            shippingCost: transportationCosts, // ✅ מחיר משלוח
+            craneUnloadCost: craneUnloadFee,   // ✅ תוספת מנוף
             date: new Date().toISOString(),
             status: "pending",
             shippingAddress: temporaryAddress,
         };
+
 
         try {
             if (user?.isCreditLine) {
@@ -222,13 +227,13 @@ const CartPage = () => {
         const requestData = {
             GroupPrivateToken: groupPrivateToken,
             Items: items,
-            Currency: 1, // 1 = ש"ח
+            Currency: 1, // ש"ח
             SaleType: 1, // עסקה מיידית
             RedirectURL: `${window.location.origin}/order-success`,
             FailRedirectURL: `${window.location.origin}/cart`,
             IPNURL: `${window.location.origin}/api/payment-ipn`,
-            CustomerFirstName: user?.firstName || "אורח",
-            CustomerLastName: user?.lastName || "משתמש",
+            CustomerFirstName: firstName,
+            CustomerLastName: lastName,
             EmailAddress: user?.email || "guest@example.com"
         };
 
@@ -359,10 +364,10 @@ const CartPage = () => {
     const finalTotalPrice = originalTotalPrice - (originalTotalPrice * cartDiscount) / 100 + transportationCosts + craneUnloadFee;
 
     return (
-        <div className="cart-page">
-            <h1 className="cart-title">העגלה שלי</h1>
+        <div className="cart-page p-10">
+            <h1 className="cart-title section-title-rtl mt-24">העגלה שלי</h1>
             <div className="cart-container">
-                <div className="cart-items">
+                <div className="cart-items  ">
                     {cartItems.length > 0 ? (
                         cartItems.map(item => (
                             <CartItem
@@ -394,7 +399,7 @@ const CartPage = () => {
                                     </h3>
                                     <div className="progress-bar-container">
                                         <div
-                                            className="progress-bar"
+                                            className="progress-bar bg-primary"
                                             style={{ width: `${progress.percentage}%` }}
                                         ></div>
                                         <span className="progress-percentage">
@@ -416,7 +421,7 @@ const CartPage = () => {
                     </div>
 
                     <div className="cart-summary">
-                        <h2>סיכום הזמנה</h2>
+                        <h2 >סיכום הזמנה</h2>
                         <p>סה"כ מוצרים לפני הנחה: ₪{originalTotalPrice.toFixed(2)}</p>
                         {cartDiscount > 0 && (
                             <p>
@@ -438,14 +443,14 @@ const CartPage = () => {
                                 onCancel={handleCancelOrder}
                             />
                         )}
-                        <button className="checkout-button" onClick={handleCheckoutClick}>{user?.isCreditLine ? 'סיום הזמנה' : 'מעבר לתשלום'}</button>
+                        <button className="btn-outline text-lg m-2" onClick={handleCheckoutClick}>{user?.isCreditLine ? 'סיום הזמנה' : 'מעבר לתשלום'}</button>
                     </div>
                     {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-                    <div className="address-card">
+                    <div className="address-card modal-form">
                         <h3>כתובת למשלוח</h3>
                         {isEditingAddress ? (
-                            <div className="address-form">
+                            <div className="modal-form">
                                 <input
                                     type="text"
                                     name="city"
@@ -481,7 +486,7 @@ const CartPage = () => {
                                     placeholder="כניסה"
                                     onChange={handleAddressChange}
                                 />
-                                <button onClick={saveTemporaryAddressToFirestore} className="save-address-button">
+                                <button onClick={saveTemporaryAddressToFirestore} className="btn-primary text-lg m-2">
                                     שמור כתובת
                                 </button>
                             </div>
@@ -492,7 +497,7 @@ const CartPage = () => {
                                 <p>דירה: {temporaryAddress.apartment || 'לא זמין'}</p>
                                 <p>קומה: {temporaryAddress.floor || 'לא זמין'}</p>
                                 <p>כניסה: {temporaryAddress.entrance || 'לא זמין'}</p>
-                                <button onClick={handleEditAddressToggle} className="edit-address-button">
+                                <button onClick={handleEditAddressToggle} className="btn-outline text-lg m-2 ">
                                     ערוך כתובת
                                 </button>
                             </div>

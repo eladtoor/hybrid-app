@@ -299,65 +299,77 @@ const AdminPanel = () => {
     };
 
     return (
-        <div className="admin-panel">
-            <h1>פאנל ניהול</h1>
-            <h2>ניהול מחירי מינימום לקבוצות חומרים</h2>
+        <div className="admin-panel p-32">
+            <h1 className='text-4xl inline-block font-bold text-gray-900 mt-6 pr-4 border-r-4 border-primary'>פאנל ניהול</h1>
+            <h2 className='text-xl mb-4'>ניהול מחירי מינימום לקבוצות חומרים</h2>
             {loading ? (
                 <p>טוען...</p>
             ) : (
                 <>
-                    <table className="admin-table">
-                        <thead>
-                            <tr>
-                                <th>שם הקבוצה</th>
-                                <th>מחיר מינימום נוכחי</th>
-                                <th>מחיר הובלה</th>
-                                <th>עדכן מחיר מינימום ומחיר הובלה</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {materialGroups.map((group) => (
-                                <tr key={group.groupName}>
-                                    <td>
-                                        {group.groupName === 'Colors and Accessories' && 'צבעים ומוצרים נלווים'}
-                                        {group.groupName === 'Powders' && 'אבקות (דבקים וטייח)'}
-                                        {group.groupName === 'Gypsum and Tracks' && 'גבס ומסלולים'}
-                                    </td>
-                                    <td>{group.minPrice}₪</td>
-                                    <td>{group.transportationPrice}₪</td>
-                                    <td>
-                                        <input
-                                            type="number"
-                                            value={editedPrices[group.groupName]?.minPrice ?? group.minPrice}
-                                            onChange={(e) =>
-                                                handlePriceChange(group.groupName, 'minPrice', e.target.value === '' ? null : Number(e.target.value))
-                                            }
-                                        />
-                                        <input
-                                            type="number"
-                                            value={editedPrices[group.groupName]?.transportationPrice ?? group.transportationPrice}
-                                            onChange={(e) =>
-                                                handlePriceChange(group.groupName, 'transportationPrice', e.target.value === '' ? null : Number(e.target.value))
-                                            }
-                                        />
-
-                                    </td>
+                    <div className="overflow-x-auto rounded-lg shadow-md text-lg">
+                        <table className="min-w-full table-auto text-right border border-gray-300 bg-white">
+                            <thead className="bg-orange-100 text-orange-800">
+                                <tr>
+                                    <th className="px-6 py-3 border-b border-gray-300 font-semibold text-xl">שם הקבוצה</th>
+                                    <th className="px-6 py-3 border-b border-gray-300 font-semibold text-xl">מחיר מינימום נוכחי</th>
+                                    <th className="px-6 py-3 border-b border-gray-300 font-semibold text-xl">מחיר הובלה</th>
+                                    <th className="px-6 py-3 border-b border-gray-300 font-semibold text-xl">עדכן מחיר מינימום ומחיר הובלה</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {materialGroups.map((group, index) => (
+                                    <tr key={group.groupName} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                                        <td className="px-6 py-4 border-b border-gray-200">
+                                            {group.groupName === 'Colors and Accessories' && 'צבעים ומוצרים נלווים'}
+                                            {group.groupName === 'Powders' && 'אבקות (דבקים וטייח)'}
+                                            {group.groupName === 'Gypsum and Tracks' && 'גבס ומסלולים'}
+                                        </td>
+                                        <td className="px-6 py-4 border-b border-gray-200">{group.minPrice}₪</td>
+                                        <td className="px-6 py-4 border-b border-gray-200">{group.transportationPrice}₪</td>
+                                        <td className="px-6 py-4 border-b border-gray-200 space-y-2">
+                                            <input
+                                                type="number"
+                                                className="w-28 px-2 m-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+                                                value={editedPrices[group.groupName]?.minPrice ?? group.minPrice}
+                                                onChange={(e) =>
+                                                    handlePriceChange(
+                                                        group.groupName,
+                                                        'minPrice',
+                                                        e.target.value === '' ? null : Number(e.target.value)
+                                                    )
+                                                }
+                                            />
+                                            <input
+                                                type="number"
+                                                className="w-28 px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+                                                value={editedPrices[group.groupName]?.transportationPrice ?? group.transportationPrice}
+                                                onChange={(e) =>
+                                                    handlePriceChange(
+                                                        group.groupName,
+                                                        'transportationPrice',
+                                                        e.target.value === '' ? null : Number(e.target.value)
+                                                    )
+                                                }
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
                     <button
                         onClick={handleSaveChanges}
-                        className="admin-button"
+                        className="admin-button btn-outline mt-4 text-xl "
                     >
                         עדכן מחירים
                     </button>
 
                 </>
-
             )}
+
             <button
-                className="admin-button"
+                className="admin-button btn-outline text-xl"
                 onClick={() => {
                     setIsEditing(false);
                     setNewProduct(initialProductState);
@@ -374,14 +386,14 @@ const AdminPanel = () => {
                 placeholder="חפש לפי מזהה/מק״ט/שם"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-bar"
+                className="search-bar search-input"
             />
 
             {showForm && (
                 <div className="modal">
                     <div className="modal-content">
-                        <span className="close" onClick={() => setShowForm(false)}>&times;</span>
-                        <h2>{isEditing ? "ערוך מוצר" : "הוסף מוצר חדש"}</h2>
+                        <span className="close modal-close" onClick={() => setShowForm(false)}>&times;</span>
+                        <h2 className='section-title-rtl'>{isEditing ? "ערוך מוצר" : "הוסף מוצר חדש"}</h2>
                         <form onSubmit={handleSubmit}>
                             <label>
                                 מזהה:
@@ -634,8 +646,8 @@ const AdminPanel = () => {
                             <td className="admin-td">{product['מק"ט']}</td>
                             <td className="admin-td">{product.סוג}</td>
                             <td className="admin-td">
-                                <button onClick={() => openEditModal(product)}>ערוך</button>
-                                <button onClick={() => handleDelete(product._id)}>מחק</button>
+                                <button className='btn m-2' onClick={() => openEditModal(product)}>ערוך</button>
+                                <button className='btn-primary m-2' onClick={() => handleDelete(product._id)}>מחק</button>
                             </td>
                         </tr>
                     ))}

@@ -196,7 +196,7 @@ const NavBar = () => {
             {/* ✅ הצגת שורת החיפוש */}
             {searchVisible && (
                 <div className="navbar-search">
-                    <input
+                    <input className='search-input'
                         type="text"
                         placeholder="חפש מוצרים..."
                         value={searchQuery}

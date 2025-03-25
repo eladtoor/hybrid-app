@@ -38,7 +38,7 @@ const PurchaseHistory = () => {
     };
 
     return (
-        <div className="purchase-history p-6 text-center">
+        <div className="purchase-history p-40 text-center">
             <h1 className="text-2xl font-semibold mb-6">היסטוריית רכישות של {userName}</h1>
             <table className="w-full border-collapse shadow-md rounded-lg">
                 <thead>
@@ -68,7 +68,7 @@ const PurchaseHistory = () => {
                                 <td className="p-3">{purchase.status}</td>
                                 <td className="p-3">₪{purchase.totalPrice}</td>
                                 <td className="p-3">
-                                    <button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                                    <button className="btn-outline text-grayish"
                                         onClick={() => handleViewDetails(purchase.cartItems)}>
                                         פירוט
                                     </button>

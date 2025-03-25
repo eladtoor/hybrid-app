@@ -211,8 +211,8 @@ const UserManagement = () => {
 
 
   return (
-    <div className="user-management">
-      <h1>ניהול משתמשים</h1>
+    <div className="user-management p-40">
+      <h1 className='text-3xl font-bold text-gray-900 text-right mb-6 pr-4 border-r-4 border-primary'>ניהול משתמשים</h1>
       <table className="user-table">
         <thead>
           <tr>
@@ -255,8 +255,8 @@ const UserManagement = () => {
                   : 'לא זמין'}
               </td>
               <td className="action-buttons">
-                <button onClick={() => handleEditUser(user)}>עריכה</button>
-                <button onClick={() => handleViewPurchaseHistory(user.id, user.name)}>
+                <button className="btn-outline m-2 text-grayish" onClick={() => handleEditUser(user)}>עריכה</button>
+                <button className="btn-primary m-2" onClick={() => handleViewPurchaseHistory(user.id, user.name)}>
                   הצג היסטוריית רכישות
                 </button>
               </td>
@@ -272,7 +272,7 @@ const UserManagement = () => {
       </table>
 
       <div className="whatsapp-settings">
-        <h2>עריכת פרטי וואטסאפ</h2>
+        <h2 className='text-3xl font-bold text-gray-900 text-right mb-6 pr-4 border-r-4 border-primary'>עריכת פרטי וואטסאפ</h2>
         <div className="form-group">
           <label>מספר וואטסאפ:</label>
           <input
@@ -288,14 +288,14 @@ const UserManagement = () => {
             onChange={(e) => setWhatsappMessage(e.target.value)}
           />
         </div>
-        <button onClick={handleSaveWhatsAppDetails}>שמור</button>
+        <button className='bg-primary hover:bg-orange-600 text-black font-bold py-2 px-6 rounded-lg shadow-md transition duration-300' onClick={handleSaveWhatsAppDetails}>שמור</button>
       </div>
 
       {isEditModalOpen && (
         <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={closeEditModal}>&times;</span>
-            <h2>עריכת משתמש - {selectedUser?.name}</h2>
+          <div className="modal-content relative">
+            <span className="absolute top-4 left-4 text-gray-500 hover:text-primary text-3xl cursor-pointer transition " onClick={closeEditModal}>&times;</span>
+            <h2 className='text-xl font-bold text-gray-900 text-right mb-6 pr-4 border-r-4 border-primary'>עריכת משתמש - {selectedUser?.name}</h2>
 
             <div className="form-group">
               <p>האם היוזר אדמין?</p>
@@ -394,7 +394,7 @@ const UserManagement = () => {
               </>
             )}
 
-            <button onClick={handleSaveChanges}>שמור שינויים</button>
+            <button className='btn-primary mt-4 text-light' onClick={handleSaveChanges}>שמור שינויים</button>
           </div>
         </div>
       )}

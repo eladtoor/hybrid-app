@@ -16,7 +16,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
         <div className="relative flex flex-col md:flex-row items-center justify-between bg-white shadow-lg rounded-lg p-4 mb-4 transition hover:shadow-xl">
             {/* כפתור מחיקה */}
             <button
-                className="absolute top-2 left-2 text-red-500 text-2xl hover:text-red-700 transition"
+                className="absolute top-4 left-4 text-gray-500 hover:text-primary text-3xl cursor-pointer transition"
                 onClick={() => onRemove(item.cartItemId)}
             >
                 ×
@@ -114,7 +114,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
             </div>
 
             {/* מחיר כולל */}
-            <p className="text-lg font-semibold text-gray-900 mt-2 md:mt-0">
+            <p className="text-xl font-semibold text-gray-900 mt-2 md:mt-0 m-2">
                 סה"כ מחיר: ₪{(unitPrice * totalQuantity).toFixed(2)}
             </p>
         </div>

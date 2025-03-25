@@ -1,18 +1,15 @@
 .cart-page {
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding-top: 100px;
 }
 
-.cart-title {
-  font-size: 2.5rem;
-}
+
 
 .cart-container {
   display: flex;
   justify-content: space-between;
-  width: 85%;
+  width: 95%;
   margin-top: 20px;
   min-height: 100vh;
   align-items: flex-start;
@@ -141,6 +138,7 @@
   color: #555;
   margin-top: 5px;
 }
+
 *:hover {
   transform: none !important;
 }

@@ -15,7 +15,7 @@ const RecommendedProducts = () => {
     return (
         <div className="w-full px-6 py-10 bg-white rounded-xl shadow-md border border-gray-200">
             {/* כותרת מוצרים מומלצים */}
-            <h2 className="text-3xl font-bold text-gray-900 text-right pr-6 border-r-4 border-yellow-500">
+            <h2 className="text-3xl font-bold text-gray-900 text-right pr-6 border-r-4 border-primary">
                 מוצרים מומלצים
             </h2>
 

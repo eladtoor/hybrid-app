@@ -212,8 +212,7 @@
     justify-content: center;
     border-radius: 50%;
     transition: border-color 0.3s ease, color 0.3s ease;
-    margin-top: -8px;
-    margin-left: -8px;
+
 }
 
 .navbar-search button i {
@@ -240,7 +239,7 @@
     color: red;
     font-size: 16px;
     position: absolute;
-    bottom: -5px;
+    bottom: -0.08px;
     /* ✅ שם את ההודעה מתחת לשדה */
     left: 0;
     width: 100%;
