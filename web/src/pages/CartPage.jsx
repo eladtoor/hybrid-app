@@ -270,9 +270,10 @@ const CartPage = () => {
         };
 
         console.log("📤 Sending payment request:", requestData);
+        const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
         try {
-            const response = await fetch("http://localhost:5000/api/payment/create-payment", {
+            const response = await fetch(`${BASE_URL}/api/payment/create-payment`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
