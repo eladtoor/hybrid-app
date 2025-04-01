@@ -162,13 +162,13 @@ const CartPage = () => {
             purchaseId: `${Date.now()}`,
             cartItems: cartItems.map(item => ({
                 _id: item._id,
-                sku: item['מק"ט'] || "לא זמין",
-                name: item.שם || "לא זמין",
+                sku: item.sku || item['מק"ט'] || "לא זמין",
+                name: item.name || item.baseName || "לא זמין",
+                baseName: item.baseName || "",
                 quantity: item.quantity || 1,
-                price: item.unitPrice || 0,
+                price: item.unitPrice || item.price || 0,
                 comment: item.comment || "",
-                selectedAttributes: item.selectedAttributes || {} // ✅ חשוב!
-
+                selectedAttributes: item.selectedAttributes || {}
             })),
             totalPrice: finalTotalPrice,
             shippingCost: transportationCosts, // ✅ מחיר משלוח
@@ -200,14 +200,17 @@ const CartPage = () => {
 
 
 
+    console.log(cartItems, "cart");
 
     const handlePayment = async (purchaseData) => {
         const groupPrivateToken = "f5bff741-1243-411e-9f7d-6b91d7624345";
 
         // ✅ יצירת רשימת פריטים להזמנה עם תיאור מאפיינים אם קיימים
         let items = purchaseData.cartItems.map(item => {
-            const name = item.name || "מוצר ללא שם";
-            const sku = item[`מק"ט`] || item.sku || "לא זמין";
+            console.log(item);
+
+            const name = item.baseName || item.name || "מוצר ללא שם";
+            const sku = item.sku || "לא זמין";
 
             // ✨ בניית תיאור מאפיינים בצורה קריאה בשורה אחת
             let attributesDescription = '';
@@ -285,9 +288,16 @@ const CartPage = () => {
             console.log("🔍 iCredit Response on Create Payment:", data);
 
             if (data.success && data.paymentUrl) {
+
+
+
                 localStorage.setItem("SalePrivateToken", data.salePrivateToken); // ✅ שמור את זה!
 
+
+
+
                 window.location.href = data.paymentUrl;
+
 
             } else {
                 console.error("❌ שגיאה בקבלת URL לתשלום:", data);

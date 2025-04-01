@@ -29,22 +29,25 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
             />
 
             <div className="flex-1 text-right px-4">
-                <h4 className="text-lg font-bold text-gray-800">{item.שם}</h4>
-                <p className="text-gray-600 text-sm">מק"ט: {item['מק"ט']}</p>
+                <h4 className="text-lg font-bold text-gray-800">{item.baseName}</h4>
+                <p className="text-gray-600 text-sm">מק"ט: {item.sku}</p>
 
                 {/* ✅ הצגת מאפיינים נבחרים כולל מחיר */}
-                {item.selectedAttributes && Object.keys(item.selectedAttributes).length > 0 && (
+                {item.selectedAttributesWithPrices && typeof item.selectedAttributesWithPrices === 'object' && (
                     <div className="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">
-                        {Object.entries(item.selectedAttributes).map(([key, attrObj]) => (
-                            <p key={key}>
-                                <strong>{key}:</strong> {attrObj.value}
-                                {attrObj.price > 0 && (
-                                    <span className="text-xs text-gray-500"> (₪{attrObj.price.toFixed(2)})</span>
-                                )}
-                            </p>
+                        {Object.entries(item.selectedAttributesWithPrices).map(([key, attr]) => (
+                            attr?.value ? (
+                                <p key={key}>
+                                    <strong>{key}:</strong> {attr.value}
+                                    {attr.price > 0 && (
+                                        <span className="text-xs text-gray-500"> (₪{attr.price.toFixed(2)})</span>
+                                    )}
+                                </p>
+                            ) : null
                         ))}
                     </div>
                 )}
+
 
                 {item.craneUnload !== null && item.craneUnload !== undefined && (
                     <p className="text-sm text-gray-700 mt-2">
