@@ -261,9 +261,46 @@ const AdminPanel = () => {
     const openEditModal = (product) => {
         const productToEdit = { ...product };
         productToEdit.materialGroup = productToEdit.materialGroup || ''; // Ensure material group is set
-        if (productToEdit.סוג === 'variable' && !productToEdit.attributes) {
-            productToEdit.attributes = [{ name: '', values: [{ value: '', price: '' }] }];
+
+        // ודא שמאפיינים קיימים ותואמים למבנה הדרוש
+        if (productToEdit.סוג === 'variable') {
+            if (!Array.isArray(productToEdit.attributes) || productToEdit.attributes.length === 0) {
+                // נבנה attributes מתוך variations
+                const attributeMap = {};
+
+                productToEdit.variations?.forEach((variation) => {
+                    const attrs = variation.attributes;
+                    for (const [attrName, { value, price }] of Object.entries(attrs)) {
+                        if (!attributeMap[attrName]) {
+                            attributeMap[attrName] = new Map();
+                        }
+                        attributeMap[attrName].set(value, price);
+                    }
+                });
+
+                // בניית attributes במבנה הדרוש
+                productToEdit.attributes = Object.entries(attributeMap).map(([name, valueMap]) => ({
+                    name,
+                    values: Array.from(valueMap.entries()).map(([value, price]) => ({
+                        value,
+                        price: Number(price),
+                    }))
+                }));
+            } else {
+                // Normalize existing attributes
+                productToEdit.attributes = productToEdit.attributes.map((attr) => ({
+                    name: attr.name || '',
+                    values: Array.isArray(attr.values)
+                        ? attr.values.map((val) => ({
+                            value: val?.value || '',
+                            price: val?.price || 0,
+                        }))
+                        : [{ value: '', price: 0 }],
+                }));
+            }
         }
+
+        console.log(productToEdit);
 
         // אם הקטגוריות אינן מערך, המרתן למערך
         const categoriesArray = Array.isArray(product.קטגוריות)
@@ -294,9 +331,11 @@ const AdminPanel = () => {
         setSelectedSubCategories(subCategories);
 
         setNewProduct(productToEdit);
+        setQuantityEnabled(productToEdit.quantities && productToEdit.quantities.length > 0); // הפעלת אופציית כמות אם יש
         setIsEditing(true);
         setShowForm(true);
     };
+
 
     return (
         <div className="admin-panel p-32">
@@ -454,10 +493,13 @@ const AdminPanel = () => {
                                                 <input
                                                     type="text"
                                                     value={attribute.name}
-                                                    onChange={(e) => handleAttributeChange(index, 'name', e.target.value, newProduct, setNewProduct)}
+                                                    onChange={(e) =>
+                                                        handleAttributeChange(index, 'name', e.target.value, newProduct, setNewProduct)
+                                                    }
                                                     required
                                                 />
                                             </label>
+
                                             {attribute.values.map((valueObj, valueIndex) => (
                                                 <div key={valueIndex} className="attribute-values">
                                                     <label>
@@ -465,7 +507,9 @@ const AdminPanel = () => {
                                                         <input
                                                             type="text"
                                                             value={valueObj.value}
-                                                            onChange={(e) => handleAttributeValueChange(index, valueIndex, 'value', e.target.value, newProduct, setNewProduct)}
+                                                            onChange={(e) =>
+                                                                handleAttributeValueChange(index, valueIndex, 'value', e.target.value, newProduct, setNewProduct)
+                                                            }
                                                             required
                                                         />
                                                     </label>
@@ -474,23 +518,37 @@ const AdminPanel = () => {
                                                         <input
                                                             type="number"
                                                             value={valueObj.price}
-                                                            onChange={(e) => handleAttributeValueChange(index, valueIndex, 'price', e.target.value, newProduct, setNewProduct)}
+                                                            onChange={(e) =>
+                                                                handleAttributeValueChange(index, valueIndex, 'price', e.target.value, newProduct, setNewProduct)
+                                                            }
                                                             required
                                                         />
                                                     </label>
                                                 </div>
                                             ))}
+
+                                            {/* 👇 הכפתור להוספת ערך מאפיין בתוך כל מאפיין */}
                                             <div className="attribute-buttons">
-                                                <button type="button" onClick={() => handleAddAttribute(newProduct, setNewProduct)}>
-                                                    הוסף שם מאפיין
-                                                </button>
-                                                <button type="button" onClick={() => handleAddAttributeValue(index, newProduct, setNewProduct)}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleAddAttributeValue(index, newProduct, setNewProduct)}
+                                                >
                                                     הוסף ערך מאפיין
                                                 </button>
-
                                             </div>
                                         </div>
                                     ))}
+
+                                    {/* 👇 הכפתור להוספת שם מאפיין - מחוץ ללולאה */}
+                                    <div className="attribute-buttons">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleAddAttribute(newProduct, setNewProduct)}
+                                        >
+                                            הוסף שם מאפיין
+                                        </button>
+                                    </div>
+
 
                                 </>
                             )}
@@ -505,19 +563,7 @@ const AdminPanel = () => {
                                 />
                             </label>
 
-                            <label className='comment-field-checkbox'>
-                                פתח שדה הערות
-                                <input
-                                    type="checkbox"
-                                    checked={newProduct.allowComments}
-                                    onChange={() =>
-                                        setNewProduct((prev) => ({
-                                            ...prev,
-                                            allowComments: !prev.allowComments, // ✅ Toggle allowComments state
-                                        }))
-                                    }
-                                />
-                            </label>
+
 
                             {quantityEnabled && (
                                 <div className="quantity-input-section">
@@ -543,7 +589,19 @@ const AdminPanel = () => {
                                     </button>
                                 </div>
                             )}
-
+                            <label className='comment-field-checkbox'>
+                                פתח שדה הערות
+                                <input
+                                    type="checkbox"
+                                    checked={newProduct.allowComments}
+                                    onChange={() =>
+                                        setNewProduct((prev) => ({
+                                            ...prev,
+                                            allowComments: !prev.allowComments, // ✅ Toggle allowComments state
+                                        }))
+                                    }
+                                />
+                            </label>
                             <label>
                                 מק"ט:
                                 <input type="text" name='מק"ט' value={newProduct['מק"ט']} onChange={(e) => handleInputChange(e, setNewProduct)} required />

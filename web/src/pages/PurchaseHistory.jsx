@@ -7,6 +7,7 @@ const PurchaseHistory = () => {
     const { userId, userName } = useParams();
     const [purchases, setPurchases] = useState([]);
     const [selectedPurchaseItems, setSelectedPurchaseItems] = useState([]);
+    const [selectedPurchaseDetails, setSelectedPurchaseDetails] = useState(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
     useEffect(() => {
@@ -27,14 +28,16 @@ const PurchaseHistory = () => {
         fetchPurchaseHistory();
     }, [userId]);
 
-    const handleViewDetails = (cartItems) => {
-        setSelectedPurchaseItems(cartItems);
+    const handleViewDetails = (purchase) => {
+        setSelectedPurchaseItems(purchase.cartItems || []);
+        setSelectedPurchaseDetails(purchase);
         setIsDetailModalOpen(true);
     };
 
     const closeModal = () => {
         setIsDetailModalOpen(false);
         setSelectedPurchaseItems([]);
+        setSelectedPurchaseDetails(null);
     };
 
     return (
@@ -69,7 +72,7 @@ const PurchaseHistory = () => {
                                 <td className="p-3">₪{purchase.totalPrice}</td>
                                 <td className="p-3">
                                     <button className="btn-outline text-grayish"
-                                        onClick={() => handleViewDetails(purchase.cartItems)}>
+                                        onClick={() => handleViewDetails(purchase)}>
                                         פירוט
                                     </button>
                                 </td>
@@ -80,7 +83,7 @@ const PurchaseHistory = () => {
 
             {isDetailModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl relative">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl relative">
                         <span className="absolute top-4 right-4 text-gray-600 cursor-pointer text-2xl" onClick={closeModal}>
                             &times;
                         </span>
@@ -89,28 +92,77 @@ const PurchaseHistory = () => {
                             <table className="w-full border-collapse shadow-md rounded-lg">
                                 <thead>
                                     <tr className="bg-gray-200">
-                                        <th className="p-3 text-center">מזהה מוצר</th>
+                                        <th className="p-3 text-center">שם מוצר</th>
                                         <th className="p-3 text-center">מקט</th>
-                                        <th className="p-3 text-center">שם</th>
+                                        <th className="p-3 text-center">מאפיינים</th>
                                         <th className="p-3 text-center">הערות</th>
-                                        <th className="p-3 text-center">מחיר</th>
+                                        <th className="p-3 text-center">פריקת מנוף</th>
+                                        <th className="p-3 text-center">מחיר ליחידה</th>
                                         <th className="p-3 text-center">כמות</th>
+                                        <th className="p-3 text-center">סה"כ מחיר</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {selectedPurchaseItems.map((item) => (
                                         <tr key={item._id} className="border-b">
-                                            <td className="p-3 text-center">{item._id}</td>
-                                            <td className="p-3 text-center">{item.sku}</td>
                                             <td className="p-3 text-center">{item.name}</td>
-                                            <td className="p-3 text-center">{item.comment}</td>
-                                            <td className="p-3 text-center">₪{item.price}</td>
+                                            <td className="p-3 text-center">{item.sku}</td>
+                                            <td className="p-3 text-right">
+                                                {item.selectedAttributes ? (
+                                                    Object.entries(item.selectedAttributes).map(([key, value]) => {
+                                                        let price = 0;
+
+                                                        if (Array.isArray(item.variations)) {
+                                                            const matchedVariation = item.variations.find(variation =>
+                                                                variation.attributes?.[key]?.value === value
+                                                            );
+                                                            if (matchedVariation) {
+                                                                price = parseFloat(matchedVariation.attributes[key]?.price || 0);
+                                                            }
+                                                        }
+
+                                                        return (
+                                                            <div key={key}>
+                                                                <strong>{key}:</strong> {value}
+                                                                {price > 0 && (
+                                                                    <span className="text-black-500 text-s"> (₪{price.toFixed(2)})</span>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })
+                                                ) : (
+                                                    "-"
+                                                )}
+
+                                            </td>
+                                            <td className="p-3 text-center">{item.comment || "-"}</td>
+                                            <td className="p-3 text-center">
+                                                {item.craneUnload === true ? "כן" : item.craneUnload === false ? "לא" : "-"}
+                                            </td>
+                                            <td className="p-3 text-center">₪{item.unitPrice?.toFixed(2) || "0.00"}</td>
                                             <td className="p-3 text-center">{item.quantity}</td>
+                                            <td className="p-3 text-center">₪{(item.unitPrice * item.quantity).toFixed(2)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* 🧾 סיכום הזמנה */}
+                        {selectedPurchaseDetails && (
+                            <div className="mt-6 text-right text-sm bg-gray-50 p-4 rounded shadow-inner">
+                                <p><strong>מחיר סופי:</strong> ₪{selectedPurchaseDetails.totalPrice?.toFixed(2)}</p>
+                                {selectedPurchaseDetails.shippingCost > 0 && (
+                                    <p><strong>מחיר משלוח:</strong> ₪{selectedPurchaseDetails.shippingCost.toFixed(2)}</p>
+                                )}
+                                {selectedPurchaseDetails.craneUnloadCost > 0 && (
+                                    <p><strong>מחיר פריקת מנוף:</strong> ₪{selectedPurchaseDetails.craneUnloadCost.toFixed(2)}</p>
+                                )}
+                                {selectedPurchaseDetails.payments > 1 && (
+                                    <p><strong>מספר תשלומים:</strong> {selectedPurchaseDetails.payments}</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

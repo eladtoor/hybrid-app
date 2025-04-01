@@ -188,25 +188,20 @@ const ProductCard = ({ product }) => {
             return;
         }
 
-        // ✅ בדיקה אם למוצר יש כמויות מוגדרות והמשתמש לא בחר כמות
         if (product.quantities && product.quantities.length > 0 && !selectedQuantity) {
             alert("אנא בחר כמות לפני הוספה לעגלה.");
             return;
         }
-        // ✅ בדיקה האם התנאי מופעל
+
         if (product.materialGroup === "Gypsum and Tracks" && craneUnload === null) {
             alert("אנא בחר האם דרושה פריקת מנוף.");
-
             return;
         }
-        // Prepare cart item with crane unloading selection
+
         const hasComment = product.allowComments && comment.trim() !== "";
 
-        // ✅ Generate a unique ID ONLY if there is a comment
-        // בסיס המזהה: מזהה מוצר
         let uniqueId = product._id;
 
-        // הוספת מאפיינים ייחודיים אם קיימים
         if (product.variations && Object.keys(selectedAttributes).length > 0) {
             const attributesString = Object.entries(selectedAttributes)
                 .map(([key, value]) => `${key}:${value}`)
@@ -214,27 +209,67 @@ const ProductCard = ({ product }) => {
             uniqueId += `|${attributesString}`;
         }
 
-        // הוספת הערה אם יש
         if (hasComment) {
             uniqueId += `|comment:${comment}`;
         }
 
-        const cartItem = {
-            ...product,
+        // ✅ שם מוצר כולל מאפיינים
+        const selectedAttributeString = Object.entries(selectedAttributes)
+            .map(([key, value]) => value)
+            .join(" - ");
+
+        const fullProductName = selectedAttributeString
+            ? `${product.שם} - ${selectedAttributeString}`
+            : product.שם;
+
+        // ✅ בניית selectedAttributes עם מחירים
+        const enrichedSelectedAttributes = {};
+        console.log(product);
+
+        if (product.variations && Array.isArray(product.variations)) {
+            for (const variation of product.variations) {
+                const match = Object.entries(selectedAttributes).every(([key, value]) => {
+                    return variation.attributes?.[key]?.value === value;
+                });
+
+                if (match) {
+                    Object.entries(selectedAttributes).forEach(([key, value]) => {
+                        const price = parseFloat(variation.attributes?.[key]?.price || 0);
+                        enrichedSelectedAttributes[key] = {
+                            value,
+                            price
+                        };
+                    });
+                    break; // מצאנו וריאציה מתאימה
+                }
+            }
+        } else {
+            // מוצר בלי וריאציות – שמור מחיר אפס
+            Object.entries(selectedAttributes).forEach(([key, value]) => {
+                enrichedSelectedAttributes[key] = { value, price: 0 };
+            });
+        }
+
+        const cleanCartItem = {
+            _id: product._id,
+            sku: product[`מק"ט`],
+            name: fullProductName,
+            baseName: product.שם,
             cartItemId: uniqueId,
+            quantity: selectedQuantity,
             price: totalPrice,
             unitPrice: updatedPrice,
-            quantity: selectedQuantity,
             packageSize: selectedQuantity,
-            craneUnload: product.materialGroup === "Gypsum and Tracks" ? craneUnload : null,
+            selectedAttributes: enrichedSelectedAttributes, // ✅ כולל מחיר בפנים
             comment: hasComment ? comment : "",
-            selectedAttributes, // ✅ הוספה חשובה!
+            image: product.תמונות,
+            craneUnload: product.materialGroup === "Gypsum and Tracks" ? craneUnload : null,
+            quantities: product.quantities || [], // ✅ אם קיימות
         };
 
+        console.log("🧼 Adding clean cart item:", cleanCartItem);
 
-        console.log("Adding to cart:", cartItem); // 👈 Debugging
-
-        dispatch(addToCart(cartItem));
+        dispatch(addToCart(cleanCartItem));
 
         setComment("");
         setShowModal(false);
@@ -244,6 +279,8 @@ const ProductCard = ({ product }) => {
             setShowSuccessMessage(false);
         }, 3000);
     };
+
+
 
 
 

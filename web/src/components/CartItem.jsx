@@ -11,10 +11,10 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
     const handleDecreaseByPackage = (packageSize) => {
         onDecrease(item.cartItemId, packageSize);
     };
+    console.log(item);
 
     return (
         <div className="relative flex flex-col md:flex-row items-center justify-between bg-white shadow-lg rounded-lg p-4 mb-4 transition hover:shadow-xl">
-            {/* כפתור מחיקה */}
             <button
                 className="absolute top-4 left-4 text-gray-500 hover:text-primary text-3xl cursor-pointer transition"
                 onClick={() => onRemove(item.cartItemId)}
@@ -22,51 +22,46 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
                 ×
             </button>
 
-            {/* תמונת המוצר */}
             <img
-                src={item.תמונות}
+                src={item.image}
                 alt={item.שם}
                 className="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 md:w-32 md:h-32"
             />
 
-            {/* פרטי המוצר */}
             <div className="flex-1 text-right px-4">
                 <h4 className="text-lg font-bold text-gray-800">{item.שם}</h4>
                 <p className="text-gray-600 text-sm">מק"ט: {item['מק"ט']}</p>
 
-                {/* ✅ הצגת מאפיינים נבחרים */}
+                {/* ✅ הצגת מאפיינים נבחרים כולל מחיר */}
                 {item.selectedAttributes && Object.keys(item.selectedAttributes).length > 0 && (
                     <div className="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">
-                        {Object.entries(item.selectedAttributes).map(([key, value]) => (
+                        {Object.entries(item.selectedAttributes).map(([key, attrObj]) => (
                             <p key={key}>
-                                <strong>{key}:</strong> {value}
+                                <strong>{key}:</strong> {attrObj.value}
+                                {attrObj.price > 0 && (
+                                    <span className="text-xs text-gray-500"> (₪{attrObj.price.toFixed(2)})</span>
+                                )}
                             </p>
                         ))}
                     </div>
                 )}
 
-                {/* ✅ הצגת פריקת מנוף אם קיים */}
                 {item.craneUnload !== null && item.craneUnload !== undefined && (
                     <p className="text-sm text-gray-700 mt-2">
                         <strong>פריקת מנוף:</strong> {item.craneUnload ? "כן" : "לא"}
                     </p>
                 )}
 
-                {/* הערות */}
                 {item.comment && (
                     <p className="text-sm text-gray-700 bg-gray-100 p-2 rounded-md mt-2">
                         <strong>הערה:</strong> {item.comment}
                     </p>
                 )}
 
-                {/* מחיר ליחידה */}
                 <p className="text-gray-800 font-semibold mt-2">מחיר ליחידה: ₪{unitPrice.toFixed(2)}</p>
-
-                {/* כמות כוללת */}
                 <p className="text-gray-700 font-medium">סה"כ כמות: {totalQuantity}</p>
             </div>
 
-            {/* כפתורי שינוי כמות */}
             <div className="flex flex-col items-center gap-2">
                 {item.quantities && item.quantities.length > 0 ? (
                     item.quantities.map((packageSize) => (
@@ -113,7 +108,6 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
                 )}
             </div>
 
-            {/* מחיר כולל */}
             <p className="text-xl font-semibold text-gray-900 mt-2 md:mt-0 m-2">
                 סה"כ מחיר: ₪{(unitPrice * totalQuantity).toFixed(2)}
             </p>

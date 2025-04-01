@@ -5,7 +5,7 @@ const createPayment = async (req, res) => {
     const requestData = req.body; // קבלת הנתונים מה-Frontend
 
     const response = await fetch(
-      "https://testicredit.rivhit.co.il/API/PaymentPageRequest.svc/GetUrl",
+      "https://icredit.rivhit.co.il/API/PaymentPageRequest.svc/GetUrl",
       {
         method: "POST",
         headers: {
@@ -16,9 +16,14 @@ const createPayment = async (req, res) => {
     );
 
     const data = await response.json();
+    console.log("🔍 Response from iCredit GetUrl:", data);
 
     if (data.Status === 0 && data.URL) {
-      res.json({ success: true, paymentUrl: data.URL });
+      res.json({
+        success: true,
+        paymentUrl: data.URL,
+        salePrivateToken: data.PrivateSaleToken, // ✅ חשוב!
+      });
     } else {
       res.status(400).json({
         success: false,
@@ -60,7 +65,7 @@ const getSaleDetails = async (req, res) => {
     console.log("📩 Received SaleDetails Request:", req.body);
 
     const response = await fetch(
-      "https://testicredit.rivhit.co.il/API/PaymentPageRequest.svc/SaleDetails",
+      "https://icredit.rivhit.co.il/API/PaymentPageRequest.svc/SaleDetails",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

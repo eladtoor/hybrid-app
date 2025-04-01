@@ -20,8 +20,11 @@ const CartPage = () => {
     const [cartDiscount, setCartDiscount] = useState(0);
     const [errorMessage, setErrorMessage] = useState(""); // New state for errors
     const fullName = user?.name || "לקוח אנונימי";
-    const [firstName, ...rest] = fullName.trim().split(" ");
-    const lastName = rest.length > 0 ? rest.join(" ") : "ללא";
+    const nameParts = fullName.trim().split(" ");
+    const firstName = nameParts[0] || "לקוח";
+    const lastName = nameParts.length > 1
+        ? nameParts.slice(1).join(" ")
+        : " "; // 👈 שדה חובה – אבל נשלח רווח אם אין שם משפחה
     const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
 
     const [temporaryAddress, setTemporaryAddress] = useState({
@@ -164,6 +167,8 @@ const CartPage = () => {
                 quantity: item.quantity || 1,
                 price: item.unitPrice || 0,
                 comment: item.comment || "",
+                selectedAttributes: item.selectedAttributes || {} // ✅ חשוב!
+
             })),
             totalPrice: finalTotalPrice,
             shippingCost: transportationCosts, // ✅ מחיר משלוח
@@ -174,12 +179,18 @@ const CartPage = () => {
         };
 
 
+
+
         try {
             if (user?.isCreditLine) {
                 // ✅ משתמש קו אשראי → דלג על התשלום והעבר ישירות לאישור
                 navigate("/order-confirmation", { state: { orderData: purchaseData } });
             } else {
                 // ✅ משתמש רגיל → שלח לתשלום ב-iCredit
+                localStorage.setItem("cartItems", JSON.stringify(cartItems));
+                localStorage.setItem("finalTotalPrice", finalTotalPrice.toString());
+                localStorage.setItem("shippingCost", transportationCosts.toString());
+                localStorage.setItem("craneUnloadCost", craneUnloadFee.toString());
                 await handlePayment(purchaseData);
             }
         } catch (error) {
@@ -189,20 +200,41 @@ const CartPage = () => {
 
 
 
+
     const handlePayment = async (purchaseData) => {
-        const isTestEnv = window.location.origin.includes("localhost") || window.location.href.includes("testicredit");
+        const groupPrivateToken = "f5bff741-1243-411e-9f7d-6b91d7624345";
 
-        const groupPrivateToken = isTestEnv
-            ? "80d75f51-1ca1-41a8-a698-8183d68499c6" // ✅ טוקן של TEST
-            : "YOUR_PROD_GROUP_TOKEN"; // ✅ טוקן של Production (עדכן בהתאם)
+        // ✅ יצירת רשימת פריטים להזמנה עם תיאור מאפיינים אם קיימים
+        let items = purchaseData.cartItems.map(item => {
+            const name = item.name || "מוצר ללא שם";
+            const sku = item[`מק"ט`] || item.sku || "לא זמין";
 
-        // ✅ יצירת רשימת פריטים להזמנה
-        let items = purchaseData.cartItems.map(item => ({
-            CatalogNumber: item.sku,
-            Quantity: item.quantity,
-            UnitPrice: item.price,
-            Description: item.name
-        }));
+            // ✨ בניית תיאור מאפיינים בצורה קריאה בשורה אחת
+            let attributesDescription = '';
+            if (item.selectedAttributes && typeof item.selectedAttributes === 'object') {
+                const attributePairs = Object.entries(item.selectedAttributes).map(
+                    ([key, value]) => `${key}: ${value}`
+                );
+                attributesDescription = attributePairs.join(' | ');
+            }
+
+            // 👑 תיאור סופי קריא ובלי ירידת שורה
+            const fullDescription = attributesDescription
+                ? `${name} : ${attributesDescription}`
+                : `${name} `;
+
+            return {
+                CatalogNumber: sku,
+                Quantity: item.quantity,
+                UnitPrice: item.price,
+                Description: fullDescription
+            };
+        });
+
+
+
+
+
 
         // ✅ הוספת מחיר משלוח אם קיים
         if (purchaseData.shippingCost && purchaseData.shippingCost > 0) {
@@ -252,7 +284,10 @@ const CartPage = () => {
             console.log("🔍 iCredit Response on Create Payment:", data);
 
             if (data.success && data.paymentUrl) {
-                window.location.href = data.paymentUrl; // ✅ הפנייה לדף התשלום של iCredit
+                localStorage.setItem("SalePrivateToken", data.salePrivateToken); // ✅ שמור את זה!
+
+                window.location.href = data.paymentUrl;
+
             } else {
                 console.error("❌ שגיאה בקבלת URL לתשלום:", data);
                 setErrorMessage("❌ שגיאה בהפנייתך לתשלום. נסה שוב.");
@@ -262,6 +297,7 @@ const CartPage = () => {
             setErrorMessage("❌ שגיאה בלתי צפויה. נסה שוב מאוחר יותר.");
         }
     };
+
 
 
 

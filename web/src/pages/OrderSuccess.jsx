@@ -2,21 +2,21 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
-import { onAuthStateChanged } from "firebase/auth"; // ✅ יבוא של פונקציית המעקב אחרי המשתמש
+import { onAuthStateChanged } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { setCartItems } from "../redux/slices/cartSlice";
 import { saveCartToFirestore } from '../utils/cartUtils';
-
 
 const OrderSuccess = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [verificationStatus, setVerificationStatus] = useState("pending");
-    const [currentUser, setCurrentUser] = useState(null); // ✅ נוסיף משתנה לשמירת המשתמש
+    const [currentUser, setCurrentUser] = useState(null);
+
+    const shouldSkipVerification = false;
 
     useEffect(() => {
-        // ✅ מעקב אחרי התחברות המשתמש
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log("✅ User is logged in:", user);
@@ -27,14 +27,12 @@ const OrderSuccess = () => {
             }
         });
 
-        return () => unsubscribe(); // ✅ נבטל את המאזין כשהקומפוננטה תתפרק
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
-        const isTestEnv = window.location.origin.includes("localhost") || window.location.href.includes("testicredit");
-
-        if (isTestEnv) {
-            console.warn("⚠️ Running in Test mode – skipping payment verification.");
+        if (shouldSkipVerification) {
+            console.warn("⚠️ Skipping verification manually (dev mode)");
             setVerificationStatus("success");
 
             const purchaseData = {
@@ -43,58 +41,68 @@ const OrderSuccess = () => {
                 status: "completed"
             };
 
-            if (currentUser) { // ✅ נבדוק אם המשתמש מחובר לפני שמירת ההזמנה
+            if (currentUser) {
                 const purchasesRef = collection(db, "users", currentUser.uid, "purchases");
                 addDoc(purchasesRef, purchaseData);
             }
 
-            dispatch(setCartItems([])); // ✅ ניקוי העגלה
+            dispatch(setCartItems([]));
             saveCartToFirestore([]);
             return;
         }
 
         const verifyPayment = async () => {
-            const urlParams = new URLSearchParams(location.search);
-            const publicSaleToken = urlParams.get("Token");
+            const privateToken = localStorage.getItem("SalePrivateToken");
 
-            console.log("🔍 Checking PublicSaleToken:", publicSaleToken);
+            const storedCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
+            const totalPrice = parseFloat(localStorage.getItem("finalTotalPrice") || "0");
+            const shippingCost = parseFloat(localStorage.getItem("shippingCost") || "0");
+            const craneUnloadCost = parseFloat(localStorage.getItem("craneUnloadCost") || "0");
 
-            if (!publicSaleToken) {
-                console.error("❌ PublicSaleToken is missing in URL.");
+            if (!privateToken) {
+                console.error("❌ SalePrivateToken is missing from localStorage.");
                 setVerificationStatus("failed");
                 return;
             }
-
-            const saleDetailsData = { SalePrivateToken: publicSaleToken };
 
             try {
                 const response = await fetch("http://localhost:5000/api/payment/sale-details", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(saleDetailsData)
+                    body: JSON.stringify({ SalePrivateToken: privateToken })
                 });
 
                 const data = await response.json();
-                console.log("🔍 Response from Server SaleDetails:", data);
+                console.log("🔍 Response from SaleDetails:", data);
 
-                if (data.TransactionStatus === 0) { // 0 = עסקה מאושרת לפי ה-API
+                if (data.TransactionStatus === 0) {
                     setVerificationStatus("success");
 
                     const purchaseData = {
-                        purchaseId: publicSaleToken,
+                        purchaseId: privateToken,
                         date: new Date().toISOString(),
-                        status: "completed"
+                        status: "completed",
+                        cartItems: storedCart,
+                        totalPrice: totalPrice,
+                        shippingCost: shippingCost,
+                        craneUnloadCost: craneUnloadCost,
+                        customer: {
+                            firstName: data.CustomerFirstName || "",
+                            lastName: data.CustomerLastName || "",
+                            email: data.EmailAddress || ""
+                        },
+                        payments: data.NumOfPayment || 1
                     };
 
-                    if (currentUser) { // ✅ נבדוק שוב אם המשתמש מחובר לפני שמירת ההזמנה
+                    if (currentUser) {
                         const purchasesRef = collection(db, "users", currentUser.uid, "purchases");
                         await addDoc(purchasesRef, purchaseData);
                     } else {
-                        console.warn("⚠️ לא ניתן לשמור את הרכישה כי המשתמש לא מחובר.");
+                        console.warn("⚠️ No user, purchase not saved.");
                     }
 
-                    dispatch(setCartItems([])); // ✅ ניקוי העגלה
-
+                    dispatch(setCartItems([]));
+                    saveCartToFirestore([]);
                 } else {
                     console.error("❌ Payment verification failed:", data);
                     setVerificationStatus("failed");
@@ -106,7 +114,7 @@ const OrderSuccess = () => {
         };
 
         verifyPayment();
-    }, [location, dispatch, currentUser]); // ✅ הוספת `currentUser` כתלות כדי לוודא שהוא נטען
+    }, [location, dispatch, currentUser]);
 
     return (
         <div className="text-center p-6">
@@ -138,5 +146,5 @@ const OrderSuccess = () => {
         </div>
     );
 };
-//4580000000000001
+
 export default OrderSuccess;
