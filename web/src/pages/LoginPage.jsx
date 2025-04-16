@@ -10,8 +10,9 @@ import { setUser } from "../redux/reducers/userReducer";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
-import { doc, getDoc } from "firebase/firestore";
+
 import { db } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const LoginPage = () => {
     const dispatch = useDispatch();
@@ -19,22 +20,25 @@ const LoginPage = () => {
     const auth = getAuth();
     const [searchParams] = useSearchParams();
 
-    // State לניהול טופס התחברות
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // 🔹 התחברות עם Google
+    const refParam = searchParams.get("ref");
+
     const handleGoogleSignIn = async () => {
         try {
             const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
 
-            // בדיקה אם המשתמש קיים ב-Firestore
             const userRef = doc(db, "users", user.uid);
             const userSnap = await getDoc(userRef);
+
+            const referredBy = refParam?.startsWith("agent-")
+                ? refParam.replace("agent-", "")
+                : null;
 
             if (userSnap.exists()) {
                 const fullUser = userSnap.data();
@@ -42,6 +46,17 @@ const LoginPage = () => {
                 localStorage.setItem("user", JSON.stringify(fullUser));
                 navigate("/");
             } else {
+                const newUser = {
+                    uid: user.uid,
+                    email: user.email,
+                    name: user.displayName || "",
+                    userType: "user",
+                    referredBy: referredBy || null,
+                };
+
+                await setDoc(userRef, newUser);
+                dispatch(setUser(newUser));
+                localStorage.setItem("user", JSON.stringify(newUser));
                 navigate("/user-info");
             }
         } catch (error) {
@@ -50,7 +65,6 @@ const LoginPage = () => {
         }
     };
 
-    // 🔹 התחברות עם אימייל וסיסמה
     const handleLogin = async () => {
         if (!email || !password) {
             setError("נא להזין אימייל וסיסמה");
@@ -86,7 +100,6 @@ const LoginPage = () => {
 
                 {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
-                {/* 🔹 טופס התחברות */}
                 <div className="space-y-4">
                     <input
                         type="email"
@@ -113,8 +126,9 @@ const LoginPage = () => {
 
                     <p className="text-center text-gray-600">אין לך חשבון?</p>
 
+                    {/* ✅ כפתור עם שמירת פרמטר ref */}
                     <button
-                        onClick={() => navigate("/register")}
+                        onClick={() => navigate(`/register${refParam ? `?ref=${refParam}` : ''}`)}
                         className="w-full bg-green-600 text-white py-2 rounded-md font-semibold hover:bg-green-700 transition"
                     >
                         הרשמה
@@ -123,7 +137,6 @@ const LoginPage = () => {
 
                 <hr className="my-6 border-gray-300" />
 
-                {/* 🔹 Google Login */}
                 <button
                     onClick={handleGoogleSignIn}
                     className="w-full flex items-center justify-center bg-red-500 text-white py-2 rounded-md font-semibold hover:bg-red-600 transition"

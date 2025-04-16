@@ -71,7 +71,7 @@ const UserInfoForm = () => {
 
             // ✅ שמירת המשתמש ב־Firestore
             const userRef = doc(db, "users", updatedUser.uid);
-            await setDoc(userRef, updatedUser);
+            await setDoc(userRef, updatedUser, { merge: true });
 
             navigate('/');
         } catch (error) {

@@ -17,6 +17,16 @@ import {
     handleAddAttributeValue
 } from '../utils/adminPanelUtils';
 
+
+
+
+
+import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../firebase";
+
+
+
+
 const initialProductState = {
     מזהה: '',
     סוג: 'simple',
@@ -58,6 +68,10 @@ const AdminPanel = () => {
     const [editedTransportPrices, setEditedTransportPrices] = useState({});
     const [loading, setLoading] = useState(false);
     const socketRef = useRef(null);
+    const [carouselImageUrl, setCarouselImageUrl] = useState("");
+    const [carouselFile, setCarouselFile] = useState(null);
+
+
 
 
     useEffect(() => {
@@ -106,6 +120,62 @@ const AdminPanel = () => {
 
         fetchMaterialGroups();
     }, []);
+    const optimizeCarouselImageUrl = (url) => {
+        if (!url.includes("/upload/")) return url;
+        return url.replace("/upload/", "/upload/w_1920,h_400,c_fill,q_auto,f_auto/");
+    };
+
+    const handleUploadCarouselImage = async () => {
+        if (!carouselFile) return alert("אנא בחר תמונה");
+
+        const formData = new FormData();
+        formData.append("file", carouselFile);
+        formData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
+
+        try {
+            const res = await fetch(
+                `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            const data = await res.json();
+            if (data.secure_url) {
+                const optimizedUrl = optimizeCarouselImageUrl(data.secure_url);
+                await addDoc(collection(db, "carouselImages"), { url: optimizedUrl });
+
+                alert("התמונה נוספה בהצלחה!");
+                setCarouselFile(null);
+            } else {
+                throw new Error("העלאה נכשלה");
+            }
+        } catch (error) {
+            console.error("שגיאה בהעלאה ל-Cloudinary:", error);
+            alert("שגיאה בהעלאה");
+        }
+    };
+
+    const handleDeleteAllCarouselImages = async () => {
+        const confirmed = window.confirm("האם אתה בטוח שברצונך למחוק את כל התמונות מהקרוסלה?");
+        if (!confirmed) return;
+
+        try {
+            const querySnapshot = await getDocs(collection(db, "carouselImages"));
+            const deletePromises = querySnapshot.docs.map((docSnap) =>
+                deleteDoc(doc(db, "carouselImages", docSnap.id))
+            );
+            await Promise.all(deletePromises);
+            alert("כל התמונות נמחקו בהצלחה!");
+        } catch (error) {
+            console.error("שגיאה במחיקת תמונות:", error);
+            alert("אירעה שגיאה בעת המחיקה.");
+        }
+    };
+
+
+
 
 
 
@@ -406,6 +476,35 @@ const AdminPanel = () => {
 
                 </>
             )}
+            <div className="border-t pt-6 mt-12">
+                <h2 className="text-2xl font-bold mb-4">הוספת תמונה לקרוסלה</h2>
+
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setCarouselFile(e.target.files[0])}
+                    className="mb-4"
+                />
+
+                <button
+                    onClick={handleUploadCarouselImage}
+                    className="admin-button btn-primary text-xl"
+                >
+                    העלה תמונה
+                </button>
+                <button
+                    onClick={handleDeleteAllCarouselImages}
+                    className="admin-button btn-outline text-red-600 border-red-600 hover:bg-red-100 mt-2"
+                >
+                    מחק את כל תמונות הקרוסלה
+                </button>
+
+            </div>
+
+
+
+
+
 
             <button
                 className="admin-button btn-outline text-xl"

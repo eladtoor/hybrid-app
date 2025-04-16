@@ -1,9 +1,22 @@
 :root {
-    --primary-color: #edb10c;
-    --secondary-color: #e0ddd9;
-    --secondary-background-hover-color: rgba(255, 229, 174, 0.674);
-    --hover-color: rgb(255, 174, 0);
-    --background-hover-color: #000000c9;
-    --border: #242323;
-    ;
+  --primary-color: #edb10c;
+  --secondary-color: #e0ddd9;
+  --secondary-background-hover-color: rgba(255, 229, 174, 0.674);
+  --hover-color: rgb(255, 174, 0);
+  --background-hover-color: #000000c9;
+  --border: #242323;
+}
+/* ✅ Toastify – שמירה על טוסט יציב ומרוכז */
+.Toastify__toast-container--top-center {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  top: 1.5rem !important;
+  z-index: 999999 !important;
+}
+
+/* ✅ לוודא שאין קפיצות גם על toast עצמו */
+.Toastify__toast {
+  margin: 0 auto !important;
+  padding: 1.8rem;
+  pointer-events: auto;
 }

@@ -18,6 +18,9 @@ const NavBar = () => {
     const location = useLocation();
     const [searchError, setSearchError] = useState('');
     const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
+    const [loadingUser, setLoadingUser] = useState(true);
+
+    console.log("🧑‍💻 user.userType =", user?.userType);
 
 
     const navigate = useNavigate();
@@ -26,6 +29,17 @@ const NavBar = () => {
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
     };
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+                setLoadingUser(false);
+            });
+            return () => unsubscribe();
+        };
+        checkAuth();
+    }, []);
+
 
     useEffect(() => {
         const handleResize = () => {
@@ -145,7 +159,7 @@ const NavBar = () => {
                         <i className="fa fa-search icon-style"></i>
                     </a>
 
-                    {(user || JSON.parse(localStorage.getItem('user'))) ? (
+                    {!loadingUser && user ? (
                         <div
                             className="user-dropdown"
                             onMouseEnter={() => setUserDropdownVisible(true)}

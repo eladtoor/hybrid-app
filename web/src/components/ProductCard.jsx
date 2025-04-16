@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../redux/slices/cartSlice';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
+import { toast } from 'react-toastify';
+
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
@@ -183,18 +185,22 @@ const ProductCard = ({ product }) => {
 
     const handleAddToCart = () => {
         if (!auth.currentUser) {
-            setShowLoginAlert(true);
-            setTimeout(() => setShowLoginAlert(false), 3000);
+            toast.error("⚠️ יש להתחבר כדי להוסיף מוצרים לעגלה");
+
             return;
         }
 
         if (product.quantities && product.quantities.length > 0 && !selectedQuantity) {
-            alert("אנא בחר כמות לפני הוספה לעגלה.");
+
+            toast.error("אנא בחר כמות לפני הוספה לעגלה.");
+
             return;
         }
 
         if (product.materialGroup === "Gypsum and Tracks" && craneUnload === null) {
-            alert("אנא בחר האם דרושה פריקת מנוף.");
+            toast.error("אנא בחר האם דרושה פריקת מנוף.");
+
+
             return;
         }
 
@@ -273,11 +279,10 @@ const ProductCard = ({ product }) => {
 
         setComment("");
         setShowModal(false);
-        setShowSuccessMessage(true);
 
-        setTimeout(() => {
-            setShowSuccessMessage(false);
-        }, 3000);
+        toast.success("✅ המוצר נוסף לעגלה בהצלחה");
+
+
     };
 
 
@@ -294,7 +299,7 @@ const ProductCard = ({ product }) => {
     return (
         <>
             <div
-                className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer p-3 flex flex-col w-60"
+                className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg  cursor-pointer p-3 flex flex-col w-60"
                 onClick={toggleModal}
             >
                 {/* הנחה */}
@@ -341,9 +346,13 @@ const ProductCard = ({ product }) => {
             {showModal && (
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] p-4"
-                    onClick={(e) =>
-                        e.target.className.includes('bg-black') && toggleModal()
-                    }
+                    onClick={(e) => {
+                        // תנאי מדויק – סגור רק אם באמת לחצו על הרקע של המודל, לא על טוסט
+                        if (e.target === e.currentTarget) {
+                            toggleModal();
+                        }
+                    }}
+
                 >
                     <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative max-h-[90vh] overflow-y-auto z-[1100]">
                         {/* כפתור סגירה */}

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { setUser } from "../redux/reducers/userReducer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom"; // ✅ הוספנו useSearchParams
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -10,6 +10,7 @@ const RegisterPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const auth = getAuth();
+    const [searchParams] = useSearchParams(); // ✅
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -26,12 +27,20 @@ const RegisterPage = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
+            // ✅ ניתוח פרמטר ref
+            const refParam = searchParams.get("ref");
+            const referredBy = refParam?.startsWith("agent-")
+                ? refParam.replace(/^agent-/, "").split("-")[0]
+                : null;
+
             const newUser = {
                 uid: user.uid,
                 email: user.email,
                 name: "",
                 phone: "",
                 isAdmin: false,
+                userType: "user",
+                referredBy: referredBy || null, // ✅ שמירת מזהה הסוכן אם קיים
             };
 
             await setDoc(doc(db, "users", user.uid), newUser);
@@ -64,8 +73,6 @@ const RegisterPage = () => {
         }
         setLoading(false);
     };
-
-
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
