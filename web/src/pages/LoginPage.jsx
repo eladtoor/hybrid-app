@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+
 import {
     getAuth,
     signInWithPopup,
@@ -26,6 +28,15 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
 
     const refParam = searchParams.get("ref");
+
+    const user = useSelector((state) => state.user.user);
+
+    useEffect(() => {
+        if (user?.uid) {
+            navigate("/");
+        }
+    }, [user, navigate]);
+
 
     const handleGoogleSignIn = async () => {
         try {

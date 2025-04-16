@@ -11,15 +11,6 @@ const UserProfile = () => {
 
     const user = useSelector((state) => state.user.user);
 
-    const getBaseUrl = () => {
-        return process.env.REACT_APP_BASE_URL || 'http://localhost:3000/';
-    };
-
-
-    console.log(getBaseUrl());
-
-
-
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -101,6 +92,7 @@ const UserProfile = () => {
 
     if (loading) return <p>טוען נתונים...</p>;
     if (!formData) return <p>אין נתונים להציג. אנא התחבר.</p>;
+
     return (
         <div className="max-w-lg mx-auto mt-28 p-6 bg-white shadow-md rounded-lg text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">הפרופיל שלי</h2>
@@ -118,7 +110,6 @@ const UserProfile = () => {
                     <p><strong>כניסה:</strong> {isEditing ? <input type="text" name="entrance" value={formData.address?.entrance || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.entrance}</p>
                 </div>
 
-                {/* Referral Link for Agents */}
                 {formData.userType === 'סוכן' && (
                     <div className="mt-6 p-4 bg-gray-200 rounded-md">
                         <h3 className="text-lg font-semibold">קישור הזמנה שלך</h3>
@@ -127,16 +118,16 @@ const UserProfile = () => {
                         {formData.uid && (
                             <div className="flex items-center justify-between mt-3">
                                 <a
-                                    href={`${getBaseUrl()}login?ref=agent-${formData.uid}`}
+                                    href={`${window.location.origin}/login?ref=agent-${formData.uid}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-blue-600 underline truncate"
                                 >
-                                    {`${getBaseUrl()}login?ref=agent-${formData.uid}`}
+                                    {`${window.location.origin}/login?ref=agent-${formData.uid}`}
                                 </a>
 
                                 <button
-                                    onClick={() => handleCopyToClipboard(`${getBaseUrl()}login?ref=agent-${formData.uid}`)}
+                                    onClick={() => handleCopyToClipboard(`${window.location.origin}/login?ref=agent-${formData.uid}`)}
                                     className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition"
                                 >
                                     העתק קישור
@@ -145,10 +136,6 @@ const UserProfile = () => {
                         )}
                     </div>
                 )}
-
-
-
-
             </div>
 
             <button onClick={handleEditToggle} className="mt-6 bg-yellow-500 text-white px-6 py-2 rounded-md hover:bg-yellow-600 transition">{isEditing ? "ביטול" : "ערוך"}</button>
