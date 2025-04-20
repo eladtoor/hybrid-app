@@ -39,6 +39,7 @@ import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import TestCrash from "./pages/TestCrash";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { maybeFetchProducts } from "./redux/actions/productActions";
+import { maybeFetchCategories } from "./redux/actions/categoryActions.js";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -71,7 +72,7 @@ function App() {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(fetchCategories());
+    dispatch(maybeFetchCategories());
     dispatch(maybeFetchProducts());
 
     const handleWebSocketMessage = (event) => {

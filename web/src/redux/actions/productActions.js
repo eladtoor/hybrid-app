@@ -71,7 +71,7 @@ export const maybeFetchProducts = () => async (dispatch) => {
   const lastFetched = localStorage.getItem("productsLastFetched");
 
   const isExpired =
-    !lastFetched || Date.now() - Number(lastFetched) > 1 * 60 * 1000; // 1 דקות
+    !lastFetched || Date.now() - Number(lastFetched) > 30 * 60 * 1000; // 1 דקות
 
   if (cached) {
     dispatch({

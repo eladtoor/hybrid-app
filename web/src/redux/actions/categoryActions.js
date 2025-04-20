@@ -1,4 +1,6 @@
 export const fetchCategories = () => async (dispatch) => {
+  localStorage.setItem("categoriesLastFetched", Date.now());
+
   dispatch({ type: "FETCH_CATEGORIES_REQUEST" });
 
   try {
@@ -33,5 +35,26 @@ export const fetchCategories = () => async (dispatch) => {
   } catch (error) {
     console.error("❌ Error Fetching Categories:", error);
     dispatch({ type: "FETCH_CATEGORIES_FAILURE", payload: error.message });
+  }
+};
+
+export const maybeFetchCategories = () => async (dispatch) => {
+  const cached = localStorage.getItem("categories");
+  const lastFetched = localStorage.getItem("categoriesLastFetched");
+
+  const isExpired =
+    !lastFetched || Date.now() - Number(lastFetched) > 30 * 60 * 1000;
+
+  if (cached) {
+    dispatch({
+      type: "SET_CATEGORIES_FROM_STORAGE",
+      payload: JSON.parse(cached),
+    });
+  }
+
+  if (!cached || isExpired) {
+    console.log("Update happening");
+
+    dispatch(fetchCategories());
   }
 };
