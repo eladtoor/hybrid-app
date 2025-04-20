@@ -37,8 +37,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { setUser } from "./redux/reducers/userReducer";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 import TestCrash from "./pages/TestCrash";
-
 import ErrorBoundary from "./components/ErrorBoundary";
+import { maybeFetchProducts } from "./redux/actions/productActions";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -71,28 +71,9 @@ function App() {
   }, [dispatch]);
 
   useEffect(() => {
-    const storedCategories = localStorage.getItem("categories");
-    const storedProducts = localStorage.getItem("products");
+    dispatch(fetchCategories());
+    dispatch(maybeFetchProducts());
 
-    if (storedCategories) {
-      dispatch({
-        type: "SET_CATEGORIES_FROM_STORAGE",
-        payload: JSON.parse(storedCategories),
-      });
-    } else {
-      dispatch(fetchCategories());
-    }
-
-    if (storedProducts) {
-      dispatch({
-        type: "SET_PRODUCTS_FROM_STORAGE",
-        payload: JSON.parse(storedProducts),
-      });
-    } else {
-      dispatch(fetchProducts());
-    }
-
-    // ✅ WebSocket for real-time updates (with cleanup)
     const handleWebSocketMessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "CATEGORIES_UPDATED") {

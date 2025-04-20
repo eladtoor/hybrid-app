@@ -271,6 +271,7 @@ const ProductCard = ({ product }) => {
             image: product.תמונות,
             craneUnload: product.materialGroup === "Gypsum and Tracks" ? craneUnload : null,
             quantities: product.quantities || [], // ✅ אם קיימות
+            materialGroup: product.materialGroup || "",
         };
 
         console.log("🧼 Adding clean cart item:", cleanCartItem);

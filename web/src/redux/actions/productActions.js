@@ -59,9 +59,29 @@ export const fetchProducts = () => async (dispatch) => {
     dispatch({ type: "FETCH_PRODUCTS_SUCCESS", payload: data });
 
     localStorage.setItem("products", JSON.stringify(data)); // שמירה ל-localStorage
+    localStorage.setItem("productsLastFetched", Date.now());
   } catch (error) {
     console.error("❌ FetchProducts Failed:", error);
     dispatch({ type: "FETCH_PRODUCTS_FAILURE", payload: error.message });
+  }
+};
+
+export const maybeFetchProducts = () => async (dispatch) => {
+  const cached = localStorage.getItem("products");
+  const lastFetched = localStorage.getItem("productsLastFetched");
+
+  const isExpired =
+    !lastFetched || Date.now() - Number(lastFetched) > 1 * 60 * 1000; // 1 דקות
+
+  if (cached) {
+    dispatch({
+      type: "SET_PRODUCTS_FROM_STORAGE",
+      payload: JSON.parse(cached),
+    });
+  }
+
+  if (!cached || isExpired) {
+    dispatch(fetchProducts()); // יביא מהשרת
   }
 };
 

@@ -38,6 +38,7 @@ const CartPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    console.log(cartItems.map(item => ({ name: item.name, group: item.materialGroup, price: item.unitPrice, quantity: item.quantity })));
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -435,6 +436,8 @@ const CartPage = () => {
                     <div className="progress-ticket">
                         <h2>השג 100% בכל קבוצת חומרים לקבלת הובלה חינם!</h2>
                         {materialGroups.map((group) => {
+                            console.log("🔍 Progress Data:", progressData);
+
                             const progress = progressData[group.groupName] || { totalInCart: 0, percentage: 0 };
                             const remainingAmount = Math.max(group.minPrice - progress.totalInCart, 0);
                             return (
