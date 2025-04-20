@@ -20,6 +20,8 @@ const UserManagement = () => {
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [whatsappMessage, setWhatsappMessage] = useState('');
   const [isCreditLine, setIsCreditLine] = useState(false); // הוסף ל-state
+  const [filterType, setFilterType] = useState("all");
+
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -207,34 +209,93 @@ const UserManagement = () => {
       }
     }
   };
+  const filteredUsers = users.filter((user) => {
+    if (filterType === "agents") return user.userType === "סוכן" || user.userType === "agent";
+    if (filterType === "regular") return user.userType !== "סוכן" && user.userType !== "agent";
+    if (filterType === "credit") return user.isCreditLine === true;
+    if (filterType === "admins") return user.isAdmin === true;
+    return true; // "all"
+  });
 
 
 
   return (
     <div className="user-management p-40">
       <h1 className='text-3xl font-bold text-gray-900 text-right mb-6 pr-4 border-r-4 border-primary'>ניהול משתמשים</h1>
-      <table className="user-table">
-        <thead>
-          <tr>
-            <th>שם משתמש</th>
-            <th>אימייל</th>
-            <th>טלפון</th>
-            <th>כתובת</th>
-            <th>סוג משתמש</th>
-            <th>קו אשראי</th>
+      <div className="flex gap-4 mb-4 items-center text-lg">
+        <label>
+          <input
+            type="radio"
+            value="all"
+            checked={filterType === "all"}
+            onChange={() => setFilterType("all")}
+          />
+          כל המשתמשים
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="agents"
+            checked={filterType === "agents"}
+            onChange={() => setFilterType("agents")}
+          />
+          סוכנים
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="regular"
+            checked={filterType === "regular"}
+            onChange={() => setFilterType("regular")}
+          />
+          רגילים
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="credit"
+            checked={filterType === "credit"}
+            onChange={() => setFilterType("credit")}
+          />
+          קו אשראי
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="admins"
+            checked={filterType === "admins"}
+            onChange={() => setFilterType("admins")}
+          />
+          אדמינים
+        </label>
+      </div>
 
-            <th>הנחת סוכן כללית</th>
-            <th>פעולות</th>
-            <th>לקוחות דרכו</th>
+
+      <p className="text-right text-sm text-gray-700 mb-2">
+        מציג {filteredUsers.length} מתוך {users.length} משתמשים
+      </p>
+
+      <table className="min-w-full table-auto border border-gray-300 shadow-md rounded-lg overflow-hidden text-sm text-gray-800 bg-white">
+        <thead className="bg-gray-100 text-gray-800 font-bold text-center">
+          <tr>
+            <th className="border border-gray-300 px-4 py-2">שם משתמש</th>
+            <th className="border border-gray-300 px-4 py-2">אימייל</th>
+            <th className="border border-gray-300 px-4 py-2">טלפון</th>
+            <th className="border border-gray-300 px-4 py-2">כתובת</th>
+            <th className="border border-gray-300 px-4 py-2">סוג משתמש</th>
+            <th className="border border-gray-300 px-4 py-2">קו אשראי</th>
+            <th className="border border-gray-300 px-4 py-2">הנחת סוכן כללית</th>
+            <th className="border border-gray-300 px-4 py-2">פעולות</th>
+            <th className="border border-gray-300 px-4 py-2">לקוחות דרכו</th>
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
-            <tr key={user.id}>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              <td>{user.phone || 'לא זמין'}</td>
-              <td>
+          {filteredUsers.map((user, index) => (
+            <tr key={user.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+              <td className="border border-gray-200 px-3 py-2 text-center">{user.name}</td>
+              <td className="border border-gray-200 px-3 py-2 text-center">{user.email}</td>
+              <td className="border border-gray-200 px-3 py-2 text-center">{user.phone || 'לא זמין'}</td>
+              <td className="border border-gray-200 px-3 py-2 text-center">
                 {user.address
                   ? [
                     user.address.city && `${user.address.city}`,
@@ -247,29 +308,31 @@ const UserManagement = () => {
                     .join(', ')
                   : 'לא זמין'}
               </td>
-              <td>{user.userType === 'סוכן' || user.userType === 'agent' ? 'סוכן' : 'רגיל'}</td>
-              <td>{user.isCreditLine ? 'כן' : 'לא'}</td> {/* הצגת קו אשראי */}
-              <td>
+              <td className="border border-gray-200 px-3 py-2 text-center">
+                {user.userType === 'סוכן' || user.userType === 'agent' ? 'סוכן' : 'רגיל'}
+              </td>
+              <td className="border border-gray-200 px-3 py-2 text-center">{user.isCreditLine ? 'כן' : 'לא'}</td>
+              <td className="border border-gray-200 px-3 py-2 text-center">
                 {user.userType === 'סוכן'
                   ? `${user.cartDiscount || 0}%`
                   : 'לא זמין'}
               </td>
-              <td className="action-buttons">
-                <button className="btn-outline m-2 text-grayish" onClick={() => handleEditUser(user)}>עריכה</button>
-                <button className="btn-primary m-2" onClick={() => handleViewPurchaseHistory(user.id, user.name)}>
+              <td className="border border-gray-200 px-3 py-2 text-center space-x-2 space-y-2">
+                <button className="btn-outline m-1 text-grayish" onClick={() => handleEditUser(user)}>עריכה</button>
+                <button className="btn-primary m-1" onClick={() => handleViewPurchaseHistory(user.id, user.name)}>
                   הצג היסטוריית רכישות
                 </button>
               </td>
-              <td>
+              <td className="border border-gray-200 px-3 py-2 text-center">
                 {user.userType === 'סוכן'
                   ? referralCounts[user.id] || 0
                   : 'לא זמין'}
               </td>
-
             </tr>
           ))}
         </tbody>
       </table>
+
 
       <div className="whatsapp-settings">
         <h2 className='text-3xl font-bold text-gray-900 text-right mb-6 pr-4 border-r-4 border-primary'>עריכת פרטי וואטסאפ</h2>

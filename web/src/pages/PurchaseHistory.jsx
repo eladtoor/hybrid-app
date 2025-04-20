@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 
 const PurchaseHistory = () => {
@@ -109,41 +109,28 @@ const PurchaseHistory = () => {
                                             <td className="p-3 text-center">{item.sku}</td>
                                             <td className="p-3 text-right">
                                                 {item.selectedAttributes ? (
-                                                    Object.entries(item.selectedAttributes).map(([key, value]) => {
-                                                        let price = 0;
-
-                                                        if (Array.isArray(item.variations)) {
-                                                            const matchedVariation = item.variations.find(variation =>
-                                                                variation.attributes?.[key]?.value === value
-                                                            );
-                                                            if (matchedVariation) {
-                                                                price = parseFloat(matchedVariation.attributes[key]?.price || 0);
-                                                            }
-                                                        }
-
-                                                        return (
-                                                            <div key={key}>
-                                                                <strong>{key}:</strong> {value}
-                                                                {price > 0 && (
-                                                                    <span className="text-black-500 text-s"> (₪{price.toFixed(2)})</span>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })
+                                                    Object.entries(item.selectedAttributes).map(([key, attr]) => (
+                                                        <div key={key}>
+                                                            <strong>{key}:</strong> {attr?.value || "-"}
+                                                            {attr?.price > 0 && (
+                                                                <span className="text-black-500 text-s"> (₪{attr.price.toFixed(2)})</span>
+                                                            )}
+                                                        </div>
+                                                    ))
                                                 ) : (
                                                     "-"
                                                 )}
-
                                             </td>
                                             <td className="p-3 text-center">{item.comment || "-"}</td>
                                             <td className="p-3 text-center">
                                                 {item.craneUnload === true ? "כן" : item.craneUnload === false ? "לא" : "-"}
                                             </td>
-                                            <td className="p-3 text-center">₪{item.unitPrice?.toFixed(2) || "0.00"}</td>
+                                            <td className="p-3 text-center">₪{(item.unitPrice || item.price || 0).toFixed(2)}</td>
                                             <td className="p-3 text-center">{item.quantity}</td>
-                                            <td className="p-3 text-center">₪{(item.unitPrice * item.quantity).toFixed(2)}</td>
+                                            <td className="p-3 text-center">₪{((item.unitPrice || item.price || 0) * item.quantity).toFixed(2)}</td>
                                         </tr>
                                     ))}
+
                                 </tbody>
                             </table>
                         </div>

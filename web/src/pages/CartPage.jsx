@@ -169,7 +169,9 @@ const CartPage = () => {
                 quantity: item.quantity || 1,
                 price: item.unitPrice || item.price || 0,
                 comment: item.comment || "",
-                selectedAttributes: item.selectedAttributes || {}
+                selectedAttributes: item.selectedAttributes || {},
+                packageSize: item.packageSize || item.quantity || 1,
+                quantities: item.quantities
             })),
             totalPrice: finalTotalPrice,
             shippingCost: transportationCosts, // ✅ מחיר משלוח
@@ -330,10 +332,57 @@ const CartPage = () => {
         }
     };
 
-    const handleConfirmOrder = () => {
+
+
+    const handleConfirmOrder = async () => {
         setIsModalOpen(false);
-        handleCheckout(); // Complete order if user confirms
+
+        const purchaseData = {
+            purchaseId: `${Date.now()}`,
+            cartItems: cartItems.map(item => ({
+                _id: item._id,
+                sku: item.sku || item['מק"ט'] || "לא זמין",
+                name: item.name || item.baseName || "לא זמין",
+                baseName: item.baseName || "",
+                quantity: item.quantity || 1,
+                price: item.unitPrice || item.price || 0, // ✅ סכום ליחידה
+                unitPrice: item.unitPrice || item.price || 0, // ✅ תואם למה ש-<PurchaseHistory> מצפה
+                comment: item.comment || "",
+                packageSize: item.packageSize || item.quantity || 1,
+                quantities: item.quantities,
+
+                selectedAttributes: item.selectedAttributes || {},
+                craneUnload: item.craneUnload ?? null, // ✅ חשוב כדי להציג "כן / לא" בטבלה
+            })),
+            totalPrice: finalTotalPrice,
+            shippingCost: transportationCosts,
+            craneUnloadCost: craneUnloadFee,
+            date: new Date().toISOString(),
+            status: "pending",
+            shippingAddress: temporaryAddress,
+            isCreditLine: true,
+            paymentMethod: "creditLine"
+        };
+
+        try {
+            const userRef = doc(db, "users", user.uid);
+            const purchasesRef = collection(userRef, "purchases");
+
+            await addDoc(purchasesRef, purchaseData);
+
+
+            dispatch(setCartItems([]));
+            saveCartToFirestore([]);
+
+            navigate("/order-confirmation", { state: { orderData: purchaseData } });
+        } catch (error) {
+            console.error("שגיאה בשמירת ההזמנה:", error);
+        }
     };
+
+
+
+
 
     const handleCancelOrder = () => {
         setIsModalOpen(false); // Close modal

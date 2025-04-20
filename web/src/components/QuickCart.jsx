@@ -36,16 +36,21 @@ const QuickCart = () => {
 
     const mergeProductData = (product) => {
         const productDetails = products.find((p) => p._id === product._id) || {};
+        console.log(product);
+
         return {
             ...product,
-            תמונות: productDetails.תמונות || "/default-image.jpg",
+            image: productDetails.תמונות || "/default-image.jpg",
             unitPrice: product.price || productDetails.מחיר || 0,
             sku: product.sku || productDetails.sku || "לא זמין",
             name: product.name || productDetails.שם || "ללא שם",
             quantity: product.quantity || 1,
+            packageSize: product.packageSize || product.quantities || 1, // ✅ פה הקסם
+
             cartItemId: `${product._id}-${Date.now()}`,
         };
     };
+
 
     const handleAddAllToCart = async () => {
         const mergedCartItems = recentPurchases.map((product) => mergeProductData(product));
@@ -69,7 +74,7 @@ const QuickCart = () => {
                             return (
                                 <li key={mergedItem.cartItemId} className="flex items-center justify-between py-3">
                                     <div className="flex items-center">
-                                        <img src={mergedItem.תמונות} alt={mergedItem.name} className="w-16 h-16 object-cover rounded-md mr-4" />
+                                        <img src={mergedItem.image} alt={mergedItem.name} className="w-16 h-16 object-cover rounded-md mr-4" />
                                         <div>
                                             <h3 className="text-sm font-semibold">{mergedItem.name}</h3>
                                             <p className="text-gray-500">מק"ט: {mergedItem.sku}</p>
