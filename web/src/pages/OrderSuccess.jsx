@@ -13,6 +13,7 @@ const OrderSuccess = () => {
     const dispatch = useDispatch();
     const [verificationStatus, setVerificationStatus] = useState("pending");
     const [currentUser, setCurrentUser] = useState(null);
+    const [saleDetails, setSaleDetails] = useState(null);
 
     const shouldSkipVerification = false;
 
@@ -31,21 +32,11 @@ const OrderSuccess = () => {
     }, []);
 
     useEffect(() => {
+        if (!currentUser) return; // מחכה שהמשתמש יטען
+
         if (shouldSkipVerification) {
             console.warn("⚠️ Skipping verification manually (dev mode)");
             setVerificationStatus("success");
-
-            const purchaseData = {
-                purchaseId: "test-" + Date.now(),
-                date: new Date().toISOString(),
-                status: "completed"
-            };
-
-            if (currentUser) {
-                const purchasesRef = collection(db, "users", currentUser.uid, "purchases");
-                addDoc(purchasesRef, purchaseData);
-            }
-
             dispatch(setCartItems([]));
             saveCartToFirestore([]);
             return;
@@ -53,11 +44,6 @@ const OrderSuccess = () => {
 
         const verifyPayment = async () => {
             const privateToken = localStorage.getItem("SalePrivateToken");
-
-            const storedCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
-            const totalPrice = parseFloat(localStorage.getItem("finalTotalPrice") || "0");
-            const shippingCost = parseFloat(localStorage.getItem("shippingCost") || "0");
-            const craneUnloadCost = parseFloat(localStorage.getItem("craneUnloadCost") || "0");
 
             if (!privateToken) {
                 console.error("❌ SalePrivateToken is missing from localStorage.");
@@ -74,6 +60,7 @@ const OrderSuccess = () => {
 
                 const data = await response.json();
                 console.log("🔍 Response from SaleDetails:", data);
+                setSaleDetails(data); // שומר את הנתונים לתצוגה
 
                 if (data.TransactionStatus === 0) {
                     setVerificationStatus("success");
@@ -82,10 +69,6 @@ const OrderSuccess = () => {
                         purchaseId: privateToken,
                         date: new Date().toISOString(),
                         status: "completed",
-                        cartItems: storedCart,
-                        totalPrice: totalPrice,
-                        shippingCost: shippingCost,
-                        craneUnloadCost: craneUnloadCost,
                         customer: {
                             firstName: data.CustomerFirstName || "",
                             lastName: data.CustomerLastName || "",
@@ -94,12 +77,8 @@ const OrderSuccess = () => {
                         payments: data.NumOfPayment || 1
                     };
 
-                    if (currentUser) {
-                        const purchasesRef = collection(db, "users", currentUser.uid, "purchases");
-                        await addDoc(purchasesRef, purchaseData);
-                    } else {
-                        console.warn("⚠️ No user, purchase not saved.");
-                    }
+                    const purchasesRef = collection(db, "users", currentUser.uid, "purchases");
+                    await addDoc(purchasesRef, purchaseData);
 
                     dispatch(setCartItems([]));
                     saveCartToFirestore([]);
@@ -123,6 +102,71 @@ const OrderSuccess = () => {
                 <>
                     <h1 className="text-3xl font-bold text-green-600">✅ התשלום הצליח!</h1>
                     <p className="text-lg text-gray-700 mt-4">ההזמנה שלך נשמרה בהצלחה.</p>
+
+                    {/* הצגת פירוט ההזמנה */}
+                    {saleDetails && (
+                        <>
+                            <h2 className="text-xl font-bold mt-6">פרטי ההזמנה:</h2>
+                            <div className="mt-4 space-y-4 text-right">
+                                {/* טבלת פירוט הזמנה */}
+                                <div className="mt-6 text-right">
+                                    <table className="w-full border-collapse border border-gray-300">
+                                        <thead className="bg-gray-100">
+                                            <tr>
+                                                <th className="border border-gray-300 p-2">תיאור</th>
+                                                <th className="border border-gray-300 p-2">כמות</th>
+                                                <th className="border border-gray-300 p-2">מחיר ליחידה</th>
+                                                <th className="border border-gray-300 p-2">סה"כ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {saleDetails.Items.filter(item => item.ItemCatalog !== "SUMMARY_VAT").map((item, index) => (
+                                                <tr key={index}>
+                                                    <td className="border border-gray-300 p-2">{item.Description}</td>
+                                                    <td className="border border-gray-300 p-2 text-center">{item.Quantity}</td>
+                                                    <td className="border border-gray-300 p-2 text-center">₪{item.UnitPrice.toFixed(2)}</td>
+                                                    <td className="border border-gray-300 p-2 text-center">₪{(item.UnitPrice * item.Quantity).toFixed(2)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+
+                                    {/* סיכום עלויות */}
+                                    <div className="mt-4 text-lg space-y-1 w-full flex flex-col items-center">
+                                        <div className="w-64 bg-gray-100 p-4 rounded-lg shadow">
+                                            {/* סה"כ לפני מע"מ */}
+                                            <p>סה"כ ללא מע"מ: ₪{(saleDetails.Amount - saleDetails.Items.find(item => item.ItemCatalog === "SUMMARY_VAT")?.UnitPrice || 0).toFixed(2)}</p>
+
+                                            {/* שורת המע"מ */}
+                                            {saleDetails.Items.find(item => item.ItemCatalog === "SUMMARY_VAT") && (
+                                                <p>מע"מ (18%): ₪{saleDetails.Items.find(item => item.ItemCatalog === "SUMMARY_VAT").UnitPrice.toFixed(2)}</p>
+                                            )}
+
+                                            {/* סה"כ כולל */}
+                                            <p className="font-bold text-red-600">סה"כ לתשלום: ₪{(saleDetails.Amount).toFixed(2)}</p>
+                                        </div>
+                                        {saleDetails.DocumentURL && (
+
+                                            <a
+                                                href={saleDetails.DocumentURL}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="mt-4 inline-block bg-green-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-green-700 transition"
+                                            >
+                                                הורד חשבונית PDF
+                                            </a>
+                                        )}
+                                    </div>
+
+
+                                </div>
+
+
+                            </div>
+
+                        </>
+                    )}
+
                     <button
                         onClick={() => navigate("/")}
                         className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition"

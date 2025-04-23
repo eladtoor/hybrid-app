@@ -173,7 +173,7 @@ const CartPage = () => {
                 packageSize: item.packageSize || item.quantity || 1,
                 quantities: item.quantities
             })),
-            totalPrice: finalTotalPrice,
+            totalPrice: finalTotalPriceWithVAT,
             shippingCost: transportationCosts, // ✅ מחיר משלוח
             craneUnloadCost: craneUnloadFee,   // ✅ תוספת מנוף
             date: new Date().toISOString(),
@@ -191,7 +191,7 @@ const CartPage = () => {
             } else {
                 // ✅ משתמש רגיל → שלח לתשלום ב-iCredit
                 localStorage.setItem("cartItems", JSON.stringify(cartItems));
-                localStorage.setItem("finalTotalPrice", finalTotalPrice.toString());
+                localStorage.setItem("finalTotalPrice", finalTotalPriceWithVAT.toString());
                 localStorage.setItem("shippingCost", transportationCosts.toString());
                 localStorage.setItem("craneUnloadCost", craneUnloadFee.toString());
                 await handlePayment(purchaseData);
@@ -210,8 +210,6 @@ const CartPage = () => {
 
         // ✅ יצירת רשימת פריטים להזמנה עם תיאור מאפיינים אם קיימים
         let items = purchaseData.cartItems.map(item => {
-            console.log(item);
-
             const name = item.baseName || item.name || "מוצר ללא שם";
             const sku = item.sku || "לא זמין";
 
@@ -219,15 +217,18 @@ const CartPage = () => {
             let attributesDescription = '';
             if (item.selectedAttributes && typeof item.selectedAttributes === 'object') {
                 const attributePairs = Object.entries(item.selectedAttributes).map(
-                    ([key, value]) => `${key}: ${value}`
+                    ([key, value]) => `${key}: ${value.value}`
                 );
                 attributesDescription = attributePairs.join(' | ');
             }
 
             // 👑 תיאור סופי קריא ובלי ירידת שורה
-            const fullDescription = attributesDescription
+            let fullDescription = attributesDescription
                 ? `${name} : ${attributesDescription}`
-                : `${name} `;
+                : `${name}`;
+            if (item.comment) {
+                fullDescription += ` ( הערה: ${item.comment} )`;
+            }
 
             return {
                 CatalogNumber: sku,
@@ -236,11 +237,6 @@ const CartPage = () => {
                 Description: fullDescription
             };
         });
-
-
-
-
-
 
         // ✅ הוספת מחיר משלוח אם קיים
         if (purchaseData.shippingCost && purchaseData.shippingCost > 0) {
@@ -262,6 +258,24 @@ const CartPage = () => {
             });
         }
 
+        // ✅ חישוב סה"כ לפני מע"מ ומע"מ
+        const totalPriceWithVAT = purchaseData.totalPrice;
+        const vatRate = 0.18;
+        const vatAmount = totalPriceWithVAT * vatRate / (1 + vatRate); // מע"מ מתוך המחיר הכולל
+        const totalPriceBeforeVAT = totalPriceWithVAT - vatAmount;
+
+        // ✅ הוספת שורות סיכום
+        items.push(
+
+            {
+                CatalogNumber: "SUMMARY_VAT",
+                Quantity: 1,
+                UnitPrice: vatAmount.toFixed(2),
+                Description: "מע\"מ (18%)"
+            },
+
+        );
+
         const requestData = {
             GroupPrivateToken: groupPrivateToken,
             Items: items,
@@ -275,7 +289,6 @@ const CartPage = () => {
             EmailAddress: user?.email || "guest@example.com"
         };
 
-        console.log("📤 Sending payment request:", requestData);
         const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
         try {
@@ -291,17 +304,8 @@ const CartPage = () => {
             console.log("🔍 iCredit Response on Create Payment:", data);
 
             if (data.success && data.paymentUrl) {
-
-
-
                 localStorage.setItem("SalePrivateToken", data.salePrivateToken); // ✅ שמור את זה!
-
-
-
-
                 window.location.href = data.paymentUrl;
-
-
             } else {
                 console.error("❌ שגיאה בקבלת URL לתשלום:", data);
                 setErrorMessage("❌ שגיאה בהפנייתך לתשלום. נסה שוב.");
@@ -311,6 +315,7 @@ const CartPage = () => {
             setErrorMessage("❌ שגיאה בלתי צפויה. נסה שוב מאוחר יותר.");
         }
     };
+
 
 
 
@@ -354,7 +359,7 @@ const CartPage = () => {
                 selectedAttributes: item.selectedAttributes || {},
                 craneUnload: item.craneUnload ?? null, // ✅ חשוב כדי להציג "כן / לא" בטבלה
             })),
-            totalPrice: finalTotalPrice,
+            totalPrice: finalTotalPriceWithVAT,
             shippingCost: transportationCosts,
             craneUnloadCost: craneUnloadFee,
             date: new Date().toISOString(),
@@ -369,6 +374,15 @@ const CartPage = () => {
             const purchasesRef = collection(userRef, "purchases");
 
             await addDoc(purchasesRef, purchaseData);
+            await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/email/send-confirmation`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    toEmail: user.email,
+                    orderData: purchaseData
+                })
+            });
+
 
 
             dispatch(setCartItems([]));
@@ -453,12 +467,18 @@ const CartPage = () => {
         const itemQuantity = item.quantity || 1;
         return acc + itemPrice * itemQuantity;
     }, 0);
+
     const craneUnloadFee = cartItems.some(item =>
         item.materialGroup === "Gypsum and Tracks" && item.craneUnload
     ) ? 250 : 0;
 
+    const vatRate = 0.18; // מע"מ 18%
 
-    const finalTotalPrice = originalTotalPrice - (originalTotalPrice * cartDiscount) / 100 + transportationCosts + craneUnloadFee;
+
+
+    const finalTotalPriceBeforeVAT = originalTotalPrice - (originalTotalPrice * cartDiscount) / 100 + transportationCosts + craneUnloadFee;
+    const vatAmount = finalTotalPriceBeforeVAT * vatRate;
+    const finalTotalPriceWithVAT = finalTotalPriceBeforeVAT + vatAmount;
 
     return (
         <div className="cart-page p-10">
@@ -532,15 +552,20 @@ const CartPage = () => {
                         {craneUnloadFee > 0 && (
                             <p style={{ color: "red", fontWeight: "bold" }}>תוספת פריקת מנוף: ₪250</p>
                         )}
-                        <p>סה"כ כולל הנחה ומשלוח: ₪{finalTotalPrice.toFixed(2)}</p>
+                        <p>סה"כ לפני מע"מ: ₪{finalTotalPriceBeforeVAT.toFixed(2)}</p>
+                        <p>מע"מ (18%): ₪{vatAmount.toFixed(2)}</p>
+                        <p><strong>סה"כ לתשלום: ₪{finalTotalPriceWithVAT.toFixed(2)}</strong></p>
                         {/* MODAL FOR CREDIT USERS */}
                         {isModalOpen && (
                             <ConfirmationModal
                                 cartItems={cartItems}
-                                finalTotalPrice={finalTotalPrice}
+                                finalTotalPrice={finalTotalPriceWithVAT}
+                                shippingCost={transportationCosts}
+                                craneUnloadCost={craneUnloadFee}
                                 onConfirm={handleConfirmOrder}
                                 onCancel={handleCancelOrder}
                             />
+
                         )}
                         <button className="btn-outline text-lg m-2" onClick={handleCheckoutClick}>{user?.isCreditLine ? 'סיום הזמנה' : 'מעבר לתשלום'}</button>
                     </div>

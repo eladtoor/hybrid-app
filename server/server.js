@@ -1,10 +1,13 @@
+require("dotenv").config();
+
+console.log("📧 GMAIL_USER:", process.env.GMAIL_USER);
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const http = require("http");
 const WebSocket = require("ws"); // Import WebSocket
-require("dotenv").config();
 const { buildCategoryStructure } = require("./controllers/categoryController");
 
 const userRoutes = require("./routes/userRoutes");
@@ -12,6 +15,7 @@ const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const materialGroupRoutes = require("./routes/materialGroupRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const emailRoutes = require("./routes/emailRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -51,6 +55,7 @@ app.use("/api", categoryRoutes);
 app.use("/api/materialGroups", materialGroupRoutes);
 
 app.use("/api/payment", paymentRoutes);
+app.use("/api/email", emailRoutes);
 
 app.use(express.static(path.join(__dirname, "../web/build")));
 app.get("*", (req, res) => {
