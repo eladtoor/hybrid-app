@@ -23,6 +23,7 @@ import {
 
 import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
+import CategoryImageManager from "../components/CategoryImageManager";
 
 
 
@@ -58,6 +59,7 @@ const AdminPanel = () => {
     const [showForm, setShowForm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [newProduct, setNewProduct] = useState(initialProductState);
+
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [quantityEnabled, setQuantityEnabled] = useState(false);
@@ -70,6 +72,7 @@ const AdminPanel = () => {
     const socketRef = useRef(null);
     const [carouselImageUrl, setCarouselImageUrl] = useState("");
     const [carouselFile, setCarouselFile] = useState(null);
+
 
 
 
@@ -263,6 +266,20 @@ const AdminPanel = () => {
 
         updatedProduct.קטגוריות = categoriesString;
 
+        const isDigitalCatalog = updatedProduct.קטגוריות.includes("קטלוגים דיגיטלים להורדה");
+
+        if (isDigitalCatalog) {
+            updatedProduct.materialGroup = null;
+            updatedProduct.סוג = 'simple';
+            updatedProduct.quantities = [];
+            updatedProduct.allowComments = false;
+            updatedProduct['מחיר רגיל'] = 0;
+            updatedProduct['מחיר מבצע'] = 0;
+            updatedProduct.variations = [];
+            updatedProduct.attributes = [];
+        }
+
+
         if (Number(updatedProduct['מחיר מבצע']) === 0 || !updatedProduct['מחיר מבצע']) {
             delete updatedProduct['מחיר מבצע'];
         }
@@ -410,6 +427,12 @@ const AdminPanel = () => {
     return (
         <div className="admin-panel p-32">
             <h1 className='text-4xl inline-block font-bold text-gray-900 mt-6 pr-4 border-r-4 border-primary'>פאנל ניהול</h1>
+            <div>
+                <h2 className="text-xl font-bold mb-4">ניהול תמונות קטגוריות</h2>
+                <CategoryImageManager organizedCategories={organizedCategories} />
+
+            </div>
+
             <h2 className='text-xl mb-4'>ניהול מחירי מינימום לקבוצות חומרים</h2>
             {loading ? (
                 <p>טוען...</p>
@@ -533,252 +556,259 @@ const AdminPanel = () => {
                         <span className="close modal-close" onClick={() => setShowForm(false)}>&times;</span>
                         <h2 className='section-title-rtl'>{isEditing ? "ערוך מוצר" : "הוסף מוצר חדש"}</h2>
                         <form onSubmit={handleSubmit}>
-                            <label>
-                                מזהה:
-                                <input type="number" name="מזהה" value={newProduct.מזהה} onChange={(e) => handleInputChange(e, setNewProduct)} required />
-                            </label>
-                            <label>
-                                קבוצת חומרים:
-                                <select
-                                    name="materialGroup"
-                                    value={newProduct.materialGroup || ''}
-                                    onChange={(e) =>
-                                        setNewProduct((prev) => ({
-                                            ...prev,
-                                            materialGroup: e.target.value
-                                        }))
-                                    }
-                                    required
-                                >
-                                    <option value="">בחר קבוצת חומרים</option>
-                                    <option value="Colors and Accessories">צבעים ומוצרים נלווים</option>
-                                    <option value="Powders">אבקות (דבקים וטייח)</option>
-                                    <option value="Gypsum and Tracks">גבס ומסלולים</option>
-                                </select>
-                            </label>
-                            <label>
-                                סוג:
-                                <div className="radio-group">
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="סוג"
-                                            value="simple"
-                                            checked={newProduct.סוג === 'simple'}
-                                            onChange={(e) => handleRadioChange(e, setNewProduct)}
-                                        />
-                                        Simple
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="סוג"
-                                            value="variable"
-                                            checked={newProduct.סוג === 'variable'}
-                                            onChange={(e) => handleRadioChange(e, setNewProduct)}
-                                        />
-                                        Variable
-                                    </label>
-                                </div>
-                            </label>
+                            {/* זיהוי אם קטלוג דיגיטלי */}
+                            {(() => {
+                                const isDigitalCatalog = newProduct.קטגוריות.includes("קטלוגים דיגיטלים להורדה");
 
-                            {newProduct.סוג === 'variable' && (
-                                <>
-                                    <h3>מאפיינים</h3>
-                                    {newProduct.attributes.map((attribute, index) => (
-                                        <div key={index} className="attribute-container">
-                                            <label>
-                                                שם מאפיין:
-                                                <input
-                                                    type="text"
-                                                    value={attribute.name}
-                                                    onChange={(e) =>
-                                                        handleAttributeChange(index, 'name', e.target.value, newProduct, setNewProduct)
-                                                    }
-                                                    required
-                                                />
-                                            </label>
+                                return (
+                                    <>
+                                        {!isDigitalCatalog && (
+                                            <>
+                                                <label>
+                                                    קבוצת חומרים:
+                                                    <select
+                                                        name="materialGroup"
+                                                        value={newProduct.materialGroup || ''}
+                                                        onChange={(e) =>
+                                                            setNewProduct((prev) => ({
+                                                                ...prev,
+                                                                materialGroup: e.target.value
+                                                            }))
+                                                        }
+                                                        required={!isDigitalCatalog}
+                                                    >
+                                                        <option value="">בחר קבוצת חומרים</option>
+                                                        <option value="Colors and Accessories">צבעים ומוצרים נלווים</option>
+                                                        <option value="Powders">אבקות (דבקים וטייח)</option>
+                                                        <option value="Gypsum and Tracks">גבס ומסלולים</option>
+                                                    </select>
+                                                </label>
 
-                                            {attribute.values.map((valueObj, valueIndex) => (
-                                                <div key={valueIndex} className="attribute-values">
-                                                    <label>
-                                                        ערך מאפיין:
-                                                        <input
-                                                            type="text"
-                                                            value={valueObj.value}
-                                                            onChange={(e) =>
-                                                                handleAttributeValueChange(index, valueIndex, 'value', e.target.value, newProduct, setNewProduct)
-                                                            }
-                                                            required
-                                                        />
-                                                    </label>
-                                                    <label>
-                                                        מחיר מאפיין:
-                                                        <input
-                                                            type="number"
-                                                            value={valueObj.price}
-                                                            onChange={(e) =>
-                                                                handleAttributeValueChange(index, valueIndex, 'price', e.target.value, newProduct, setNewProduct)
-                                                            }
-                                                            required
-                                                        />
-                                                    </label>
-                                                </div>
-                                            ))}
+                                                <label>
+                                                    סוג:
+                                                    <div className="radio-group">
+                                                        <label>
+                                                            <input
+                                                                type="radio"
+                                                                name="סוג"
+                                                                value="simple"
+                                                                checked={newProduct.סוג === 'simple'}
+                                                                onChange={(e) => handleRadioChange(e, setNewProduct)}
+                                                            />
+                                                            Simple
+                                                        </label>
+                                                        <label>
+                                                            <input
+                                                                type="radio"
+                                                                name="סוג"
+                                                                value="variable"
+                                                                checked={newProduct.סוג === 'variable'}
+                                                                onChange={(e) => handleRadioChange(e, setNewProduct)}
+                                                            />
+                                                            Variable
+                                                        </label>
+                                                    </div>
+                                                </label>
 
-                                            {/* 👇 הכפתור להוספת ערך מאפיין בתוך כל מאפיין */}
-                                            <div className="attribute-buttons">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleAddAttributeValue(index, newProduct, setNewProduct)}
-                                                >
-                                                    הוסף ערך מאפיין
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                                {newProduct.סוג === 'variable' && (
+                                                    <>
+                                                        <h3>מאפיינים</h3>
+                                                        {newProduct.attributes.map((attribute, index) => (
+                                                            <div key={index} className="attribute-container">
+                                                                <label>
+                                                                    שם מאפיין:
+                                                                    <input
+                                                                        type="text"
+                                                                        value={attribute.name}
+                                                                        onChange={(e) =>
+                                                                            handleAttributeChange(index, 'name', e.target.value, newProduct, setNewProduct)
+                                                                        }
+                                                                        required
+                                                                    />
+                                                                </label>
 
-                                    {/* 👇 הכפתור להוספת שם מאפיין - מחוץ ללולאה */}
-                                    <div className="attribute-buttons">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleAddAttribute(newProduct, setNewProduct)}
-                                        >
-                                            הוסף שם מאפיין
-                                        </button>
-                                    </div>
+                                                                {attribute.values.map((valueObj, valueIndex) => (
+                                                                    <div key={valueIndex} className="attribute-values">
+                                                                        <label>
+                                                                            ערך מאפיין:
+                                                                            <input
+                                                                                type="text"
+                                                                                value={valueObj.value}
+                                                                                onChange={(e) =>
+                                                                                    handleAttributeValueChange(index, valueIndex, 'value', e.target.value, newProduct, setNewProduct)
+                                                                                }
+                                                                                required
+                                                                            />
+                                                                        </label>
+                                                                        <label>
+                                                                            מחיר מאפיין:
+                                                                            <input
+                                                                                type="number"
+                                                                                value={valueObj.price}
+                                                                                onChange={(e) =>
+                                                                                    handleAttributeValueChange(index, valueIndex, 'price', e.target.value, newProduct, setNewProduct)
+                                                                                }
+                                                                                required
+                                                                            />
+                                                                        </label>
+                                                                    </div>
+                                                                ))}
 
-
-                                </>
-                            )}
-
-                            <label className='quantity-check'>
-                                אופציה לכמות
-
-                                <input
-                                    type="checkbox"
-                                    checked={quantityEnabled}
-                                    onChange={() => setQuantityEnabled(!quantityEnabled)}
-                                />
-                            </label>
-
-
-
-                            {quantityEnabled && (
-                                <div className="quantity-input-section">
-                                    <input
-                                        type="number"
-                                        min="1" // הגבלת המינימום ל-1
-                                        placeholder="הכנס כמות"
-                                        value={quantityInput}
-                                        onChange={(e) => setQuantityInput(e.target.value)}
-                                    />
-                                    <button type="button" onClick={handleAddQuantity}>הוסף כמות</button>
-
-                                    <div className="quantities-display">
-                                        {newProduct.quantities.join(', ')}
-                                    </div>
-
-                                    {/* כפתור לאיפוס הכמות */}
-                                    <button
-                                        type="button"
-                                        onClick={() => setNewProduct((prevState) => ({ ...prevState, quantities: [] }))}
-                                    >
-                                        איפוס כמות
-                                    </button>
-                                </div>
-                            )}
-                            <label className='comment-field-checkbox'>
-                                פתח שדה הערות
-                                <input
-                                    type="checkbox"
-                                    checked={newProduct.allowComments}
-                                    onChange={() =>
-                                        setNewProduct((prev) => ({
-                                            ...prev,
-                                            allowComments: !prev.allowComments, // ✅ Toggle allowComments state
-                                        }))
-                                    }
-                                />
-                            </label>
-                            <label>
-                                מק"ט:
-                                <input type="text" name='מק"ט' value={newProduct['מק"ט']} onChange={(e) => handleInputChange(e, setNewProduct)} required />
-                            </label>
-                            <label>
-                                שם:
-                                <input type="text" name="שם" value={newProduct.שם} onChange={(e) => handleInputChange(e, setNewProduct)} required />
-                            </label>
-                            <label>
-                                תיאור קצר:
-                                <textarea name="תיאור קצר" value={newProduct['תיאור קצר']} onChange={(e) => handleInputChange(e, setNewProduct)} />
-                            </label>
-                            <label>
-                                תיאור:
-                                <textarea name="תיאור" value={newProduct.תיאור} onChange={(e) => handleInputChange(e, setNewProduct)} />
-                            </label>
-                            <label>
-                                מחיר רגיל:
-                                <input type="number" name="מחיר רגיל" value={newProduct['מחיר רגיל']} onChange={(e) => handleInputChange(e, setNewProduct)} />
-                            </label>
-                            <label>
-                                מחיר מבצע:
-                                <input type="number" name="מחיר מבצע" value={newProduct['מחיר מבצע']} onChange={(e) => handleInputChange(e, setNewProduct)} />
-                            </label>
-
-                            <label>
-                                תמונות:
-                                <input type="text" name="תמונות" value={newProduct.תמונות} onChange={(e) => handleInputChange(e, setNewProduct)} />
-                            </label>
-
-                            <label>
-                                קטגוריות:
-                                <div className="category-checklist-container">
-                                    <div className="main-categories">
-                                        {organizedCategories.map((category, index) => (
-                                            <div key={index}>
-                                                <label htmlFor={`main-${index}`}>{category.categoryName}</label>
-                                                <input
-                                                    type="checkbox"
-                                                    id={`main-${index}`}
-                                                    value={category.categoryName}
-                                                    checked={selectedMainCategories.includes(category.categoryName)}
-                                                    onChange={() => handleMainCategoryChange(category.categoryName, setSelectedMainCategories, selectedSubCategories, setSelectedSubCategories)}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="sub-category-section">
-                                        {selectedMainCategories.map((mainCategoryName, index) => {
-                                            const mainCategory = organizedCategories.find(category => category.categoryName === mainCategoryName);
-
-                                            return (
-                                                <div key={index} className="sub-category-group">
-                                                    <h4>{mainCategory.categoryName}</h4>
-                                                    <div className="sub-categories">
-                                                        {mainCategory.subCategories.map((subCategory, subIndex) => (
-                                                            <div key={subIndex}>
-                                                                <label htmlFor={`sub-${index}-${subIndex}`}>{subCategory.subCategoryName}</label>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    id={`sub-${index}-${subIndex}`}
-                                                                    value={subCategory.subCategoryName}
-                                                                    checked={selectedSubCategories[mainCategoryName]?.includes(subCategory.subCategoryName) || false}
-                                                                    onChange={() => handleSubCategoryChange(mainCategoryName, subCategory.subCategoryName, selectedSubCategories, setSelectedSubCategories)}
-                                                                />
+                                                                <div className="attribute-buttons">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleAddAttributeValue(index, newProduct, setNewProduct)}
+                                                                    >
+                                                                        הוסף ערך מאפיין
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         ))}
+
+                                                        <div className="attribute-buttons">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleAddAttribute(newProduct, setNewProduct)}
+                                                            >
+                                                                הוסף שם מאפיין
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
+
+                                                <label className='quantity-check'>
+                                                    אופציה לכמות
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={quantityEnabled}
+                                                        onChange={() => setQuantityEnabled(!quantityEnabled)}
+                                                    />
+                                                </label>
+
+                                                {quantityEnabled && (
+                                                    <div className="quantity-input-section">
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            placeholder="הכנס כמות"
+                                                            value={quantityInput}
+                                                            onChange={(e) => setQuantityInput(e.target.value)}
+                                                        />
+                                                        <button type="button" onClick={handleAddQuantity}>הוסף כמות</button>
+
+                                                        <div className="quantities-display">
+                                                            {newProduct.quantities.join(', ')}
+                                                        </div>
+
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setNewProduct((prevState) => ({ ...prevState, quantities: [] }))}
+                                                        >
+                                                            איפוס כמות
+                                                        </button>
                                                     </div>
+                                                )}
+
+                                                <label className='comment-field-checkbox'>
+                                                    פתח שדה הערות
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={newProduct.allowComments}
+                                                        onChange={() =>
+                                                            setNewProduct((prev) => ({
+                                                                ...prev,
+                                                                allowComments: !prev.allowComments,
+                                                            }))
+                                                        }
+                                                    />
+                                                </label>
+
+                                                <label>
+                                                    מחיר רגיל:
+                                                    <input type="number" name="מחיר רגיל" value={newProduct['מחיר רגיל']} onChange={(e) => handleInputChange(e, setNewProduct)} />
+                                                </label>
+                                                <label>
+                                                    מחיר מבצע:
+                                                    <input type="number" name="מחיר מבצע" value={newProduct['מחיר מבצע']} onChange={(e) => handleInputChange(e, setNewProduct)} />
+                                                </label>
+                                            </>
+                                        )}
+
+                                        {/* שדות שתמיד מופיעים */}
+                                        <label>
+                                            מק"ט:
+                                            <input type="text" name='מק"ט' value={newProduct['מק"ט']} onChange={(e) => handleInputChange(e, setNewProduct)} required />
+                                        </label>
+                                        <label>
+                                            שם:
+                                            <input type="text" name="שם" value={newProduct.שם} onChange={(e) => handleInputChange(e, setNewProduct)} required />
+                                        </label>
+                                        <label>
+                                            תיאור קצר:
+                                            <textarea name="תיאור קצר" value={newProduct['תיאור קצר']} onChange={(e) => handleInputChange(e, setNewProduct)} />
+                                        </label>
+                                        <label>
+                                            תיאור (לינק לקטלוג):
+                                            <textarea name="תיאור" value={newProduct.תיאור} onChange={(e) => handleInputChange(e, setNewProduct)} />
+                                        </label>
+                                        <label>
+                                            תמונות:
+                                            <input type="text" name="תמונות" value={newProduct.תמונות} onChange={(e) => handleInputChange(e, setNewProduct)} />
+                                        </label>
+
+                                        {/* קטגוריות */}
+                                        <label>
+                                            קטגוריות:
+                                            <div className="category-checklist-container">
+                                                <div className="main-categories">
+                                                    {organizedCategories.map((category, index) => (
+                                                        <div key={index}>
+                                                            <label htmlFor={`main-${index}`}>{category.categoryName}</label>
+                                                            <input
+                                                                type="checkbox"
+                                                                id={`main-${index}`}
+                                                                value={category.categoryName}
+                                                                checked={selectedMainCategories.includes(category.categoryName)}
+                                                                onChange={() => handleMainCategoryChange(category.categoryName, setSelectedMainCategories, selectedSubCategories, setSelectedSubCategories)}
+                                                            />
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </label>
+
+                                                <div className="sub-category-section">
+                                                    {selectedMainCategories.map((mainCategoryName, index) => {
+                                                        const mainCategory = organizedCategories.find(category => category.categoryName === mainCategoryName);
+
+                                                        return (
+                                                            <div key={index} className="sub-category-group">
+                                                                <h4>{mainCategory.categoryName}</h4>
+                                                                <div className="sub-categories">
+                                                                    {mainCategory.subCategories.map((subCategory, subIndex) => (
+                                                                        <div key={subIndex}>
+                                                                            <label htmlFor={`sub-${index}-${subIndex}`}>{subCategory.subCategoryName}</label>
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                id={`sub-${index}-${subIndex}`}
+                                                                                value={subCategory.subCategoryName}
+                                                                                checked={selectedSubCategories[mainCategoryName]?.includes(subCategory.subCategoryName) || false}
+                                                                                onChange={() => handleSubCategoryChange(mainCategoryName, subCategory.subCategoryName, selectedSubCategories, setSelectedSubCategories)}
+                                                                            />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </>
+                                );
+                            })()}
 
                             <button type="submit">{isEditing ? "שמור שינויים" : "שמור מוצר"}</button>
                         </form>
+
                     </div>
                 </div>
             )}

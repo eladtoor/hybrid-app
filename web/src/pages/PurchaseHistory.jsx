@@ -69,7 +69,7 @@ const PurchaseHistory = () => {
                                     hour12: false,
                                 })}</td>
                                 <td className="p-3">{purchase.status}</td>
-                                <td className="p-3">₪{purchase.totalPrice}</td>
+                                <td className="p-3">₪{purchase.totalPrice.toFixed(2)}</td>
                                 <td className="p-3">
                                     <button className="btn-outline text-grayish"
                                         onClick={() => handleViewDetails(purchase)}>
@@ -105,7 +105,7 @@ const PurchaseHistory = () => {
                                 <tbody>
                                     {selectedPurchaseItems.map((item) => (
                                         <tr key={item._id} className="border-b">
-                                            <td className="p-3 text-center">{item.name}</td>
+                                            <td className="p-3 text-center">{item.baseName || item.name}</td>
                                             <td className="p-3 text-center">{item.sku}</td>
                                             <td className="p-3 text-right">
                                                 {item.selectedAttributes ? (
@@ -130,29 +130,38 @@ const PurchaseHistory = () => {
                                             <td className="p-3 text-center">₪{((item.unitPrice || item.price || 0) * item.quantity).toFixed(2)}</td>
                                         </tr>
                                     ))}
-
                                 </tbody>
                             </table>
                         </div>
 
                         {/* 🧾 סיכום הזמנה */}
-                        {selectedPurchaseDetails && (
-                            <div className="mt-6 text-right text-sm bg-gray-50 p-4 rounded shadow-inner">
-                                <p><strong>מחיר סופי:</strong> ₪{selectedPurchaseDetails.totalPrice?.toFixed(2)}</p>
-                                {selectedPurchaseDetails.shippingCost > 0 && (
-                                    <p><strong>מחיר משלוח:</strong> ₪{selectedPurchaseDetails.shippingCost.toFixed(2)}</p>
-                                )}
-                                {selectedPurchaseDetails.craneUnloadCost > 0 && (
-                                    <p><strong>מחיר פריקת מנוף:</strong> ₪{selectedPurchaseDetails.craneUnloadCost.toFixed(2)}</p>
-                                )}
-                                {selectedPurchaseDetails.payments > 1 && (
-                                    <p><strong>מספר תשלומים:</strong> {selectedPurchaseDetails.payments}</p>
-                                )}
-                            </div>
-                        )}
+                        {selectedPurchaseDetails && (() => {
+                            const vatRate = 0.18;
+                            const totalPrice = selectedPurchaseDetails.totalPrice || 0;
+                            const totalBeforeVAT = totalPrice / (1 + vatRate);
+                            const vatAmount = totalPrice - totalBeforeVAT;
+
+                            return (
+                                <div className="mt-6 text-right text-sm bg-gray-50 p-4 rounded shadow-inner">
+                                    <p><strong>סה"כ ללא מע"מ:</strong> ₪{totalBeforeVAT.toFixed(2)}</p>
+                                    <p><strong>מע"מ (18%):</strong> ₪{vatAmount.toFixed(2)}</p>
+                                    <p><strong>סה"כ לתשלום:</strong> ₪{totalPrice.toFixed(2)}</p>
+                                    {selectedPurchaseDetails.shippingCost > 0 && (
+                                        <p><strong>מחיר משלוח:</strong> ₪{selectedPurchaseDetails.shippingCost.toFixed(2)}</p>
+                                    )}
+                                    {selectedPurchaseDetails.craneUnloadCost > 0 && (
+                                        <p><strong>מחיר פריקת מנוף:</strong> ₪{selectedPurchaseDetails.craneUnloadCost.toFixed(2)}</p>
+                                    )}
+                                    {selectedPurchaseDetails.payments > 1 && (
+                                        <p><strong>מספר תשלומים:</strong> {selectedPurchaseDetails.payments}</p>
+                                    )}
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             )}
+
         </div>
     );
 };

@@ -6,7 +6,7 @@ import { auth } from '../firebase';
 import { toast } from 'react-toastify';
 
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const user = useSelector((state) => state.user.user); // Get user data from Redux
@@ -93,13 +93,14 @@ const ProductCard = ({ product }) => {
 
 
     const calculateTotalPrice = (updatedAttributes, quantity) => {
+        const effectiveQuantity = quantity || 1; // ✅ ברירת מחדל ל-1 אם אין כמות נבחרת
+
         let updatedPriceTemp = product["מחיר רגיל"] || 0;
 
         const discountInfo = user?.productDiscounts?.find((discount) => discount.productId === product._id);
         const discount = discountInfo ? parseFloat(discountInfo.discount) : 0;
         setDiscountPercentage(discount);
-        setHasDiscount(discount > 0); // Check if there is a discount
-
+        setHasDiscount(discount > 0);
 
         if (product.variations && product.variations.length > 0) {
             for (const variation of product.variations) {
@@ -127,8 +128,9 @@ const ProductCard = ({ product }) => {
         const finalPrice = updatedPriceTemp - (updatedPriceTemp * discount) / 100;
         setOriginalPrice(updatedPriceTemp);
         setUpdatedPrice(finalPrice);
-        setTotalPrice(finalPrice * quantity);
+        setTotalPrice(finalPrice * effectiveQuantity); // ✅ השתמש ב-effectiveQuantity
     };
+
 
     const renderVariationAttributes = () => {
         if (product.variations && product.variations.length > 0) {
@@ -297,6 +299,8 @@ const ProductCard = ({ product }) => {
     };
 
 
+
+
     return (
         <>
             <div
@@ -333,7 +337,7 @@ const ProductCard = ({ product }) => {
 
                 {/* תיאור מוצר */}
                 <p className="text-sm text-gray-500 text-center line-clamp-2 mt-1">
-                    {product["תיאור קצר"] ? product["תיאור קצר"] : product["תיאור"]}
+                    {product["תיאור קצר"] ? product["תיאור קצר"] : ""}
                 </p>
 
                 {/* קישור לפרטים נוספים */}
@@ -348,12 +352,10 @@ const ProductCard = ({ product }) => {
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] p-4"
                     onClick={(e) => {
-                        // תנאי מדויק – סגור רק אם באמת לחצו על הרקע של המודל, לא על טוסט
                         if (e.target === e.currentTarget) {
                             toggleModal();
                         }
                     }}
-
                 >
                     <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative max-h-[90vh] overflow-y-auto z-[1100]">
                         {/* כפתור סגירה */}
@@ -373,79 +375,121 @@ const ProductCard = ({ product }) => {
                             alt={product.שם}
                             className="w-32 h-32 object-cover rounded-full mx-auto mt-4"
                         />
-                        <p className="text-center text-gray-600 mt-2">
-                            {product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}
-                        </p>
 
-                        {/* מחיר */}
-                        <div className="mt-4 text-center">
-                            {hasDiscount ? (
-                                <>
-                                    <p className="text-gray-500 line-through">₪{(originalPrice * selectedQuantity).toFixed(2)}</p>
-                                    <p className="text-2xl font-bold text-red-500">₪{totalPrice.toFixed(2)}</p>
-                                </>
-                            ) : (
-                                <p className="text-2xl font-bold text-gray-900">₪{totalPrice.toFixed(2)}</p>
-                            )}
-                        </div>
+                        {/* תיאור או לינק */}
+                        {isDigitalCatalogCategory ? (
+                            <p className="text-center text-blue-600 mt-4">
+                                <a
+                                    href={product["תיאור"]}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline"
+                                >
+                                    לחץ כאן לצפייה בקטלוג
+                                </a>
+                            </p>
+                        ) : (
+                            <p className="text-center text-gray-600 mt-2">
+                                {product["תיאור"] ? product["תיאור"] : product["תיאור קצר"]}
+                            </p>
+                        )}
 
-                        {/* מאפיינים */}
-                        {product.סוג === 'variable' && (
-                            <div className="mt-4">
-                                <h3 className="font-semibold text-gray-800 text-center mb-2">בחר מאפיין:</h3>
-                                <div className="flex flex-wrap justify-center gap-3">
-                                    {renderVariationAttributes()}
+                        {/* שאר התוכן - רק אם לא קטלוג דיגיטלי */}
+                        {!isDigitalCatalogCategory && (
+                            <>
+                                {/* מחיר */}
+                                <div className="mt-4 text-center">
+                                    {hasDiscount ? (
+                                        <>
+                                            <p className="text-gray-500 line-through">
+                                                ₪{(originalPrice * (selectedQuantity || 1)).toFixed(2)}{" "}
+                                                {selectedQuantity ? (
+                                                    <span className="text-sm text-gray-600">עבור {selectedQuantity} יחידות</span>
+                                                ) : (
+                                                    <span className="text-sm text-gray-600">ליחידה</span>
+                                                )}
+                                            </p>
+                                            <p className="text-2xl font-bold text-red-500">
+                                                ₪{totalPrice.toFixed(2)}{" "}
+                                                {selectedQuantity ? (
+                                                    <span className="text-sm text-gray-600">עבור {selectedQuantity} יחידות</span>
+                                                ) : (
+                                                    <span className="text-sm text-gray-600">ליחידה</span>
+                                                )}
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <p className="text-2xl font-bold text-gray-900">
+                                            ₪{totalPrice.toFixed(2)}{" "}
+                                            {selectedQuantity ? (
+                                                <span className="text-sm text-gray-600">עבור {selectedQuantity} יחידות</span>
+                                            ) : (
+                                                <span className="text-sm text-gray-600">ליחידה</span>
+                                            )}
+                                        </p>
+                                    )}
                                 </div>
-                            </div>
-                        )}
 
-                        {/* כמות */}
-                        {product.quantities && product.quantities.length > 0 && (
-                            <div className="mt-4">
-                                <h3 className="font-semibold text-gray-800">בחר כמות:</h3>
-                                <div className="flex gap-2 mt-2">
-                                    {product.quantities.map((quantity, index) => (
-                                        <label key={index} className={`px-4 py-2 border rounded-md cursor-pointer transition ${selectedQuantity === quantity ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
-                                            <input type="radio" name="quantity" value={quantity} checked={selectedQuantity === quantity} onChange={() => handleQuantityChange(quantity)} className="hidden" />
-                                            {quantity}
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                                {/* מאפיינים */}
+                                {product.סוג === 'variable' && (
+                                    <div className="mt-4">
+                                        <h3 className="font-semibold text-gray-800 text-center mb-2">בחר מאפיין:</h3>
+                                        <div className="flex flex-wrap justify-center gap-3">
+                                            {renderVariationAttributes()}
+                                        </div>
+                                    </div>
+                                )}
 
-                        {/* ✅ הצגת אפשרות פריקת מנוף אם המוצר מקטגוריית "גבס ומסלולים" */}
-                        {product.materialGroup === "Gypsum and Tracks" && (
-                            <div className="mt-4">
-                                <h3 className="font-semibold text-gray-800">פריקת מנוף:</h3>
-                                <div className="flex gap-2 mt-2">
-                                    <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === true ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
-                                        <input type="radio" name="craneUnload" value="true" checked={craneUnload === true} onChange={() => handleCraneUnloadChange(true)} className="hidden" />
-                                        כן
-                                    </label>
-                                    <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === false ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
-                                        <input type="radio" name="craneUnload" value="false" checked={craneUnload === false} onChange={() => handleCraneUnloadChange(false)} className="hidden" />
-                                        לא
-                                    </label>
-                                </div>
-                            </div>
-                        )}
+                                {/* כמות */}
+                                {product.quantities && product.quantities.length > 0 && (
+                                    <div className="mt-4">
+                                        <h3 className="font-semibold text-gray-800">בחר כמות:</h3>
+                                        <div className="flex gap-2 mt-2">
+                                            {product.quantities.map((quantity, index) => (
+                                                <label key={index} className={`px-4 py-2 border rounded-md cursor-pointer transition ${selectedQuantity === quantity ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                                                    <input type="radio" name="quantity" value={quantity} checked={selectedQuantity === quantity} onChange={() => handleQuantityChange(quantity)} className="hidden" />
+                                                    {quantity}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
-                        {/* הערות */}
-                        {product.allowComments && (
-                            <div className="mt-4">
-                                <label className="font-semibold text-gray-800">הערות:</label>
-                                <input type="text" placeholder="הזן הערה למוצר..." value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-2 border rounded-md mt-2" />
-                            </div>
-                        )}
+                                {/* פריקת מנוף */}
+                                {product.materialGroup === "Gypsum and Tracks" && (
+                                    <div className="mt-4">
+                                        <h3 className="font-semibold text-gray-800">פריקת מנוף:</h3>
+                                        <div className="flex gap-2 mt-2">
+                                            <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === true ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                                                <input type="radio" name="craneUnload" value="true" checked={craneUnload === true} onChange={() => handleCraneUnloadChange(true)} className="hidden" />
+                                                כן
+                                            </label>
+                                            <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === false ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                                                <input type="radio" name="craneUnload" value="false" checked={craneUnload === false} onChange={() => handleCraneUnloadChange(false)} className="hidden" />
+                                                לא
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
 
-                        {/* כפתור הוספה לעגלה */}
-                        <button className="mt-6 w-full bg-green-600 text-white py-2 rounded-md font-semibold hover:bg-green-700 transition" onClick={handleAddToCart} >
-                            הוסף לעגלה
-                        </button>
+                                {/* הערות */}
+                                {product.allowComments && (
+                                    <div className="mt-4">
+                                        <label className="font-semibold text-gray-800">הערות:</label>
+                                        <input type="text" placeholder="הזן הערה למוצר..." value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-2 border rounded-md mt-2" />
+                                    </div>
+                                )}
+
+                                {/* כפתור הוספה לעגלה */}
+                                <button className="mt-6 w-full bg-green-600 text-white py-2 rounded-md font-semibold hover:bg-green-700 transition" onClick={handleAddToCart}>
+                                    הוסף לעגלה
+                                </button>
+                            </>
+                        )}
                     </div>
-                </div >
+                </div>
             )}
+
 
 
 

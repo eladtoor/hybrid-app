@@ -124,72 +124,78 @@ const AgentDashboard = () => {
             </table>
 
             {isEditModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl relative">
-                        <button onClick={closeEditModal} className="absolute top-2 left-2 text-xl text-gray-600 hover:text-black">&times;</button>
-                        <h2 className="text-xl font-bold mb-4">עריכת הנחות - {selectedUser?.name}</h2>
+                <div className="mt-4 fixed inset-0 bg-black bg-opacity-50 flex justify-center z-50 overflow-y-auto">
+                    <div className="flex items-center justify-center min-h-screen p-6">
+                        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-3xl relative">
+                            <button onClick={closeEditModal} className="absolute top-3 left-3 text-2xl text-gray-600 hover:text-black">&times;</button>
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold text-center">עריכת הנחות - {selectedUser?.name}</h2>
 
-                        <input
-                            type="text"
-                            placeholder="חפש מוצר לפי מזהה/שם"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full border p-2 rounded mb-4"
-                        />
+                                <input
+                                    type="text"
+                                    placeholder="חפש מוצר לפי מזהה/שם"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full border p-3 rounded-lg"
+                                />
 
-                        {searchQuery && (
-                            <ul className="bg-gray-50 border border-gray-300 rounded mb-4 max-h-40 overflow-y-auto">
-                                {filteredProducts.map((product) => (
-                                    <li
-                                        key={product._id}
-                                        onClick={() => handleAddProductDiscount(product)}
-                                        className="p-2 flex items-center cursor-pointer hover:bg-blue-100"
-                                    >
-                                        <img
-                                            src={product["תמונות"]}
-                                            alt={product["שם"]}
-                                            className="w-10 h-10 rounded object-cover mr-2"
-                                        />
-                                        <span>{product["שם"]} ({product.מזהה})</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
+                                {searchQuery && (
+                                    <ul className="bg-gray-50 border border-gray-300 rounded-lg max-h-40 overflow-y-auto divide-y">
+                                        {filteredProducts.map((product) => (
+                                            <li
+                                                key={product._id}
+                                                onClick={() => handleAddProductDiscount(product)}
+                                                className="p-3 flex items-center cursor-pointer hover:bg-blue-100"
+                                            >
+                                                <img
+                                                    src={product["תמונות"]}
+                                                    alt={product["שם"]}
+                                                    className="w-12 h-12 rounded object-cover mr-3"
+                                                />
+                                                <span>{product["שם"]} ({product.מזהה})</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
 
-                        <div className="space-y-4">
-                            {productDiscounts.map((discount, index) => (
-                                <div key={index} className="border p-4 rounded bg-gray-50">
-                                    <p className="mb-2">מוצר: <strong>{discount.productName}</strong> ({discount.productId})</p>
-                                    <div className="flex items-center space-x-2">
-                                        <label className="w-28">אחוז הנחה:</label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            value={discount.discount}
-                                            onChange={(e) => handleProductDiscountChange(index, 'discount', e.target.value)}
-                                            className="border p-2 rounded w-full"
-                                        />
-                                        <button
-                                            onClick={() => handleRemoveProductDiscount(index)}
-                                            className="text-red-500 hover:text-red-700"
-                                        >
-                                            הסר
-                                        </button>
-                                    </div>
+                                <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
+                                    {productDiscounts.map((discount, index) => (
+                                        <div key={index} className="border p-4 rounded-lg bg-gray-50">
+                                            <p className="mb-3">מוצר: <strong>{discount.productName}</strong> ({discount.productId})</p>
+                                            <div className="flex items-center space-x-3">
+                                                <label className="w-32">אחוז הנחה:</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="100"
+                                                    value={discount.discount}
+                                                    onChange={(e) => handleProductDiscountChange(index, 'discount', e.target.value)}
+                                                    className="border p-2 rounded-lg w-full"
+                                                />
+                                                <button
+                                                    onClick={() => handleRemoveProductDiscount(index)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                >
+                                                    הסר
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
 
-                        <button
-                            onClick={handleSaveChanges}
-                            className="mt-6 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
-                        >
-                            שמור שינויים
-                        </button>
+                                <button
+                                    onClick={handleSaveChanges}
+                                    className="w-full mt-4 bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition shadow"
+                                >
+                                    שמור שינויים
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
+
+
         </div>
     );
 };

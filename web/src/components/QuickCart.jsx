@@ -80,7 +80,7 @@ const QuickCart = () => {
                                             <p className="text-gray-500">מק"ט: {mergedItem.sku}</p>
                                             <p className="text-gray-500">כמות אחרונה: {mergedItem.quantity}</p>
                                             {mergedItem.comment && <p className="text-sm text-gray-600">הערות: {mergedItem.comment}</p>}
-                                            <p className="text-sm text-gray-600">מחיר ליחידה: ₪{mergedItem.unitPrice}</p>
+                                            <p className="text-sm text-gray-600">מחיר ליחידה: ₪{mergedItem.unitPrice.toFixed(2)}</p>
                                         </div>
                                     </div>
                                 </li>

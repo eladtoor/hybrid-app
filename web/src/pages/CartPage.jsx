@@ -194,7 +194,8 @@ const CartPage = () => {
                 localStorage.setItem("finalTotalPrice", finalTotalPriceWithVAT.toString());
                 localStorage.setItem("shippingCost", transportationCosts.toString());
                 localStorage.setItem("craneUnloadCost", craneUnloadFee.toString());
-                await handlePayment(purchaseData);
+                await handlePayment(purchaseData, cartDiscount, originalTotalPrice);
+
             }
         } catch (error) {
             console.error("Error initiating checkout:", error);
@@ -205,8 +206,20 @@ const CartPage = () => {
 
     console.log(cartItems, "cart");
 
-    const handlePayment = async (purchaseData) => {
-        const groupPrivateToken = "f5bff741-1243-411e-9f7d-6b91d7624345";
+
+    const handlePayment = async (purchaseData, cartDiscount, originalTotalPrice) => {
+        const groupPrivateToken = process.env.REACT_APP_GROUP_PRIVATE_TOKEN;
+
+        const formatCurrency = (amount) => {
+            const formatter = new Intl.NumberFormat('he-IL', {
+                style: 'currency',
+                currency: 'ILS',
+                minimumFractionDigits: 2
+            });
+            return formatter.format(amount);
+        };
+
+
 
         // ✅ יצירת רשימת פריטים להזמנה עם תיאור מאפיינים אם קיימים
         let items = purchaseData.cartItems.map(item => {
@@ -258,7 +271,21 @@ const CartPage = () => {
             });
         }
 
+
+        // ✅ הוספת הנחת עגלה אם קיימת
+        if (cartDiscount > 0) {
+            const discountAmount = originalTotalPrice * cartDiscount / 100;
+
+            items.push({
+                CatalogNumber: "CART_DISCOUNT",
+                Quantity: 1,
+                UnitPrice: -discountAmount, // מספר גולמי!
+                Description: `הנחת עגלה (${cartDiscount}%): ${formatCurrency(-discountAmount)}`
+            });
+        }
+
         // ✅ חישוב סה"כ לפני מע"מ ומע"מ
+
         const totalPriceWithVAT = purchaseData.totalPrice;
         const vatRate = 0.18;
         const vatAmount = totalPriceWithVAT * vatRate / (1 + vatRate); // מע"מ מתוך המחיר הכולל

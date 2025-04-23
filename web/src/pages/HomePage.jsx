@@ -7,6 +7,8 @@ import RecommendedProducts from '../components/RecommendedProducts';
 import AboutUs from '../components/AboutUs';
 import QuickCart from '../components/QuickCart';
 import { FiShoppingCart } from 'react-icons/fi';
+import DiscountedProducts from '../components/DiscountedProducts';
+
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -87,7 +89,12 @@ const HomePage = () => {
                 {/* אודותינו */}
                 <AboutUs />
                 {/* מוצרים מומלצים */}
-                <RecommendedProducts />
+                {/* מוצרים בהנחה */}
+                {user && user.productDiscounts ? (
+                    <DiscountedProducts discountedProducts={user.productDiscounts} />
+                ) : (
+                    <RecommendedProducts />
+                )}
             </div>
 
 
