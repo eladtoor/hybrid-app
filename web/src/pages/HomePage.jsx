@@ -8,6 +8,8 @@ import AboutUs from '../components/AboutUs';
 import QuickCart from '../components/QuickCart';
 import { FiShoppingCart } from 'react-icons/fi';
 import DiscountedProducts from '../components/DiscountedProducts';
+import StatsCounters from '../components/StatsCounters';
+
 
 
 const HomePage = () => {
@@ -22,27 +24,32 @@ const HomePage = () => {
     };
 
     return (
-        <div className="mt-28 bg-gray-100 min-h-screen relative">
-            {/* קרוסלה */}
-            <div className="w-full">
+        <div className="mt-36 min-h-screen relative">
+
+            <div className="w-full mb-8">
                 <Carousel />
             </div>
 
+            <StatsCounters>
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                    {user ? (
+                        <h2 className="text-2xl font-bold text-gray-900">
+                            ברוך הבא {user.name}
+                        </h2>
+                    ) : (
+                        <button
+                            className="bg-gray-900 hover:bg-primary text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300"
+                            onClick={handleLoginClick}
+                        >
+                            התחבר עכשיו
+                        </button>
+                    )}
+                </div>
+            </StatsCounters>
+
+
             {/* הודעת ברוך הבא או התחברות */}
-            <div className="flex justify-center items-center my-10">
-                {user ? (
-                    <h2 className="text-2xl font-bold text-gray-800">
-                        ברוך הבא {user.name}
-                    </h2>
-                ) : (
-                    <button
-                        className="bg-primary hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300"
-                        onClick={handleLoginClick}
-                    >
-                        התחבר עכשיו
-                    </button>
-                )}
-            </div>
+
 
             {/* אייקון צף לפתיחת עגלה מהירה מעל כפתור הוואטסאפ */}
             {user && (

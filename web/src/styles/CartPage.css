@@ -4,8 +4,6 @@
   padding-top: 100px;
 }
 
-
-
 .cart-container {
   display: flex;
   justify-content: space-between;
@@ -137,10 +135,6 @@
   font-size: 0.9rem;
   color: #555;
   margin-top: 5px;
-}
-
-*:hover {
-  transform: none !important;
 }
 
 .error-message {

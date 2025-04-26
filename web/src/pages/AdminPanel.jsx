@@ -72,6 +72,26 @@ const AdminPanel = () => {
     const socketRef = useRef(null);
     const [carouselImageUrl, setCarouselImageUrl] = useState("");
     const [carouselFile, setCarouselFile] = useState(null);
+    const [siteStats, setSiteStats] = useState({
+        clients: 0,
+        supplyPoints: 0,
+        onlineUsers: 0,
+        lastOrderMinutes: 0
+    });
+
+    useEffect(() => {
+        const fetchSiteStats = async () => {
+            try {
+                const response = await fetch('/api/site-stats');
+                const data = await response.json();
+                setSiteStats(data);
+            } catch (error) {
+                console.error('Error fetching site stats:', error);
+            }
+        };
+
+        fetchSiteStats();
+    }, []);
 
 
 
@@ -423,10 +443,88 @@ const AdminPanel = () => {
         setShowForm(true);
     };
 
+    const handleStatsChange = (e) => {
+        const { name, value } = e.target;
+        setSiteStats((prev) => ({
+            ...prev,
+            [name]: Number(value)
+        }));
+    };
+
+    const handleSaveStats = async () => {
+        try {
+            const response = await fetch('/api/site-stats', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(siteStats)
+            });
+
+            if (!response.ok) throw new Error('Failed to update site stats');
+            alert('Site stats updated successfully!');
+        } catch (error) {
+            console.error('Error updating site stats:', error);
+            alert('Failed to update site stats');
+        }
+    };
+
+
 
     return (
         <div className="admin-panel p-32">
             <h1 className='text-4xl inline-block font-bold text-gray-900 mt-6 pr-4 border-r-4 border-primary'>פאנל ניהול</h1>
+
+            <div className="border-t pt-6 mt-12">
+                <h2 className="text-2xl font-bold mb-4">ניהול סטטיסטיקות דף הבית</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label>
+                        לקוחות מרוצים:
+                        <input
+                            type="number"
+                            name="clients"
+                            value={siteStats.clients}
+                            onChange={handleStatsChange}
+                            className="w-full border rounded px-3 py-2"
+                        />
+                    </label>
+                    <label>
+                        נקודות אספקה:
+                        <input
+                            type="number"
+                            name="supplyPoints"
+                            value={siteStats.supplyPoints}
+                            onChange={handleStatsChange}
+                            className="w-full border rounded px-3 py-2"
+                        />
+                    </label>
+                    <label>
+                        מחוברים כרגע:
+                        <input
+                            type="number"
+                            name="onlineUsers"
+                            value={siteStats.onlineUsers}
+                            onChange={handleStatsChange}
+                            className="w-full border rounded px-3 py-2"
+                        />
+                    </label>
+                    <label>
+                        דקות מההזמנה האחרונה:
+                        <input
+                            type="number"
+                            name="lastOrderMinutes"
+                            value={siteStats.lastOrderMinutes}
+                            onChange={handleStatsChange}
+                            className="w-full border rounded px-3 py-2"
+                        />
+                    </label>
+                </div>
+                <button
+                    onClick={handleSaveStats}
+                    className="btn-primary mt-4 text-xl"
+                >
+                    שמור סטטיסטיקות
+                </button>
+            </div>
+
             <div>
                 <h2 className="text-xl font-bold mb-4">ניהול תמונות קטגוריות</h2>
                 <CategoryImageManager organizedCategories={organizedCategories} />

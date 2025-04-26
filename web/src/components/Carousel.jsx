@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -6,71 +6,94 @@ import { db } from '../firebase';
 const Carousel = () => {
     const [images, setImages] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const autoSlideRef = useRef();
 
     useEffect(() => {
         const fetchImages = async () => {
             try {
                 const snapshot = await getDocs(collection(db, 'carouselImages'));
-                const urls = snapshot.docs.map((doc) => doc.data().url);
+                const urls = snapshot.docs.map((doc) => {
+                    const originalUrl = doc.data().url;
+                    const [base, rest] = originalUrl.split('/upload/');
+                    return `${base}/upload/q_auto,f_auto/${rest.split('/').slice(1).join('/')}`;
+                });
                 setImages(urls);
             } catch (error) {
                 console.error('שגיאה בטעינת תמונות הקרוסלה:', error);
             }
         };
-
         fetchImages();
     }, []);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-        }, 4000);
-        return () => clearInterval(interval);
+        if (images.length > 0) {
+            startAutoSlide();
+        }
+        return stopAutoSlide;
     }, [images]);
 
-    const handlePrev = () => {
-        setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+    const startAutoSlide = () => {
+        stopAutoSlide();
+        autoSlideRef.current = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % images.length);
+        }, 4000);
     };
 
-    const handleNext = () => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    const stopAutoSlide = () => {
+        if (autoSlideRef.current) {
+            clearInterval(autoSlideRef.current);
+        }
     };
 
-    if (images.length === 0) return null;
+    if (!images.length) return null;
 
     return (
-        <div className="relative w-full h-[400px] overflow-hidden">
-            <div
-                className="flex transition-transform duration-700 ease-in-out"
-                style={{ transform: `translateX(${currentIndex * 100}%)`, direction: 'rtl' }}
-            >
-                {images.map((src, index) => (
-                    <div key={index} className="w-full flex-shrink-0 h-[400px]">
-                        <img src={src} alt={`Slide ${index}`} className="w-full h-full object-cover" />
-                    </div>
-                ))}
-            </div>
+        <div
+            className="relative max-w-6xl  mx-auto  h-[400px] rounded-xl overflow-hidden  shadow-lg shadow-gray-900 bg-white/20 flex justify-center items-center hover:border-4 border-double border-gray-900"
+            onMouseEnter={stopAutoSlide}
+            onMouseLeave={startAutoSlide}
+        >
+            <img
+                src={images[currentIndex]}
+                alt={`Slide ${currentIndex}`}
+                className="h-[400px] w-full object-contain  transition-opacity duration-700 ease-in-out shadow-lg rounded"
+            />
 
+
+            {/* חצים */}
             <button
-                className="absolute top-1/2 right-4 bg-transparent text-white p-3 rounded-full hover:bg-black/30 transition"
-                onClick={handlePrev}
+                onClick={() => {
+                    stopAutoSlide();
+                    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+                    startAutoSlide();
+                }}
+                className="absolute top-1/2 left-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/80 hover:scale-110 transition"
             >
-                <FaChevronRight size={28} />
+                <FaChevronLeft />
+            </button>
+            <button
+                onClick={() => {
+                    stopAutoSlide();
+                    setCurrentIndex((prev) => (prev + 1) % images.length);
+                    startAutoSlide();
+                }}
+                className="absolute top-1/2 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/80 hover:scale-110 transition"
+            >
+                <FaChevronRight />
             </button>
 
-            <button
-                className="absolute top-1/2 left-4 bg-transparent text-white p-3 rounded-full hover:bg-black/30 transition"
-                onClick={handleNext}
-            >
-                <FaChevronLeft size={28} />
-            </button>
-
-            <div className="absolute bottom-4 left-1/2 flex gap-3">
+            {/* נקודות */}
+            <div className="flex justify-center gap-2 absolute bottom-2.5 left-1/2 ">
                 {images.map((_, index) => (
                     <span
                         key={index}
-                        className={`w-6 h-1 transition cursor-pointer ${currentIndex === index ? 'bg-white' : 'bg-gray-500'}`}
-                        onClick={() => setCurrentIndex(index)}
+                        onClick={() => {
+                            stopAutoSlide();
+                            setCurrentIndex(index);
+                            startAutoSlide();
+                        }}
+                        className={`w-3 h-3 rounded-full border border-white cursor-pointer transition ${index === currentIndex ? 'bg-primary' : 'bg-gray-400'
+                            }`}
                     ></span>
                 ))}
             </div>

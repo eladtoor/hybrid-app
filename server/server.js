@@ -17,6 +17,7 @@ const materialGroupRoutes = require("./routes/materialGroupRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const emailRoutes = require("./routes/emailRoutes");
 const categoryImagesRoutes = require("./routes/categoryImagesRoutes");
+const siteStatsRoutes = require("./routes/siteStatsRoutes");
 
 const app = express();
 const server = http.createServer(app);
@@ -58,6 +59,8 @@ app.use("/api/materialGroups", materialGroupRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/category-images", categoryImagesRoutes);
+
+app.use("/api/site-stats", siteStatsRoutes);
 
 app.use(express.static(path.join(__dirname, "../web/build")));
 app.get("*", (req, res) => {

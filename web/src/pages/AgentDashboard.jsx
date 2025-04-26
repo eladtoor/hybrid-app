@@ -96,7 +96,7 @@ const AgentDashboard = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto mt-28 p-6 bg-white shadow-md rounded-lg">
+        <div className="max-w-4xl mx-auto mt-40 p-10 bg-white shadow-2xl rounded-3xl">
             <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">משתמשים שנרשמו דרך הלינק שלך</h1>
             <table className="w-full table-auto border border-gray-300 mb-10">
                 <thead>
@@ -114,7 +114,7 @@ const AgentDashboard = () => {
                             <td className="p-3 border text-center">{user.email}</td>
                             <td className="p-3 border text-center">{user.phone || 'לא זמין'}</td>
                             <td className="p-3 border text-center">
-                                <button onClick={() => handleEditUser(user)} className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600 transition">
+                                <button onClick={() => handleEditUser(user)} className="bg-gray-900 y text-white px-4 py-1 rounded hover:bg-primary transition">
                                     עריכה
                                 </button>
                             </td>

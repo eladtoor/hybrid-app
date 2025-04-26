@@ -40,6 +40,7 @@ import TestCrash from "./pages/TestCrash";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { maybeFetchProducts } from "./redux/actions/productActions";
 import { maybeFetchCategories } from "./redux/actions/categoryActions.js";
+import DeliveryDays from "./pages/DeliveryDays";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -103,10 +104,10 @@ function App() {
       <PersistGate loading={<p>Loading...</p>} persistor={persistor}>
         <ErrorBoundary>
           <Router>
-            <div className="flex flex-col min-h-screen">
+            <NavBar categories={categories} />
+            <div className="flex flex-col min-h-screen bg-wall-texture bg-cover bg-fixed bg-center bg-white/40 bg-blend-lighten">
+              {" "}
               <ScrollToTop />
-              <NavBar categories={categories} />
-
               <main className="flex-grow">
                 <Routes>
                   <Route
@@ -115,6 +116,7 @@ function App() {
                       <HomePage categories={categories} products={products} />
                     }
                   />
+                  <Route path="/delivery-days" element={<DeliveryDays />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/test-crash" element={<TestCrash />} />
 
@@ -170,7 +172,6 @@ function App() {
                   />
                 </Routes>
               </main>
-
               <Footer />
               <FloatingWhatsAppButton />
               <ToastContainer

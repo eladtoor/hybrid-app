@@ -304,7 +304,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
     return (
         <>
             <div
-                className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg  cursor-pointer p-3 flex flex-col w-60"
+                className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:scale-110 transition-all duration-300 hover:shadow-lg  cursor-pointer p-3 flex flex-col w-60"
                 onClick={toggleModal}
             >
                 {/* הנחה */}
@@ -326,7 +326,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
                     <img
                         src={product.תמונות}
                         alt={product.שם}
-                        className="w-full h-full object-cover transition-all duration-300 hover:scale-105"
+                        className="w-full h-full object-cover transition-all duration-300 "
                     />
                 </div>
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setUser } from '../redux/reducers/userReducer';
 import { fetchUserDataFromFirestore, updateUserDataInFirestore } from '../utils/userUtils';
+import { User } from 'lucide-react';
 
 const UserProfile = () => {
     const [loading, setLoading] = useState(true);
@@ -90,56 +91,63 @@ const UserProfile = () => {
         }
     };
 
-    if (loading) return <p>טוען נתונים...</p>;
-    if (!formData) return <p>אין נתונים להציג. אנא התחבר.</p>;
+    if (loading) return <p className="text-center mt-20 text-gray-700 text-lg">טוען נתונים...</p>;
+    if (!formData) return <p className="text-center mt-20 text-gray-700 text-lg">אין נתונים להציג. אנא התחבר.</p>;
 
     return (
-        <div className="max-w-lg mx-auto mt-28 p-6 bg-white shadow-md rounded-lg text-center">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">הפרופיל שלי</h2>
-            <div className="bg-gray-100 p-6 rounded-md">
-                <p><strong>שם:</strong> {isEditing ? <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} className="border p-2 rounded-md w-full" /> : formData.name}</p>
-                <p><strong>מייל:</strong> {formData.email}</p>
-                <p><strong>פלאפון:</strong> {isEditing ? <input type="tel" name="phone" value={formData.phone || ''} onChange={handleInputChange} className="border p-2 rounded-md w-full" /> : formData.phone}</p>
+        <div className="profile-card mb-32 font-sans">
+            <div className="profile-content text-center">
+                <div className="flex justify-center items-center gap-4 mb-6">
+                    <User className="w-10 h-10 text-primary animate-bounce" />
+                    <h2 className="text-4xl font-extrabold text-gray-900 border-b-4 border-primary inline-block tracking-wide">הפרופיל שלי</h2>
+                </div>
+                <div className="bg-gradient-to-br from-gray-100 via-white to-gray-200 p-8 rounded-3xl shadow-2xl">
+                    <p className="text-lg mb-2"><strong>שם:</strong> {isEditing ? <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange} className="profile-input" /> : formData.name}</p>
+                    <p className="text-lg mb-2"><strong>מייל:</strong> {formData.email}</p>
+                    <p className="text-lg mb-2"><strong>פלאפון:</strong> {isEditing ? <input type="tel" name="phone" value={formData.phone || ''} onChange={handleInputChange} className="profile-input" /> : formData.phone}</p>
 
-                <div className="mt-4">
-                    <p><strong>כתובת:</strong></p>
-                    <p><strong>עיר:</strong> {isEditing ? <input type="text" name="city" value={formData.address?.city || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.city}</p>
-                    <p><strong>רחוב:</strong> {isEditing ? <input type="text" name="street" value={formData.address?.street || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.street}</p>
-                    <p><strong>דירה:</strong> {isEditing ? <input type="text" name="apartment" value={formData.address?.apartment || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.apartment}</p>
-                    <p><strong>קומה:</strong> {isEditing ? <input type="text" name="floor" value={formData.address?.floor || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.floor}</p>
-                    <p><strong>כניסה:</strong> {isEditing ? <input type="text" name="entrance" value={formData.address?.entrance || ''} onChange={handleAddressChange} className="border p-2 rounded-md w-full" /> : formData.address?.entrance}</p>
+                    <div className="mt-6">
+                        <p className="text-xl font-semibold mb-4">כתובת</p>
+                        <p className="text-lg mb-2"><strong>עיר:</strong> {isEditing ? <input type="text" name="city" value={formData.address?.city || ''} onChange={handleAddressChange} className="profile-input" /> : formData.address?.city}</p>
+                        <p className="text-lg mb-2"><strong>רחוב:</strong> {isEditing ? <input type="text" name="street" value={formData.address?.street || ''} onChange={handleAddressChange} className="profile-input" /> : formData.address?.street}</p>
+                        <p className="text-lg mb-2"><strong>דירה:</strong> {isEditing ? <input type="text" name="apartment" value={formData.address?.apartment || ''} onChange={handleAddressChange} className="profile-input" /> : formData.address?.apartment}</p>
+                        <p className="text-lg mb-2"><strong>קומה:</strong> {isEditing ? <input type="text" name="floor" value={formData.address?.floor || ''} onChange={handleAddressChange} className="profile-input" /> : formData.address?.floor}</p>
+                        <p className="text-lg mb-2"><strong>כניסה:</strong> {isEditing ? <input type="text" name="entrance" value={formData.address?.entrance || ''} onChange={handleAddressChange} className="profile-input" /> : formData.address?.entrance}</p>
+                    </div>
+
+                    {formData.userType === 'סוכן' && (
+                        <div className="mt-8 p-6 bg-gradient-to-r from-blue-100 via-white to-blue-100 rounded-xl shadow-md">
+                            <h3 className="text-lg font-semibold mb-2">קישור הזמנה שלך</h3>
+                            <p className="text-gray-700">שתף קישור זה כדי להזמין משתמשים:</p>
+
+                            {formData.uid && (
+                                <div className="flex items-center justify-between mt-4">
+                                    <a
+                                        href={`${window.location.origin}/login?ref=agent-${formData.uid}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 underline truncate text-sm"
+                                    >
+                                        {`${window.location.origin}/login?ref=agent-${formData.uid}`}
+                                    </a>
+
+                                    <button
+                                        onClick={() => handleCopyToClipboard(`${window.location.origin}/login?ref=agent-${formData.uid}`)}
+                                        className="btn-primary"
+                                    >
+                                        העתק קישור
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
-                {formData.userType === 'סוכן' && (
-                    <div className="mt-6 p-4 bg-gray-200 rounded-md">
-                        <h3 className="text-lg font-semibold">קישור הזמנה שלך</h3>
-                        <p className="text-gray-700">שתף קישור זה כדי להזמין משתמשים:</p>
-
-                        {formData.uid && (
-                            <div className="flex items-center justify-between mt-3">
-                                <a
-                                    href={`${window.location.origin}/login?ref=agent-${formData.uid}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 underline truncate"
-                                >
-                                    {`${window.location.origin}/login?ref=agent-${formData.uid}`}
-                                </a>
-
-                                <button
-                                    onClick={() => handleCopyToClipboard(`${window.location.origin}/login?ref=agent-${formData.uid}`)}
-                                    className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition"
-                                >
-                                    העתק קישור
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
+                <div className="flex justify-center gap-4 profile-button mt-8">
+                    <button onClick={handleEditToggle} className="btn-outline text-lg px-8">{isEditing ? "ביטול" : "ערוך"}</button>
+                    {isEditing && <button onClick={handleSave} className="btn-primary text-lg px-8">שמור</button>}
+                </div>
             </div>
-
-            <button onClick={handleEditToggle} className="mt-6 bg-yellow-500 text-white px-6 py-2 rounded-md hover:bg-yellow-600 transition">{isEditing ? "ביטול" : "ערוך"}</button>
-            {isEditing && <button onClick={handleSave} className="ml-4 bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition">שמור</button>}
         </div>
     );
 };
