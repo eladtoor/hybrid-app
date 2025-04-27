@@ -24,21 +24,21 @@ const HomePage = () => {
     };
 
     return (
-        <div className="mt-36 min-h-screen relative">
+        <div className="sm:mt-32 mt-24 min-h-screen relative">
 
-            <div className="w-full mb-8">
+            <div className="w-full mb-8 ">
                 <Carousel />
             </div>
 
             <StatsCounters>
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                <div className="absolute  left-1/2 transform -translate-x-1/2 sm:pt-4 ">
                     {user ? (
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-bold text-gray-900 ">
                             ברוך הבא {user.name}
                         </h2>
                     ) : (
                         <button
-                            className="bg-gray-900 hover:bg-primary text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300"
+                            className="bg-gray-900 hover:bg-primary text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-300 mt-3 sm:mt-0"
                             onClick={handleLoginClick}
                         >
                             התחבר עכשיו
@@ -48,7 +48,7 @@ const HomePage = () => {
             </StatsCounters>
 
 
-            {/* הודעת ברוך הבא או התחברות */}
+
 
 
             {/* אייקון צף לפתיחת עגלה מהירה מעל כפתור הוואטסאפ */}
@@ -97,7 +97,9 @@ const HomePage = () => {
                 <AboutUs />
                 {/* מוצרים מומלצים */}
                 {/* מוצרים בהנחה */}
-                {user && user.productDiscounts ? (
+                {console.log(user)
+                }
+                {user && user.productDiscounts?.length > 0 ? (
                     <DiscountedProducts discountedProducts={user.productDiscounts} />
                 ) : (
                     <RecommendedProducts />

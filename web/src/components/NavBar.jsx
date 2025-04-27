@@ -34,8 +34,9 @@ const NavBar = () => {
     }, []);
 
     useEffect(() => {
-        if (location.pathname !== '/search') setSearchVisible(false);
-    }, [location.pathname]);
+        setSearchVisible(false); // תמיד סוגר
+    }, [location.pathname, location.search]); // מאזין גם ל-query string
+
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -68,8 +69,9 @@ const NavBar = () => {
                     className="md:hidden text-white text-2xl p-2"
                     onClick={toggleMenu}
                 >
-                    <i className="fas fa-bars"></i>
+                    <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
                 </button>
+
 
                 {/* Logo */}
                 <div className="flex justify-start">
@@ -167,61 +169,84 @@ const NavBar = () => {
             {/* Mobile Menu */}
             <div className={`md:hidden fixed top-0 right-0 h-full w-full bg-black/50 transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={toggleMenu}>
                 <div
-                    className={`absolute right-0 top-0 h-full w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                    className={`absolute right-0 top-20 h-[calc(100%-5rem)] w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <button onClick={toggleMenu} className="absolute top-4 left-4 text-2xl text-black">
-                        <i className="fas fa-times"></i>
+
+                    <button onClick={toggleMenu} className="md:hidden text-white text-2xl p-2">
+                        <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
                     </button>
-                    <div className="flex flex-col gap-6 px-8 pt-20">
-                        <div className="text-2xl font-bold mb-4">{categories.companyName}</div>
+
+
+                    <div className="flex flex-col gap-4">
+                        <Link
+                            to="/"
+                            className=" text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
+
+                            onClick={toggleMenu}
+                        >
+                            דף הבית
+                        </Link>
+                        <div className="text-2xl font-bold text-center text-gray-800 border-b-2 border-gray-300 pb-4">{categories.companyName}</div>
                         <div className="border-b border-gray-200 pb-4">
+
                             {Object.values(categories.companyCategories).map((category, idx) => (
                                 <Link
                                     key={idx}
                                     to={`/${category.categoryName}/${category.categoryName}`}
-                                    className="block py-2 text-gray-800 hover:text-red-600"
+                                    className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
+
                                     onClick={toggleMenu}
                                 >
                                     {category.categoryName}
                                 </Link>
                             ))}
                         </div>
-                        {!loadingUser && user ? (
-                            <>
-                                <Link to="/profile" onClick={toggleMenu} className="text-gray-800 hover:text-red-600">
-                                    הפרופיל שלי
-                                </Link>
-                                {user.userType === 'סוכן' && (
-                                    <Link to="/agent-dashboard" onClick={toggleMenu} className="text-gray-800 hover:text-red-600">
-                                        ניהול לקוחות
+                        <div className="flex flex-col ">
+
+                            {!loadingUser && user ? (
+                                <>
+                                    <Link to="/profile" onClick={toggleMenu} className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
+                                    >
+                                        הפרופיל שלי
                                     </Link>
-                                )}
-                                {user.isAdmin && (
-                                    <>
-                                        <Link to="/admin-panel" onClick={toggleMenu} className="text-gray-800 hover:text-red-600">
-                                            עריכת מוצרים
+                                    {user.userType === 'סוכן' && (
+                                        <Link to="/agent-dashboard" onClick={toggleMenu} className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
+                                        >
+                                            ניהול לקוחות
                                         </Link>
-                                        <Link to="/user-management" onClick={toggleMenu} className="text-gray-800 hover:text-red-600">
-                                            ניהול משתמשים
-                                        </Link>
-                                    </>
-                                )}
-                                <button
-                                    onClick={async () => {
-                                        await handleSignOut();
-                                        toggleMenu();
-                                    }}
-                                    className="text-gray-800 hover:text-red-600 text-right"
+                                    )}
+                                    {user.isAdmin && (
+                                        <>
+                                            <Link to="/admin-panel" onClick={toggleMenu} className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
+                                            >
+                                                עריכת מוצרים
+                                            </Link>
+                                            <Link to="/user-management" onClick={toggleMenu} className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
+                                            >
+                                                ניהול משתמשים
+                                            </Link>
+                                        </>
+                                    )}
+                                    <button
+                                        onClick={async () => {
+                                            await handleSignOut();
+                                            toggleMenu();
+                                        }}
+                                        className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
+
+                                    >
+                                        התנתק
+                                    </button>
+                                </>
+                            ) : (
+                                <Link to="/login" onClick={toggleMenu} className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
                                 >
-                                    התנתק
-                                </button>
-                            </>
-                        ) : (
-                            <Link to="/login" onClick={toggleMenu} className="text-gray-800 hover:text-red-600">
-                                התחברות
-                            </Link>
-                        )}
+                                    התחברות
+                                </Link>
+                            )}
+                        </div>
+
                     </div>
                 </div>
             </div>

@@ -49,41 +49,39 @@ const Carousel = () => {
 
     return (
         <div
-            className="relative max-w-6xl  mx-auto  h-[400px] rounded-xl overflow-hidden  shadow-lg shadow-gray-900 bg-white/20 flex justify-center items-center hover:border-4 border-double border-gray-900"
+            className="relative max-w-6xl mx-auto h-[200px] md:h-[400px] rounded-xl overflow-hidden shadow-lg shadow-gray-900 bg-white/20 flex justify-center items-center hover:border-4 border-double border-gray-900"
             onMouseEnter={stopAutoSlide}
             onMouseLeave={startAutoSlide}
         >
             <img
                 src={images[currentIndex]}
                 alt={`Slide ${currentIndex}`}
-                className="h-[400px] w-full object-contain  transition-opacity duration-700 ease-in-out shadow-lg rounded"
+                className="h-full w-full object-contain transition-opacity duration-700 ease-in-out shadow-lg rounded"
             />
 
-
-            {/* חצים */}
             <button
                 onClick={() => {
                     stopAutoSlide();
                     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
                     startAutoSlide();
                 }}
-                className="absolute top-1/2 left-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/80 hover:scale-110 transition"
+                className="absolute top-1/2 left-2 md:left-4 bg-black/50 text-white p-1.5 md:p-2 rounded-full hover:bg-black/80 hover:scale-110 transition"
             >
-                <FaChevronLeft />
+                <FaChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
             </button>
+
             <button
                 onClick={() => {
                     stopAutoSlide();
                     setCurrentIndex((prev) => (prev + 1) % images.length);
                     startAutoSlide();
                 }}
-                className="absolute top-1/2 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/80 hover:scale-110 transition"
+                className="absolute top-1/2 right-2 md:right-4 bg-black/50 text-white p-1.5 md:p-2 rounded-full hover:bg-black/80 hover:scale-110 transition"
             >
-                <FaChevronRight />
+                <FaChevronRight className="w-4 h-4 md:w-5 md:h-5" />
             </button>
 
-            {/* נקודות */}
-            <div className="flex justify-center gap-2 absolute bottom-2.5 left-1/2 ">
+            <div className="flex justify-center gap-1.5 md:gap-2 absolute bottom-2 left-1/2 transform -translate-x-1/2">
                 {images.map((_, index) => (
                     <span
                         key={index}
@@ -92,9 +90,9 @@ const Carousel = () => {
                             setCurrentIndex(index);
                             startAutoSlide();
                         }}
-                        className={`w-3 h-3 rounded-full border border-white cursor-pointer transition ${index === currentIndex ? 'bg-primary' : 'bg-gray-400'
+                        className={`w-2 h-2 md:w-3 md:h-3 rounded-full border border-white cursor-pointer transition ${index === currentIndex ? 'bg-primary' : 'bg-gray-400'
                             }`}
-                    ></span>
+                    />
                 ))}
             </div>
         </div>

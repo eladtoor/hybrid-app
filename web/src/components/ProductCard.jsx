@@ -304,7 +304,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
     return (
         <>
             <div
-                className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:scale-110 transition-all duration-300 hover:shadow-lg  cursor-pointer p-3 flex flex-col w-60"
+                className="relative bg-white rounded-lg border border-gray-900 overflow-hidden hover:scale-110 transition-all duration-300 hover:shadow-lg cursor-pointer p-4 flex flex-col items-center w-56 h-56 sm:w-60 sm:h-80"
                 onClick={toggleModal}
             >
                 {/* הנחה */}
@@ -326,19 +326,21 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
                     <img
                         src={product.תמונות}
                         alt={product.שם}
-                        className="w-full h-full object-cover transition-all duration-300 "
+                        className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded-lg mb-4"
                     />
                 </div>
 
                 {/* שם מוצר */}
-                <h3 className="text-md font-medium text-gray-900 text-center mt-2 truncate">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 text-center min-h-[3rem]">
                     {product.שם}
                 </h3>
 
-                {/* תיאור מוצר */}
-                <p className="text-sm text-gray-500 text-center line-clamp-2 mt-1">
-                    {product["תיאור קצר"] ? product["תיאור קצר"] : ""}
-                </p>
+                {/* תיאור מוצר - מוסתר במובייל */}
+                <div className="hidden sm:block">
+                    <p className="text-sm sm:text-base text-gray-600 text-center min-h-[2rem]">
+                        {product["תיאור קצר"] ? product["תיאור קצר"] : ""}
+                    </p>
+                </div>
 
                 {/* קישור לפרטים נוספים */}
                 <div className="text-center mt-2">
@@ -350,14 +352,17 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
 
             {showModal && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] p-4"
+                    className="fixed inset-0 bg-black bg-opacity-60 sm:bg-opacity-50 flex items-center justify-center z-[1000] p-4"
                     onClick={(e) => {
                         if (e.target === e.currentTarget) {
                             toggleModal();
                         }
                     }}
                 >
-                    <div className="bg-white w-11/12 max-w-md p-6 rounded-lg shadow-lg relative max-h-[90vh] overflow-y-auto z-[1100]">
+                    <div className="bg-white w-11/12 max-w-md p-4 sm:p-6 rounded-lg shadow-lg relative max-h-[80vh] sm:max-h-[90vh]
+ overflow-y-auto z-[1100] transform transition-transform duration-300 scale-95 sm:scale-100"
+
+                    >
                         {/* כפתור סגירה */}
                         <button
                             className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl"
@@ -367,13 +372,13 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
                         </button>
 
                         {/* תוכן המודל */}
-                        <h2 className="text-2xl font-bold text-gray-800 text-center">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center">
                             {product.שם}
                         </h2>
                         <img
                             src={product.תמונות}
                             alt={product.שם}
-                            className="w-32 h-32 object-cover rounded-full mx-auto mt-4"
+                            className="w-28 h-28 sm:w-32 sm:h-32 object-contain rounded-none sm:rounded-full mx-auto mt-4"
                         />
 
                         {/* תיאור או לינק */}
@@ -398,7 +403,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
                         {!isDigitalCatalogCategory && (
                             <>
                                 {/* מחיר */}
-                                <div className="mt-4 text-center">
+                                <div className="mt-3 sm:mt-4 text-center">
                                     {hasDiscount ? (
                                         <>
                                             <p className="text-gray-500 line-through">
@@ -432,7 +437,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
 
                                 {/* מאפיינים */}
                                 {product.סוג === 'variable' && (
-                                    <div className="mt-4">
+                                    <div className="mt-3 sm:mt-4 text-center">
                                         <h3 className="font-semibold text-gray-800 text-center mb-2">בחר מאפיין:</h3>
                                         <div className="flex flex-wrap justify-center gap-3">
                                             {renderVariationAttributes()}
@@ -442,7 +447,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
 
                                 {/* כמות */}
                                 {product.quantities && product.quantities.length > 0 && (
-                                    <div className="mt-4">
+                                    <div className="mt-3 sm:mt-4 text-center">
                                         <h3 className="font-semibold text-gray-800">בחר כמות:</h3>
                                         <div className="flex gap-2 mt-2">
                                             {product.quantities.map((quantity, index) => (
@@ -457,7 +462,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
 
                                 {/* פריקת מנוף */}
                                 {product.materialGroup === "Gypsum and Tracks" && (
-                                    <div className="mt-4">
+                                    <div className="mt-3 sm:mt-4 text-center">
                                         <h3 className="font-semibold text-gray-800">פריקת מנוף:</h3>
                                         <div className="flex gap-2 mt-2">
                                             <label className={`px-4 py-2 border rounded-md cursor-pointer transition ${craneUnload === true ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
@@ -474,7 +479,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
 
                                 {/* הערות */}
                                 {product.allowComments && (
-                                    <div className="mt-4">
+                                    <div className="mt-3 sm:mt-4 text-center">
                                         <label className="font-semibold text-gray-800">הערות:</label>
                                         <input type="text" placeholder="הזן הערה למוצר..." value={comment} onChange={(e) => setComment(e.target.value)} className="w-full p-2 border rounded-md mt-2" />
                                     </div>

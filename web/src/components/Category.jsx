@@ -18,14 +18,12 @@ const Category = ({ title, subcategories }) => {
     }, []);
 
     return (
-        <div className="w-full px-6 py-10 bg-white rounded-xl shadow-md border border-gray-200">
-            {/* כותרת קטגוריה */}
-            <h2 className="text-3xl font-bold text-gray-900 text-right pr-6 border-r-4 border-primary">
+        <div className="w-full px-3 md:px-6 py-6 md:py-10 bg-white rounded-xl shadow-md border border-gray-200">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-right pr-3 md:pr-6 border-r-4 border-primary">
                 {title}
             </h2>
 
-            {/* רשימת תת קטגוריות */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 justify-center mt-8">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8 justify-center mt-6 md:mt-8">
                 {subcategoryArray.length > 0 ? (
                     subcategoryArray.map((subcategory, index) => {
                         const imageForCategory = categoryImages.find(
@@ -35,11 +33,10 @@ const Category = ({ title, subcategories }) => {
                         return (
                             <button
                                 key={index}
-                                className="flex flex-col items-center bg-gray-50 shadow-md rounded-xl p-5 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                                className="flex flex-col items-center bg-gray-50 shadow-md rounded-xl p-3 md:p-5 transition-all duration-300 hover:scale-105 hover:shadow-xl"
                                 onClick={() => moveToSubcategory(subcategory.categoryName)}
                             >
-                                {/* תמונה של תת-קטגוריה */}
-                                <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-gray-300 hover:border-primary transition-all duration-300">
+                                <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-gray-300 hover:border-primary transition-all duration-300">
                                     <img
                                         src={
                                             imageForCategory ||
@@ -51,8 +48,7 @@ const Category = ({ title, subcategories }) => {
                                     />
                                 </div>
 
-                                {/* שם תת קטגוריה */}
-                                <p className="text-lg font-semibold text-gray-800 mt-4">
+                                <p className="text-base md:text-lg font-semibold text-gray-800 mt-3 md:mt-4 text-center">
                                     {subcategory.categoryName}
                                 </p>
                             </button>
@@ -62,7 +58,6 @@ const Category = ({ title, subcategories }) => {
                     <p className="text-gray-500">אין תת-קטגוריות זמינות</p>
                 )}
             </div>
-
         </div>
     );
 };

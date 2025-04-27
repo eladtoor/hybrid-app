@@ -22,11 +22,11 @@ const DiscountedProducts = ({ discountedProducts }) => {
     }
 
     return (
-        <div className="w-full bg-white shadow-lg rounded-lg p-6 mt-10">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center border-b pb-2">
+        <div className="w-full px-4 sm:px-6 py-8 sm:py-10 bg-white rounded-xl shadow-md border border-gray-200 mt-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 text-center border-b pb-2">
                 מוצרים בהנחה עבורך
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6 justify-items-center">
                 {discountedFullProducts.map((product) => (
                     <ProductCard key={product._id} product={product} />
                 ))}

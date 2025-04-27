@@ -4,14 +4,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 
 const SearchResults = () => {
-    const products = useSelector((state) => state.products.products); // ✅ קבלת מוצרים מעודכנים מה-Redux
+    const products = useSelector((state) => state.products.products);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const location = useLocation();
     const navigate = useNavigate();
     const query = new URLSearchParams(location.search).get('query');
 
     useEffect(() => {
-        console.log("🔄 Redux Products Updated in SearchResults:", products);
         if (query && products.length > 0) {
             const lowerQuery = query.toLowerCase();
             const regex = new RegExp(lowerQuery.split('').join('.*'), 'i');
@@ -39,21 +38,15 @@ const SearchResults = () => {
             const results = [...exactNameMatches, ...filteredPartialMatches].slice(0, 9);
             setFilteredProducts(results);
         }
-    }, [query, products]); // ✅ מאזין לשינויים במוצרים ובשאילתת החיפוש
-
-    const handleSearch = () => {
-        if (query.trim()) {
-            navigate(`/search?query=${query}`);
-        }
-    };
+    }, [query, products]);
 
     return (
-        <div className="max-w-screen-lg mx-auto mt-24 p-6">
-            <h2 className="text-center text-2xl font-bold text-gray-800 mb-6">
+        <div className="max-w-screen-lg mx-auto mt-24 p-4 sm:p-6">
+            <h2 className="text-center text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
                 תוצאות חיפוש עבור: <span className="text-blue-600">{query}</span>
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6 justify-items-center">
                 {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
                         <ProductCard key={product._id} product={product} />

@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from "firebase/auth";
 import CartItem from '../components/CartItem';
-import '../styles/CartPage.css';
 import { increaseQuantity, decreaseQuantity, removeFromCart, setCartItems } from '../redux/slices/cartSlice';
 import { loadCartFromFirestore, saveCartToFirestore } from '../utils/cartUtils';
 import { auth, db } from '../firebase';
@@ -508,15 +507,16 @@ const CartPage = () => {
     const finalTotalPriceWithVAT = finalTotalPriceBeforeVAT + vatAmount;
 
     return (
-        <div className="cart-page p-10">
-            <h1 className="cart-title section-title-rtl mt-24">העגלה שלי</h1>
-            <div className="cart-container">
-                <div className="cart-items  ">
+        <div className="min-h-screen w-full px-4 md:px-10 pt-16 md:pt-24">
+            <h1 className="text-2xl md:text-4xl font-bold text-right mb-6 md:mb-10">העגלה שלי</h1>
+
+            <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+                {/* Cart Items Section */}
+                <div className="w-full md:w-2/3 space-y-4">
                     {cartItems.length > 0 ? (
                         cartItems.map(item => (
                             <CartItem
                                 key={item.cartItemId}
-
                                 item={item}
                                 onIncrease={handleIncrease}
                                 onDecrease={handleDecrease}
@@ -524,90 +524,89 @@ const CartPage = () => {
                             />
                         ))
                     ) : (
-                        <h2>העגלה ריקה</h2>
+                        <div className="text-xl text-center py-10">העגלה ריקה</div>
                     )}
                 </div>
-                <div className="vertical-divider"></div>
-                <div className="cart-summary-container">
-                    <div className="progress-ticket">
-                        <h2>השג 100% בכל קבוצת חומרים לקבלת הובלה חינם!</h2>
-                        {materialGroups.map((group) => {
-                            console.log("🔍 Progress Data:", progressData);
 
+                {/* Cart Summary Section */}
+                <div className="w-full md:w-1/3 space-y-6">
+                    {/* Progress Section */}
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h2 className="text-lg font-semibold mb-4 text-right">
+                            השג 100% בכל קבוצת חומרים לקבלת הובלה חינם!
+                        </h2>
+                        {materialGroups.map((group) => {
                             const progress = progressData[group.groupName] || { totalInCart: 0, percentage: 0 };
                             const remainingAmount = Math.max(group.minPrice - progress.totalInCart, 0);
                             return (
-                                <div key={group.groupName} className="progress-group">
-                                    <h3>
+                                <div key={group.groupName} className="mb-4">
+                                    <h3 className="text-right font-medium mb-2">
                                         {group.groupName === 'Colors and Accessories' && 'צבעים ומוצרים נלווים'}
                                         {group.groupName === 'Powders' && 'אבקות (דבקים וטייח)'}
                                         {group.groupName === 'Gypsum and Tracks' && 'גבס ומסלולים'}
                                     </h3>
-                                    <div className="progress-bar-container">
+                                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                                         <div
-                                            className="progress-bar bg-primary"
+                                            className="h-full bg-blue-600 transition-all duration-300"
                                             style={{ width: `${progress.percentage}%` }}
-                                        ></div>
-                                        <span className="progress-percentage">
-                                            {Math.floor(progress.percentage)}%
-                                        </span>
+                                        />
                                     </div>
-                                    {progress.totalInCart > 0 ? (
-                                        <p className="add-more-text">
-                                            {progress.percentage < 100
+                                    <p className="text-sm mt-1 text-right">
+                                        {progress.totalInCart > 0
+                                            ? progress.percentage < 100
                                                 ? `הוסף ${remainingAmount}₪ להובלה חינם (משלוח: ${group.transportationPrice}₪)`
-                                                : 'הובלה חינם!'}
-                                        </p>
-                                    ) : (
-                                        <p className="add-more-text">אין מוצרים מקבוצה זו בעגלה</p>
-                                    )}
+                                                : 'הובלה חינם!'
+                                            : 'אין מוצרים מקבוצה זו בעגלה'
+                                        }
+                                    </p>
                                 </div>
                             );
                         })}
                     </div>
 
-                    <div className="cart-summary">
-                        <h2 >סיכום הזמנה</h2>
-                        <p>סה"כ מוצרים לפני הנחה: ₪{originalTotalPrice.toFixed(2)}</p>
-                        {cartDiscount > 0 && (
-                            <p>
-                                <strong>הנחת עגלה (%{cartDiscount}):</strong> ₪{(originalTotalPrice * cartDiscount / 100).toFixed(2)}
-                            </p>
-                        )}
-                        <p>מחיר משלוח: ₪{transportationCosts.toFixed(2)}</p>
+                    {/* Order Summary */}
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h2 className="text-xl font-bold mb-4 text-right">סיכום הזמנה</h2>
+                        <div className="space-y-2 text-right">
+                            <p>סה"כ מוצרים לפני הנחה: ₪{originalTotalPrice.toFixed(2)}</p>
+                            {cartDiscount > 0 && (
+                                <p className="text-green-600">
+                                    הנחת עגלה (%{cartDiscount}): ₪{(originalTotalPrice * cartDiscount / 100).toFixed(2)}
+                                </p>
+                            )}
+                            <p>מחיר משלוח: ₪{transportationCosts.toFixed(2)}</p>
+                            {craneUnloadFee > 0 && (
+                                <p className="text-red-600 font-semibold">תוספת פריקת מנוף: ₪250</p>
+                            )}
+                            <p>סה"כ לפני מע"מ: ₪{finalTotalPriceBeforeVAT.toFixed(2)}</p>
+                            <p>מע"מ (18%): ₪{vatAmount.toFixed(2)}</p>
+                            <p className="text-lg font-bold">סה"כ לתשלום: ₪{finalTotalPriceWithVAT.toFixed(2)}</p>
+                        </div>
 
-                        {craneUnloadFee > 0 && (
-                            <p style={{ color: "red", fontWeight: "bold" }}>תוספת פריקת מנוף: ₪250</p>
-                        )}
-                        <p>סה"כ לפני מע"מ: ₪{finalTotalPriceBeforeVAT.toFixed(2)}</p>
-                        <p>מע"מ (18%): ₪{vatAmount.toFixed(2)}</p>
-                        <p><strong>סה"כ לתשלום: ₪{finalTotalPriceWithVAT.toFixed(2)}</strong></p>
-                        {/* MODAL FOR CREDIT USERS */}
-                        {isModalOpen && (
-                            <ConfirmationModal
-                                cartItems={cartItems}
-                                finalTotalPrice={finalTotalPriceWithVAT}
-                                shippingCost={transportationCosts}
-                                craneUnloadCost={craneUnloadFee}
-                                onConfirm={handleConfirmOrder}
-                                onCancel={handleCancelOrder}
-                            />
+                        <button
+                            onClick={handleCheckoutClick}
+                            className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            {user?.isCreditLine ? 'סיום הזמנה' : 'מעבר לתשלום'}
+                        </button>
 
+                        {errorMessage && (
+                            <p className="mt-2 text-red-600 text-center">{errorMessage}</p>
                         )}
-                        <button className="btn-outline text-lg m-2" onClick={handleCheckoutClick}>{user?.isCreditLine ? 'סיום הזמנה' : 'מעבר לתשלום'}</button>
                     </div>
-                    {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-                    <div className="address-card modal-form">
-                        <h3>כתובת למשלוח</h3>
+                    {/* Shipping Address */}
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h3 className="text-lg font-semibold mb-4 text-right">כתובת למשלוח</h3>
                         {isEditingAddress ? (
-                            <div className="modal-form">
+                            <div className="space-y-3">
                                 <input
                                     type="text"
                                     name="city"
                                     value={temporaryAddress.city}
                                     placeholder="עיר"
                                     onChange={handleAddressChange}
+                                    className="w-full p-2 border rounded-lg text-right"
                                 />
                                 <input
                                     type="text"
@@ -615,6 +614,7 @@ const CartPage = () => {
                                     value={temporaryAddress.street}
                                     placeholder="רחוב"
                                     onChange={handleAddressChange}
+                                    className="w-full p-2 border rounded-lg text-right"
                                 />
                                 <input
                                     type="text"
@@ -622,6 +622,7 @@ const CartPage = () => {
                                     value={temporaryAddress.apartment}
                                     placeholder="דירה"
                                     onChange={handleAddressChange}
+                                    className="w-full p-2 border rounded-lg text-right"
                                 />
                                 <input
                                     type="text"
@@ -629,6 +630,7 @@ const CartPage = () => {
                                     value={temporaryAddress.floor}
                                     placeholder="קומה"
                                     onChange={handleAddressChange}
+                                    className="w-full p-2 border rounded-lg text-right"
                                 />
                                 <input
                                     type="text"
@@ -636,19 +638,26 @@ const CartPage = () => {
                                     value={temporaryAddress.entrance}
                                     placeholder="כניסה"
                                     onChange={handleAddressChange}
+                                    className="w-full p-2 border rounded-lg text-right"
                                 />
-                                <button onClick={saveTemporaryAddressToFirestore} className="btn-primary text-lg m-2">
+                                <button
+                                    onClick={saveTemporaryAddressToFirestore}
+                                    className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                >
                                     שמור כתובת
                                 </button>
                             </div>
                         ) : (
-                            <div className="address-details">
+                            <div className="space-y-2 text-right">
                                 <p>עיר: {temporaryAddress.city || 'לא זמין'}</p>
                                 <p>רחוב: {temporaryAddress.street || 'לא זמין'}</p>
                                 <p>דירה: {temporaryAddress.apartment || 'לא זמין'}</p>
                                 <p>קומה: {temporaryAddress.floor || 'לא זמין'}</p>
                                 <p>כניסה: {temporaryAddress.entrance || 'לא זמין'}</p>
-                                <button onClick={handleEditAddressToggle} className="btn-outline text-lg m-2 ">
+                                <button
+                                    onClick={handleEditAddressToggle}
+                                    className="w-full mt-2 border border-blue-600 text-blue-600 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                >
                                     ערוך כתובת
                                 </button>
                             </div>
@@ -656,6 +665,17 @@ const CartPage = () => {
                     </div>
                 </div>
             </div>
+
+            {isModalOpen && (
+                <ConfirmationModal
+                    cartItems={cartItems}
+                    finalTotalPrice={finalTotalPriceWithVAT}
+                    shippingCost={transportationCosts}
+                    craneUnloadCost={craneUnloadFee}
+                    onConfirm={handleConfirmOrder}
+                    onCancel={handleCancelOrder}
+                />
+            )}
         </div>
     );
 };
