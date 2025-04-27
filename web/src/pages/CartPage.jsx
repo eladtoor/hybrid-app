@@ -508,7 +508,7 @@ const CartPage = () => {
 
     return (
         <div className="min-h-screen w-full px-4 md:px-10 pt-16 md:pt-24">
-            <h1 className="text-2xl md:text-4xl font-bold text-right mb-6 md:mb-10">העגלה שלי</h1>
+            <h1 className="text-2xl md:text-4xl font-bold text-right mb-6 md:mb-10 mt-10">העגלה שלי</h1>
 
             <div className="flex flex-col md:flex-row gap-6 md:gap-10">
                 {/* Cart Items Section */}

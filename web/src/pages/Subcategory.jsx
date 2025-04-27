@@ -52,7 +52,7 @@ export const Subcategory = () => {
                 </h2>}
 
                 {!isDigitalCatalogCategory && subCategories.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
                         {subCategories.map((subcategory, index) => (
                             <button
                                 key={index}
@@ -84,7 +84,7 @@ export const Subcategory = () => {
                 </h2>
 
                 {products.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6 justify-items-center">
                         {products.map((product) => (
                             <ProductCard
                                 key={product.productId}

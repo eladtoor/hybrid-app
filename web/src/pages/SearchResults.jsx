@@ -46,7 +46,7 @@ const SearchResults = () => {
                 תוצאות חיפוש עבור: <span className="text-blue-600">{query}</span>
             </h2>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6 justify-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-6 justify-items-center">
                 {filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
                         <ProductCard key={product._id} product={product} />

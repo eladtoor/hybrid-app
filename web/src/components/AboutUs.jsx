@@ -25,7 +25,7 @@ const AboutUs = () => {
                 </div>
 
                 {/* יתרונות עם אייקונים */}
-                <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-4 gap-6 text-center">
                     <div className="flex flex-col items-center">
                         <FaCheckCircle className="text-primary text-3xl sm:text-4xl" />
                         <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mt-2">מחיר מנצח</h3>

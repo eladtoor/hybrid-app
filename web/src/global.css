@@ -6,6 +6,7 @@
   --background-hover-color: #000000c9;
   --border: #242323;
 }
+
 /* ✅ Toastify – שמירה על טוסט יציב ומרוכז */
 .Toastify__toast-container--top-center {
   left: 50% !important;
