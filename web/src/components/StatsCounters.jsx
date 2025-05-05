@@ -25,16 +25,13 @@ const Counter = ({ end, label, Icon }) => {
     }, [end]);
 
     return (
-        <div className="relative aspect-square bg-white/20 backdrop-blur-md border border-gray-200 rounded-3xl p-4 shadow-xl hover:scale-105 transition-transform duration-500 group overflow-hidden w-full">
+        <div className="relative aspect-square bg-white/20 backdrop-blur-md border border-gray-200 rounded-3xl p-4 shadow-xl hover:scale-105 transition-transform duration-500 group overflow-hidden w-full max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]">
 
-            <div className="absolute inset-0  rounded-3xl border-2 border-transparent group-hover:border-primary animate-border-gradient"></div>
+            <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-primary animate-border-gradient"></div>
             <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <Icon className="w-8 h-8 md:w-12 md:h-12 text-primary mb-4"
-                />
-                <span className="text-2xl md:text-4xl font-extrabold text-gray-800"
-                >{count}</span>
-                <span className="text-sm md:text-lg text-gray-700 mt-2"
-                >{label}</span>
+                <Icon className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 text-primary mb-2 sm:mb-4" />
+                <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold text-gray-800">{count}</span>
+                <span className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-700 mt-1 sm:mt-2">{label}</span>
             </div>
         </div>
     );

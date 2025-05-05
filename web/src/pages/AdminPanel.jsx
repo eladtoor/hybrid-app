@@ -473,8 +473,9 @@ const AdminPanel = () => {
         <div className="admin-panel p-32">
             <h1 className='text-4xl inline-block font-bold text-gray-900 mt-6 pr-4 border-r-4 border-primary'>פאנל ניהול</h1>
 
-            <div className="border-t pt-6 mt-12">
-                <h2 className="text-2xl font-bold mb-4">ניהול סטטיסטיקות דף הבית</h2>
+            {/* ניהול סטטיסטיקות דף הבית */}
+            <div className="border-t pt-6 mt-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">ניהול סטטיסטיקות דף הבית</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <label>
                         לקוחות מרוצים:
@@ -519,7 +520,7 @@ const AdminPanel = () => {
                 </div>
                 <button
                     onClick={handleSaveStats}
-                    className="btn-primary mt-4 text-xl"
+                    className="w-full sm:w-auto btn-primary mt-4 text-lg"
                 >
                     שמור סטטיסטיקות
                 </button>
@@ -531,7 +532,7 @@ const AdminPanel = () => {
 
             </div>
 
-            <h2 className='text-xl mb-4'>ניהול מחירי מינימום לקבוצות חומרים</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">ניהול מחירי מינימום לקבוצות חומרים</h2>
             {loading ? (
                 <p>טוען...</p>
             ) : (
@@ -597,29 +598,26 @@ const AdminPanel = () => {
 
                 </>
             )}
-            <div className="border-t pt-6 mt-12">
-                <h2 className="text-2xl font-bold mb-4">הוספת תמונה לקרוסלה</h2>
-
+            <div className="mt-8">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">הוספת תמונה לקרוסלה</h2>
                 <input
                     type="file"
                     accept="image/*"
                     onChange={(e) => setCarouselFile(e.target.files[0])}
                     className="mb-4"
                 />
-
                 <button
                     onClick={handleUploadCarouselImage}
-                    className="admin-button btn-primary text-xl"
+                    className="w-full sm:w-auto btn-primary text-lg"
                 >
                     העלה תמונה
                 </button>
                 <button
                     onClick={handleDeleteAllCarouselImages}
-                    className="admin-button btn-outline text-red-600 border-red-600 hover:bg-red-100 mt-2"
+                    className="w-full sm:w-auto btn-outline text-red-600 border-red-600 hover:bg-red-100 mt-2"
                 >
                     מחק את כל תמונות הקרוסלה
                 </button>
-
             </div>
 
 
@@ -645,7 +643,7 @@ const AdminPanel = () => {
                 placeholder="חפש לפי מזהה/מק״ט/שם"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-bar search-input"
+                className="search-bar search-input hidden md:block"
             />
 
             {showForm && (
@@ -911,7 +909,7 @@ const AdminPanel = () => {
                 </div>
             )}
 
-            <table className="admin-table">
+            <table className="admin-table hidden md:block" >
                 <thead>
                     <tr>
                         <th className="admin-th">תמונה</th>
@@ -922,7 +920,7 @@ const AdminPanel = () => {
                         <th className="admin-th">פעולות</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="admin-tbody">
                     {filteredProducts?.map((product) => (
                         <tr key={product._id}>
                             <td className="admin-td"><img src={product["תמונות"]} alt={product.name} className="admin-img" /></td>

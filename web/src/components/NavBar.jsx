@@ -107,6 +107,7 @@ const NavBar = () => {
                     <button onClick={() => setSearchVisible(!searchVisible)} className="text-white hover:text-red-600 text-2xl">
                         <i className="fa fa-search"></i>
                     </button>
+
                     {!loadingUser && user ? (
                         <div className="relative group">
                             <button className="text-white hover:text-red-600 text-2xl">
@@ -153,7 +154,9 @@ const NavBar = () => {
                     <button onClick={() => navigate('/cart')} className="text-white hover:text-red-600 text-2xl">
                         <i className="fa fa-shopping-cart"></i>
                     </button>
+
                 </div>
+
 
                 {/* Mobile Icons */}
                 <div className="flex md:hidden items-center gap-4">
@@ -202,6 +205,7 @@ const NavBar = () => {
                                 </Link>
                             ))}
                         </div>
+
                         <div className="flex flex-col ">
 
                             {!loadingUser && user ? (
@@ -250,6 +254,8 @@ const NavBar = () => {
                     </div>
                 </div>
             </div>
+
+
 
             {/* Search Bar */}
             {searchVisible && (

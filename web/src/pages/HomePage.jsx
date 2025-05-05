@@ -30,6 +30,7 @@ const HomePage = () => {
                 <Carousel />
             </div>
 
+
             <StatsCounters>
                 <div className="absolute  left-1/2 transform -translate-x-1/2 sm:pt-4 ">
                     {user ? (

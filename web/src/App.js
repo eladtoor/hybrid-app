@@ -41,6 +41,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { maybeFetchProducts } from "./redux/actions/productActions";
 import { maybeFetchCategories } from "./redux/actions/categoryActions.js";
 import DeliveryDays from "./pages/DeliveryDays";
+import FloatingTranslateButton from "./components/FloatingTranslateButton.jsx";
 
 function App() {
   const categories = useSelector((state) => state.categories.categories);
@@ -174,6 +175,7 @@ function App() {
               </main>
               <Footer />
               <FloatingWhatsAppButton />
+              <FloatingTranslateButton />
               <ToastContainer
                 position="top-center"
                 autoClose={3000}
