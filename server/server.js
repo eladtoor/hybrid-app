@@ -59,7 +59,8 @@ app.use((req, res, next) => {
       "script-src 'self' 'unsafe-inline' https://apis.google.com https://cdn.gtranslate.net; " +
       "style-src 'self' 'unsafe-inline'; " +
       "font-src 'self' https: data:; " +
-      "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il https://firestore.googleapis.com wss://hybrid-app-1-2haj.onrender.com; " +
+      "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il https://firestore.googleapis.com wss://hybrid-app-1-2haj.onrender.com https://identitytoolkit.googleapis.com; " +
+      "frame-src 'self' https://*.firebaseapp.com; " +
       "frame-ancestors 'none'; " +
       "object-src 'none'; " +
       "base-uri 'self'; " +
