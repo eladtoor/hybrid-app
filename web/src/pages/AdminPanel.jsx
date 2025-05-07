@@ -740,6 +740,7 @@ const AdminPanel = () => {
                                                                             מחיר מאפיין:
                                                                             <input
                                                                                 type="number"
+                                                                                step="0.01"
                                                                                 value={valueObj.price}
                                                                                 onChange={(e) =>
                                                                                     handleAttributeValueChange(index, valueIndex, 'price', e.target.value, newProduct, setNewProduct)

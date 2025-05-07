@@ -50,6 +50,28 @@ const corsOptions = { origin: "*" };
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// ✅ HTTP Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " +
+      "img-src 'self' https: data:; " +
+      "script-src 'self' 'unsafe-inline'; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "font-src 'self' https: data:; " +
+      "connect-src 'self'; " +
+      "frame-ancestors 'none'; " +
+      "object-src 'none'; " +
+      "base-uri 'self'; " +
+      "form-action 'self';"
+  );
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=()");
+  next();
+});
+
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
