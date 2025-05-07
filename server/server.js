@@ -56,10 +56,10 @@ app.use((req, res, next) => {
     "Content-Security-Policy",
     "default-src 'self'; " +
       "img-src 'self' https: data:; " +
-      "script-src 'self' 'unsafe-inline' https://apis.google.com https://cdn.gtranslate.net https://translate.google.com https://translate.googleapis.com; " +
+      "script-src 'self' 'unsafe-inline' https://apis.google.com https://cdn.gtranslate.net https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com; " +
       "style-src 'self' 'unsafe-inline' https://www.gstatic.com; " +
       "font-src 'self' https: data:; " +
-      "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il https://firestore.googleapis.com wss://hybrid-app-1-2haj.onrender.com https://identitytoolkit.googleapis.com; " +
+      "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il https://firestore.googleapis.com wss://hybrid-app-1-2haj.onrender.com https://identitytoolkit.googleapis.com https://translate.googleapis.com; " +
       "frame-src 'self' https://*.firebaseapp.com; " +
       "frame-ancestors 'none'; " +
       "object-src 'none'; " +
