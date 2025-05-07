@@ -59,7 +59,7 @@ app.use((req, res, next) => {
       "script-src 'self' 'unsafe-inline'; " +
       "style-src 'self' 'unsafe-inline'; " +
       "font-src 'self' https: data:; " +
-      "connect-src 'self'; " +
+      "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il; " +
       "frame-ancestors 'none'; " +
       "object-src 'none'; " +
       "base-uri 'self'; " +
