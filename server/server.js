@@ -56,10 +56,10 @@ app.use((req, res, next) => {
     "Content-Security-Policy",
     "default-src 'self'; " +
       "img-src 'self' https: data:; " +
-      "script-src 'self' 'unsafe-inline'; " +
+      "script-src 'self' 'unsafe-inline' https://apis.google.com https://cdn.gtranslate.net; " +
       "style-src 'self' 'unsafe-inline'; " +
       "font-src 'self' https: data:; " +
-      "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il; " +
+      "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il https://firestore.googleapis.com wss://hybrid-app-1-2haj.onrender.com; " +
       "frame-ancestors 'none'; " +
       "object-src 'none'; " +
       "base-uri 'self'; " +
