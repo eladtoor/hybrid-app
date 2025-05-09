@@ -99,7 +99,11 @@ app.use(
     dotfiles: "ignore",
   })
 );
-app.get("*", (req, res) => {
+app.get("*", (req, res, next) => {
+  if (req.path.includes(".")) {
+    return next(); // בקשות לקבצים מוסתרים או סטטיים → לא מגיב
+  }
+
   res.sendFile(path.join(__dirname, "../web/build", "index.html"));
 });
 
