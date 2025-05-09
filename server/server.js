@@ -94,6 +94,14 @@ app.use("/api/category-images", categoryImagesRoutes);
 
 app.use("/api/site-stats", siteStatsRoutes);
 
+app.use((req, res, next) => {
+  const blockedFiles = ["/BitKeeper", "/.hg", "/.bzr", "/.darcs"];
+  if (blockedFiles.includes(req.path)) {
+    return res.status(404).send("Not found");
+  }
+  next();
+});
+
 app.use(
   express.static(path.join(__dirname, "../web/build"), {
     dotfiles: "ignore",
