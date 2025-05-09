@@ -11,7 +11,7 @@ const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
     const handleDecreaseByPackage = (packageSize) => {
         onDecrease(item.cartItemId, packageSize);
     };
-    console.log(item);
+
 
     return (
         <div className="relative flex flex-col md:flex-row items-center justify-between bg-white shadow-lg rounded-lg p-4 mb-4 transition hover:shadow-xl">

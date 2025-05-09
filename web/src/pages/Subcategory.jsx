@@ -34,7 +34,6 @@ export const Subcategory = () => {
     if (!currentCategory) {
         return <p className="text-center text-gray-600 mt-10">לא נמצאה קטגוריה בשם {subcategoryName}.</p>;
     }
-    console.log(subcategoryName);
 
     const isDigitalCatalogCategory = subcategoryName === "קטלוגים דיגיטלים להורדה"
     const subCategories = currentCategory.subCategories || [];

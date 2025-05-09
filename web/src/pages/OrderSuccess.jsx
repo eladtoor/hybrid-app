@@ -20,7 +20,6 @@ const OrderSuccess = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log("✅ User is logged in:", user);
                 setCurrentUser(user);
             } else {
                 console.warn("⚠️ No user logged in");
@@ -59,7 +58,6 @@ const OrderSuccess = () => {
                 });
 
                 const data = await response.json();
-                console.log("🔍 Response from SaleDetails:", data);
                 setSaleDetails(data); // שומר את הנתונים לתצוגה
 
                 if (data.TransactionStatus === 0) {

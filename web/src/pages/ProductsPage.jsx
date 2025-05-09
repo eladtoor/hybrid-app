@@ -8,7 +8,6 @@ const ProductsPage = () => {
 
     // Get categories from Redux store
     const companyCategories = useSelector((state) => state.categories.categories?.companyCategories);
-    console.log(companyCategories, "im here");
 
     // Handle loading state
     if (!companyCategories) {

@@ -407,7 +407,6 @@ const AdminPanel = () => {
             }
         }
 
-        console.log(productToEdit);
 
         // אם הקטגוריות אינן מערך, המרתן למערך
         const categoriesArray = Array.isArray(product.קטגוריות)

@@ -25,8 +25,6 @@ export const fetchCategories = () => async (dispatch) => {
       return;
     }
 
-    console.log("📦 Received Categories:", data);
-
     const newData = { companyName: "טמבור", companyCategories: { ...data } };
 
     localStorage.setItem("categories", JSON.stringify(newData));
@@ -53,8 +51,6 @@ export const maybeFetchCategories = () => async (dispatch) => {
   }
 
   if (!cached || isExpired) {
-    console.log("Update happening");
-
     dispatch(fetchCategories());
   }
 };

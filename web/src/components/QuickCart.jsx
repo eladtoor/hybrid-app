@@ -36,7 +36,6 @@ const QuickCart = () => {
 
     const mergeProductData = (product) => {
         const productDetails = products.find((p) => p._id === product._id) || {};
-        console.log(product);
 
         return {
             ...product,

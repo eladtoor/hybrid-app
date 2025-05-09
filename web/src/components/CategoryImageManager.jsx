@@ -17,7 +17,7 @@ const CategoryImageManager = ({ organizedCategories }) => {
                     imagesMap[cat.name] = cat.image;
                 });
 
-                console.log(imagesMap, "הגעתי לכאן");
+
 
                 setCategoryImages(imagesMap);
             });

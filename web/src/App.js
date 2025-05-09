@@ -80,10 +80,6 @@ function App() {
     const handleWebSocketMessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "CATEGORIES_UPDATED") {
-        console.log(
-          "🔄 WebSocket: Received Updated Categories",
-          message.payload
-        );
         const formattedCategories = {
           companyName: "טמבור",
           companyCategories: message.payload,

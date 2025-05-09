@@ -53,12 +53,10 @@ const UserManagement = () => {
         });
 
         setReferralCounts(counts);
-        console.log('Referral Counts:', counts); // Debugging log
 
         // Save referral counts to the agent documents
         for (const agentId of Object.keys(counts)) {
           const referralCount = counts[agentId];
-          console.log(`Updating agent ${agentId} with referral count: ${referralCount}`); // Debug log
           try {
             const agentRef = doc(db, 'users', agentId);
             await updateDoc(agentRef, { referralCount });
@@ -67,7 +65,6 @@ const UserManagement = () => {
           }
         }
 
-        console.log('Referral counts updated successfully!');
       } catch (error) {
         console.error("Error fetching users or updating referral counts:", error);
       }
@@ -119,7 +116,6 @@ const UserManagement = () => {
   }, [searchQuery, products]);
 
   const handleEditUser = (user) => {
-    console.log(user, "הדפסה");
 
     setSelectedUser(user);
     setIsAdmin(user.isAdmin);
@@ -146,7 +142,6 @@ const UserManagement = () => {
 
   const handleAddProductDiscount = (product) => {
     if (!productDiscounts.find(discount => discount.productId === product._id)) {
-      console.log(product, "פהפהפהה");
 
       setProductDiscounts((prevDiscounts) => [
         ...prevDiscounts,
@@ -374,7 +369,6 @@ const UserManagement = () => {
 
             <div className="form-group">
               <p>סוג משתמש:</p>
-              {console.log(userType)}
 
               <select
                 value={userType === 'סוכן' || userType === 'agent' ? "סוכן" : "רגיל"} // Reflects the userType state

@@ -37,7 +37,6 @@ const CartPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    console.log(cartItems.map(item => ({ name: item.name, group: item.materialGroup, price: item.unitPrice, quantity: item.quantity })));
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -203,7 +202,6 @@ const CartPage = () => {
 
 
 
-    console.log(cartItems, "cart");
 
 
     const handlePayment = async (purchaseData, cartDiscount, originalTotalPrice) => {
@@ -327,7 +325,6 @@ const CartPage = () => {
             });
 
             const data = await response.json();
-            console.log("🔍 iCredit Response on Create Payment:", data);
 
             if (data.success && data.paymentUrl) {
                 localStorage.setItem("SalePrivateToken", data.salePrivateToken); // ✅ שמור את זה!

@@ -98,8 +98,7 @@ const HomePage = () => {
                 <AboutUs />
                 {/* מוצרים מומלצים */}
                 {/* מוצרים בהנחה */}
-                {console.log(user)
-                }
+
                 {user && user.productDiscounts?.length > 0 ? (
                     <DiscountedProducts discountedProducts={user.productDiscounts} />
                 ) : (

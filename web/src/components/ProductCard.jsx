@@ -232,7 +232,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
 
         // ✅ בניית selectedAttributes עם מחירים
         const enrichedSelectedAttributes = {};
-        console.log(product);
+
 
         if (product.variations && Array.isArray(product.variations)) {
             for (const variation of product.variations) {
@@ -276,7 +276,6 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
             materialGroup: product.materialGroup || "",
         };
 
-        console.log("🧼 Adding clean cart item:", cleanCartItem);
 
         dispatch(addToCart(cleanCartItem));
 
@@ -293,7 +292,6 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
 
 
     const handleCraneUnloadChange = (value) => {
-        console.log(value);
 
         setCraneUnload(value);
     };

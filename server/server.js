@@ -94,7 +94,11 @@ app.use("/api/category-images", categoryImagesRoutes);
 
 app.use("/api/site-stats", siteStatsRoutes);
 
-app.use(express.static(path.join(__dirname, "../web/build")));
+app.use(
+  express.static(path.join(__dirname, "../web/build"), {
+    dotfiles: "ignore",
+  })
+);
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../web/build", "index.html"));
 });
