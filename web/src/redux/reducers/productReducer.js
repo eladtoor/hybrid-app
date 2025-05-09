@@ -12,11 +12,6 @@ const productReducer = (state = initialState, action) => {
       return { ...state, loading: true };
 
     case "FETCH_PRODUCTS_SUCCESS":
-      console.log(
-        "🔄 Redux - Fetched new products from server:",
-        action.payload
-      );
-
       localStorage.setItem("products", JSON.stringify(action.payload)); // ✅ Save fetched products
 
       return { ...state, loading: false, products: action.payload };
@@ -56,8 +51,6 @@ const productReducer = (state = initialState, action) => {
       return { ...state, loading: true };
 
     case "UPDATE_PRODUCT_SUCCESS":
-      console.log("✅ Redux - Updated product in state:", action.payload);
-
       const modifiedProducts = state.products.map((product) =>
         product._id === action.payload._id ? action.payload : product
       );
@@ -67,9 +60,6 @@ const productReducer = (state = initialState, action) => {
       return { ...state, loading: false, products: modifiedProducts };
 
     case "UPDATE_PRODUCTS_LIST":
-      console.log("🔄 WebSocket - Received updated products:", action.payload);
-      console.log(action.payload);
-
       // 🔍 סינון מוצרים עם ערכים לא תקינים (0 במחיר, תיאור ריק וכו')
       const filteredProducts = action.payload.map((product) => {
         if (!product.מחיר || product.מחיר === 0) {

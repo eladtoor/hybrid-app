@@ -15,7 +15,6 @@ export const fetchUserDataFromFirestore = async (uid) => {
     if (userSnap.exists()) {
       return userSnap.data(); // החזרת נתוני המשתמש
     } else {
-      console.log("No such document!");
       return null;
     }
   } catch (error) {
@@ -34,7 +33,6 @@ export const updateUserDataInFirestore = async (uid, updatedData) => {
   try {
     const userRef = doc(db, "users", uid);
     await setDoc(userRef, updatedData, { merge: true }); // שמירה עם merge כדי לעדכן את הנתונים הקיימים
-    console.log("User data updated successfully.");
   } catch (error) {
     console.error("Error updating user data in Firestore:", error);
   }

@@ -16,7 +16,6 @@ const createPayment = async (req, res) => {
     );
 
     const data = await response.json();
-    console.log("🔍 Response from iCredit GetUrl:", data);
 
     if (data.Status === 0 && data.URL) {
       res.json({
@@ -40,8 +39,6 @@ const createPayment = async (req, res) => {
 };
 const verifyPayment = async (req, res) => {
   try {
-    console.log("📩 Received Verify Request:", req.body); // ✅ הדפס את הנתונים שנשלחים ל-iCredit
-
     const response = await fetch(
       "https://testicredit.rivhit.co.il/API/PaymentPageRequest.svc/Verify",
       {
@@ -52,7 +49,6 @@ const verifyPayment = async (req, res) => {
     );
 
     const data = await response.json();
-    console.log("🔍 Response from iCredit Verify:", data);
 
     res.json(data);
   } catch (error) {
@@ -62,8 +58,6 @@ const verifyPayment = async (req, res) => {
 };
 const getSaleDetails = async (req, res) => {
   try {
-    console.log("📩 Received SaleDetails Request:", req.body);
-
     const response = await fetch(
       "https://icredit.rivhit.co.il/API/PaymentPageRequest.svc/SaleDetails",
       {
@@ -74,7 +68,6 @@ const getSaleDetails = async (req, res) => {
     );
 
     const data = await response.json();
-    console.log("🔍 Response from iCredit SaleDetails:", data);
 
     res.json(data);
   } catch (error) {

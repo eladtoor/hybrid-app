@@ -7,7 +7,6 @@ const initialState = {
 const categoryReducer = (state = initialState, action) => {
   switch (action.type) {
     case "SET_CATEGORIES":
-      console.log("🛠 [Reducer] Updating Categories:", action.payload);
       return {
         ...state,
         categories: action.payload, // ✅ Ensure proper format

@@ -32,7 +32,6 @@ export const saveWhatsAppDetails = async (
     };
 
     await setDoc(whatsappRef, data);
-    console.log("WhatsApp details saved successfully.");
   } catch (error) {
     console.error("Error saving WhatsApp details:", error);
     throw error;

@@ -27,7 +27,6 @@ const cartSlice = createSlice({
         });
       }
 
-      console.log("🛒 updated cart:", state.cartItems);
       saveCartToFirestore([...state.cartItems]);
     },
 

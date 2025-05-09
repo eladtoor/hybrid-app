@@ -22,16 +22,10 @@ export const listenForProductUpdates = () => (dispatch) => {
   window.socket.onmessage = (event) => {
     try {
       const message = JSON.parse(event.data);
-      console.log("🔄 WebSocket - Raw message from server:", message);
 
       if (message.type === "PRODUCTS_UPDATED") {
-        console.log(
-          "🔄 WebSocket - Received updated products:",
-          message.payload
-        );
         dispatch(updateProductsList(message.payload));
       } else if (message.type === "CATEGORIES_UPDATED") {
-        console.log("🔄 Received Categories Update:", message.payload);
         dispatch(fetchCategories());
       }
     } catch (error) {
@@ -90,8 +84,6 @@ export const createProduct = (newProductData) => async (dispatch) => {
   dispatch({ type: "CREATE_PRODUCT_REQUEST" });
 
   try {
-    console.log("📤 Sending new product data:", newProductData);
-
     const response = await fetch(`${getBaseUrl()}/api/products/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -175,7 +167,6 @@ export const updateProduct = (updatedProduct) => async (dispatch) => {
     if (response.ok) {
       dispatch({ type: "UPDATE_PRODUCT_SUCCESS", payload: data });
 
-      console.log("⏳ Fetching fresh products from server after update...");
       setTimeout(() => {
         dispatch(fetchProducts());
       }, 500);
@@ -206,8 +197,6 @@ export const fetchCategories = () => async (dispatch) => {
   try {
     const response = await fetch(`${getBaseUrl()}/api/categories`);
     const categoriesData = await response.json();
-
-    console.log("🔄 Updated Categories:", categoriesData);
 
     const updatedCategories = {
       companyName: "טמבור",

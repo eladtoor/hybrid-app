@@ -24,8 +24,6 @@ if (!window.socket) {
       const message = JSON.parse(event.data);
 
       if (message.type === "PRODUCTS_UPDATED") {
-        console.log("🔄 Received WebSocket Update:", message.payload);
-
         if (message.payload.length) {
           // ✅ Ensure products list isn't empty
           store.dispatch({
@@ -41,8 +39,6 @@ if (!window.socket) {
       }
 
       if (message.type === "CATEGORIES_UPDATED") {
-        console.log("🔄 Received WebSocket Category Update:", message.payload);
-
         // ✅ Ensure the correct structure before dispatching
         const formattedCategories = {
           companyName: "טמבור",

@@ -70,6 +70,8 @@ app.use((req, res, next) => {
       "font-src 'self' https: data:; " +
       "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il https://firestore.googleapis.com wss://hybrid-app-1-2haj.onrender.com https://identitytoolkit.googleapis.com https://translate.googleapis.com https://translate-pa.googleapis.com https://www.lavangroup.co.il https://securetoken.googleapis.com https://api.cloudinary.com; " +
       "frame-src 'self' https://*.firebaseapp.com; " +
+      "worker-src 'none'; " +
+      "media-src 'none'; " +
       "frame-ancestors 'none'; " +
       "object-src 'none'; " +
       "base-uri 'self'; " +
