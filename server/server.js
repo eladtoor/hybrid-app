@@ -46,7 +46,16 @@ const connectDB = async () => {
 
 connectDB(); // Initial connection
 
-const corsOptions = { origin: "*" };
+const corsOptions = {
+  origin: [
+    "http://localhost:3000",
+    "https://lavangroup.co.il",
+    "https://www.lavangroup.co.il",
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
 app.use(cors(corsOptions));
 app.use(express.json());
 
