@@ -187,7 +187,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
 
     const handleAddToCart = () => {
         if (!auth.currentUser) {
-            toast.error("⚠️ יש להתחבר כדי להוסיף מוצרים לעגלה");
+            toast.error("יש להתחבר כדי להוסיף מוצרים לעגלה");
 
             return;
         }
@@ -282,7 +282,7 @@ const ProductCard = ({ product, isDigitalCatalogCategory = false }) => {
         setComment("");
         setShowModal(false);
 
-        toast.success("✅ המוצר נוסף לעגלה בהצלחה");
+        toast.success("המוצר נוסף לעגלה בהצלחה");
 
 
     };
