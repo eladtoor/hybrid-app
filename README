@@ -42,7 +42,6 @@ npm run dev
 
 ⚠️ Make sure to add .env files in both server and web folders with your Firebase, MongoDB, and Stripe credentials.
 
-
 📫 Contact
 GitHub: eladtoor
 
