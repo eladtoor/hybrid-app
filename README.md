@@ -38,17 +38,14 @@ npm run dev
 cd ../web
 npm install
 npm run dev
+```
 
+⚠️ Make sure to add `.env` files in both `server` and `web` folders with your Firebase, MongoDB, and Stripe credentials.
 
+## 📸 Screenshots  
+*(Coming soon – will include dashboard, product form, and orders view)*
 
-⚠️ Make sure to add .env files in both server and web folders with your Firebase, MongoDB, and Stripe credentials.
-
-📸 Screenshots
-(Coming soon – will include dashboard, product form, and orders view)
-
-📫 Contact
-GitHub: eladtoor
-
-LinkedIn: Elad Toorgeman
-
-Email: eladtoorgeman@gmail.com
+## 📫 Contact  
+GitHub: [eladtoor](https://github.com/eladtoor)  
+LinkedIn: [Elad Toorgeman](https://www.linkedin.com/in/elad-toorgeman-3a27b8233)  
+Email: [eladtoorgeman@gmail.com](mailto:eladtoorgeman@gmail.com)
