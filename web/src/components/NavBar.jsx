@@ -88,7 +88,7 @@ const NavBar = () => {
                         </button>
                         <div className="absolute top-full left-1/4 transform -translate-x-1/2 hidden group-hover:block bg-gray-900/90 backdrop-blur-sm p-5 shadow-lg rounded-md z-50 border">
                             <div className="flex flex-row">
-                                {categories?.companyCategories
+                                {categories?.companyCategories && Object.keys(categories.companyCategories).length > 0
                                     ? Object.values(categories.companyCategories).map((category, idx) => (
                                         <Link
                                             key={idx}
@@ -194,18 +194,18 @@ const NavBar = () => {
                         </Link>
                         <div className="text-2xl font-bold text-center text-gray-800 border-b-2 border-gray-300 pb-4">{categories.companyName}</div>
                         <div className="border-b border-gray-200 pb-4">
-
-                            {Object.values(categories.companyCategories).map((category, idx) => (
-                                <Link
-                                    key={idx}
-                                    to={`/${category.categoryName}/${category.categoryName}`}
-                                    className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
-
-                                    onClick={toggleMenu}
-                                >
-                                    {category.categoryName}
-                                </Link>
-                            ))}
+                            {categories?.companyCategories && Object.keys(categories.companyCategories).length > 0
+                                ? Object.values(categories.companyCategories).map((category, idx) => (
+                                    <Link
+                                        key={idx}
+                                        to={`/${category.categoryName}/${category.categoryName}`}
+                                        className="block w-full text-lg text-gray-900 font-bold bg-gray-100 border-b border-white py-3 px-4 text-center hover:bg-blue-900 hover:text-white transition-colors duration-300"
+                                        onClick={toggleMenu}
+                                    >
+                                        {category.categoryName}
+                                    </Link>
+                                ))
+                                : <p className="text-gray-900 font-bold text-center">אין קטגוריות זמינות</p>}
                         </div>
 
                         <div className="flex flex-col ">
