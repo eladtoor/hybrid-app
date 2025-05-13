@@ -88,15 +88,17 @@ const NavBar = () => {
                         </button>
                         <div className="absolute top-full left-1/4 transform -translate-x-1/2 hidden group-hover:block bg-gray-900/90 backdrop-blur-sm p-5 shadow-lg rounded-md z-50 border">
                             <div className="flex flex-row">
-                                {Object.values(categories.companyCategories).map((category, idx) => (
-                                    <Link
-                                        key={idx}
-                                        to={`/${category.categoryName}/${category.categoryName}`}
-                                        className="text-lg text-white hover:bg-black px-4 py-3 rounded transition-colors border border-transparent hover:border-gray-300"
-                                    >
-                                        {category.categoryName}
-                                    </Link>
-                                ))}
+                                {categories?.companyCategories
+                                    ? Object.values(categories.companyCategories).map((category, idx) => (
+                                        <Link
+                                            key={idx}
+                                            to={`/${category.categoryName}/${category.categoryName}`}
+                                            className="text-lg text-white hover:bg-black px-4 py-3 rounded transition-colors border border-transparent hover:border-gray-300"
+                                        >
+                                            {category.categoryName}
+                                        </Link>
+                                    ))
+                                    : <p className="text-white">אין קטגוריות זמינות</p>}
                             </div>
                         </div>
                     </div>
