@@ -340,7 +340,9 @@ const AdminPanel = () => {
             dispatch(updateProduct(updatedProduct));
             setIsEditing(false);
         } else {
-            dispatch(createProduct(updatedProduct));
+            // לפני שליחת המוצר לשרת
+            const { מזהה, ...productToSend } = updatedProduct;
+            dispatch(createProduct(productToSend));
         }
 
         setNewProduct(initialProductState);
@@ -354,7 +356,7 @@ const AdminPanel = () => {
     };
 
     const handleAddQuantity = () => {
-        if (quantityInput && !isNaN(quantityInput) && Number(quantityInput) > 0) { // בדיקה אם המספר חיובי
+        if (quantityInput && !isNaN(quantityInput) && Number(quantityInput) > 0) { // בדיקה אם המספר חיובית
             setNewProduct(prevState => ({
                 ...prevState,
                 quantities: [...prevState.quantities, Number(quantityInput)]
