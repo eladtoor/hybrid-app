@@ -65,11 +65,11 @@ app.use((req, res, next) => {
     "Content-Security-Policy",
     "default-src 'self'; " +
       "img-src 'self' https: data:; " +
-      "script-src 'self' 'unsafe-inline' https://apis.google.com https://cdn.gtranslate.net https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com; " +
-      "script-src-elem 'self' 'unsafe-inline' https://apis.google.com https://cdn.gtranslate.net https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com; " +
-      "style-src 'self' 'unsafe-inline' https://www.gstatic.com; " +
+      "script-src 'self' 'unsafe-inline' https://apis.google.com https://cdn.gtranslate.net https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com https://clients6.google.com https://translate.googleusercontent.com https://vee-crm.com; " +
+      "script-src-elem 'self' 'unsafe-inline' https://cdn.gtranslate.net https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com https://clients6.google.com https://translate.googleusercontent.com https://vee-crm.com; " +
+      "style-src 'self' 'unsafe-inline' https://vee-crm.com https://www.gstatic.com; " +
       "font-src 'self' https: data:; " +
-      "connect-src 'self' https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il https://firestore.googleapis.com wss://hybrid-app-1-2haj.onrender.com https://identitytoolkit.googleapis.com https://translate.googleapis.com https://translate-pa.googleapis.com https://www.lavangroup.co.il https://securetoken.googleapis.com https://api.cloudinary.com; " +
+      "connect-src 'self' https://vee-crm.com https://cdn.gtranslate.net https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com https://clients6.google.com https://translate.googleusercontent.com https://hybrid-app-1-2haj.onrender.com https://lavangroup.co.il https://firestore.googleapis.com wss://hybrid-app-1-2haj.onrender.com https://identitytoolkit.googleapis.com https://www.lavangroup.co.il https://securetoken.googleapis.com https://api.cloudinary.com; " +
       "frame-src 'self' https://*.firebaseapp.com; " +
       "worker-src 'none'; " +
       "media-src 'none'; " +
@@ -78,7 +78,6 @@ app.use((req, res, next) => {
       "base-uri 'self'; " +
       "form-action 'self';"
   );
-
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
