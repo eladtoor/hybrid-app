@@ -340,9 +340,7 @@ const AdminPanel = () => {
             dispatch(updateProduct(updatedProduct));
             setIsEditing(false);
         } else {
-            // לפני שליחת המוצר לשרת
-            const { מזהה, ...productToSend } = updatedProduct;
-            dispatch(createProduct(productToSend));
+            dispatch(createProduct(updatedProduct));
         }
 
         setNewProduct(initialProductState);
@@ -680,7 +678,16 @@ const AdminPanel = () => {
                                                         <option value="Gypsum and Tracks">גבס ומסלולים</option>
                                                     </select>
                                                 </label>
-
+                                                <label>
+                                                    מזהה:
+                                                    <input
+                                                        type="text"
+                                                        name="מזהה"
+                                                        value={newProduct.מזהה}
+                                                        onChange={(e) => handleInputChange(e, setNewProduct)}
+                                                        required
+                                                    />
+                                                </label>
                                                 <label>
                                                     סוג:
                                                     <div className="radio-group">
